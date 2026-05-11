@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>No.17 자기증명 일기</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="header">
+      <button class="header-back" onclick="history.back()">‹</button>
+      <span class="header-title" style="color:var(--c17);">No.17 자기증명 일기</span>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeBtn">🌙</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- 힌트 -->
+      <div class="hint-box">
+        정체성을 행동의 출발점으로. 같은 선언을 며칠씩 이어가도 좋습니다.
+      </div>
+
+      <!-- DATE -->
+      <div class="section">
+        <div class="field-label">DATE</div>
+        <input type="date" id="dateInput">
+      </div>
+
+      <!-- 오늘의 나 -->
+      <div class="section">
+        <div class="field-label">오늘의 나</div>
+        <div class="sentence-row card-17">
+          <span>나는</span>
+          <input type="text" id="declaration" placeholder="어떤" style="flex:1;min-width:60px;">
+          <span>한 사람이다.</span>
+        </div>
+      </div>
+
+      <!-- 오늘의 증거 -->
+      <div class="section">
+        <div class="field-label">오늘의 증거</div>
+        <p style="font-size:12px;color:var(--text-hint);margin-bottom:10px;">
+          이 정체성을 뒷받침하는 오늘의 작은 사실. 평가가 아닌 일어난 일만.
+        </p>
+        <div class="num-field">
+          <span class="num-label">01</span>
+          <input type="text" id="ev0" placeholder="오늘 있었던 일">
+        </div>
+        <div class="num-field">
+          <span class="num-label">02</span>
+          <input type="text" id="ev1" placeholder="오늘 있었던 일">
+        </div>
+        <div class="num-field">
+          <span class="num-label">03</span>
+          <input type="text" id="ev2" placeholder="오늘 있었던 일">
+        </div>
+      </div>
+
+      <!-- 한 줄 결론 -->
+      <div class="section">
+        <div class="field-label">한 줄 결론</div>
+        <div class="sentence-row card-17">
+          <span>오늘의 나는 분명히</span>
+          <input type="text" id="conclusion" placeholder="어떤" style="flex:1;min-width:60px;">
+          <span>한 사람이었다.</span>
+        </div>
+      </div>
+
+      <button class="btn btn-17" id="saveBtn">저장하기</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import {
+      onAuthChange,
+      saveIdentityDiary, getIdentityDiary,
+      formatDate,
+    } from './firebase.js';
+
+    // ── 테마 ──────────────────────────────────────────────────────────────
+    const root = document.documentElement;
+    const themeBtn = document.getElementById('themeBtn');
+    function applyTheme(t) {
+      root.setAttribute('data-theme', t);
+      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    }
+    applyTheme(localStorage.getItem('theme') || 'light');
+    themeBtn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      applyTheme(next);
+    });
+
+    // ── 날짜 기본값 ───────────────────────────────────────────────────────
+    const dateInput = document.getElementById('dateInput');
+    dateInput.value = formatDate(new Date());
+
+    // ── 토스트 ────────────────────────────────────────────────────────────
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // ── 기존 데이터 로드 ──────────────────────────────────────────────────
+    let currentUid = null;
+
+    async function loadData(uid, date) {
+      const data = await getIdentityDiary(uid, date);
+      if (!data) return;
+      document.getElementById('declaration').value  = data.declaration  || '';
+      document.getElementById('ev0').value          = data.evidence?.[0] || '';
+      document.getElementById('ev1').value          = data.evidence?.[1] || '';
+      document.getElementById('ev2').value          = data.evidence?.[2] || '';
+      document.getElementById('conclusion').value   = data.conclusion   || '';
+    }
+
+    dateInput.addEventListener('change', () => {
+      if (currentUid) loadData(currentUid, dateInput.value);
+    });
+
+    // ── 인증 ──────────────────────────────────────────────────────────────
+    onAuthChange(async user => {
+      if (!user) { window.location.replace('index.html'); return; }
+      currentUid = user.uid;
+      await loadData(user.uid, dateInput.value);
+    });
+
+    // ── 저장 ──────────────────────────────────────────────────────────────
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      if (!currentUid) return;
+
+      const declaration = document.getElementById('declaration').value.trim();
+      const conclusion  = document.getElementById('conclusion').value.trim();
+
+      if (!declaration) {
+        showToast('오늘의 나를 입력해주세요.');
+        return;
+      }
+
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = '저장 중…';
+
+      try {
+        await saveIdentityDiary(currentUid, dateInput.value, {
+          declaration,
+          evidence: [
+            document.getElementById('ev0').value.trim(),
+            document.getElementById('ev1').value.trim(),
+            document.getElementById('ev2').value.trim(),
+          ],
+          conclusion,
+        });
+        showToast('✓ 저장되었습니다');
+        setTimeout(() => window.location.href = 'home.html', 1200);
+      } catch (e) {
+        showToast('저장에 실패했습니다. 다시 시도해주세요.');
+        saveBtn.disabled = false;
+        saveBtn.textContent = '저장하기';
+      }
+    });
+  </script>
+</body>
+</html>

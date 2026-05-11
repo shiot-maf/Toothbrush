@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>홈 — 끌어당김의 기록</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="header">
+      <span class="header-title">끌어당김의 기록</span>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeBtn" aria-label="테마 전환">🌙</button>
+        <button class="icon-btn" id="logoutBtn" aria-label="로그아웃" title="로그아웃">↩</button>
+      </div>
+    </div>
+
+    <div class="page-content" id="mainContent">
+      <!-- 날짜 -->
+      <div class="date-hero">
+        <div class="ym" id="ymText"></div>
+        <div class="day-num" id="dayNum"></div>
+        <div class="weekday" id="weekdayText"></div>
+      </div>
+
+      <!-- 노트 카드들 -->
+      <div class="section">
+        <div class="section-title">오늘의 노트</div>
+
+        <a class="note-card" href="note17.html" id="card17">
+          <div class="note-icon note-icon-17">📓</div>
+          <div class="note-card-body">
+            <div class="note-card-name">No.17 자기증명 일기</div>
+            <div class="note-card-sub">매일 저녁 · 5분</div>
+            <div class="note-card-preview" id="preview17">불러오는 중…</div>
+          </div>
+          <div class="note-status" id="status17">…</div>
+        </a>
+
+        <a class="note-card" href="note21.html" id="card21">
+          <div class="note-icon note-icon-21">🙏</div>
+          <div class="note-card-body">
+            <div class="note-card-name">No.21 감사 선행기법</div>
+            <div class="note-card-sub">매일 잠들기 전 · 3분</div>
+            <div class="note-card-preview" id="preview21">불러오는 중…</div>
+          </div>
+          <div class="note-status" id="status21">…</div>
+        </a>
+
+        <a class="note-card" href="note28.html" id="card28">
+          <div class="note-icon note-icon-28">🧭</div>
+          <div class="note-card-body">
+            <div class="note-card-name">No.28 HARD 노트</div>
+            <div class="note-card-sub">주 1회 일요일 · 15분</div>
+            <div class="note-card-preview" id="preview28">불러오는 중…</div>
+          </div>
+          <div class="note-status" id="status28">…</div>
+        </a>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- 이동 버튼 -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <a class="btn btn-outline" href="report.html">📊 이번 주 리포트 보기</a>
+        <a class="btn btn-outline" href="history.html">📅 기록 열람</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import {
+      onAuthChange, signOutUser,
+      getIdentityDiary, getGratitudeAdvance, getHardNote,
+      formatDate, getWeekKey,
+    } from './firebase.js';
+
+    // ── 테마 ──────────────────────────────────────────────────────────────
+    const root = document.documentElement;
+    const themeBtn = document.getElementById('themeBtn');
+    function applyTheme(t) {
+      root.setAttribute('data-theme', t);
+      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    }
+    applyTheme(localStorage.getItem('theme') || 'light');
+    themeBtn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      applyTheme(next);
+    });
+
+    // ── 날짜 표시 ─────────────────────────────────────────────────────────
+    const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+    const today = new Date();
+    document.getElementById('ymText').textContent =
+      `${today.getFullYear()}년 ${today.getMonth() + 1}월`;
+    document.getElementById('dayNum').textContent = today.getDate();
+    document.getElementById('weekdayText').textContent =
+      `${WEEKDAYS[today.getDay()]}요일`;
+
+    // ── 유틸 ──────────────────────────────────────────────────────────────
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function setCard(statusId, previewId, done, previewText) {
+      const s = document.getElementById(statusId);
+      const p = document.getElementById(previewId);
+      if (done) {
+        s.textContent = '✓';
+        s.className = 'note-status status-done';
+        p.textContent = previewText || '';
+      } else {
+        s.textContent = '미작성';
+        s.className = 'note-status status-todo';
+        p.textContent = '아직 작성하지 않았어요';
+      }
+    }
+
+    // ── 인증 + 데이터 로드 ────────────────────────────────────────────────
+    onAuthChange(async user => {
+      if (!user) { window.location.replace('index.html'); return; }
+
+      const uid     = user.uid;
+      const todayStr = formatDate(today);
+      const weekKey  = getWeekKey(today);
+
+      try {
+        const [d17, d21, d28] = await Promise.all([
+          getIdentityDiary(uid, todayStr),
+          getGratitudeAdvance(uid, todayStr),
+          getHardNote(uid, weekKey),
+        ]);
+
+        setCard('status17', 'preview17',
+          !!d17, d17 ? `나는 ${d17.declaration} 한 사람이다.` : '');
+
+        setCard('status21', 'preview21',
+          !!d21, d21 ? (d21.gratitudes?.[0] || '') + ' 감사합니다.' : '');
+
+        setCard('status28', 'preview28',
+          !!d28, d28 ? `키워드: ${d28.keyword || ''}` : '');
+      } catch (e) {
+        showToast('데이터를 불러오지 못했습니다.');
+        ['preview17', 'preview21', 'preview28'].forEach(id => {
+          document.getElementById(id).textContent = '불러오기 실패';
+        });
+        ['status17', 'status21', 'status28'].forEach(id => {
+          document.getElementById(id).textContent = '–';
+        });
+      }
+    });
+
+    // ── 로그아웃 ──────────────────────────────────────────────────────────
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      if (!confirm('로그아웃하시겠어요?')) return;
+      await signOutUser();
+      window.location.replace('index.html');
+    });
+  </script>
+</body>
+</html>

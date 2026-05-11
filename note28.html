@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>No.28 HARD 노트</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="header">
+      <button class="header-back" onclick="history.back()">‹</button>
+      <span class="header-title" style="color:var(--c28);">No.28 HARD 노트</span>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeBtn">🌙</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- 힌트 -->
+      <div class="hint-box" style="border-color:var(--c28);">
+        풍요와 방향을 한 페이지에. 주 1회, 일요일 아침 15분.
+      </div>
+
+      <!-- DATE + 키워드 -->
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <div style="flex:1;">
+          <div class="field-label">DATE</div>
+          <input type="date" id="dateInput">
+        </div>
+        <div style="flex:1;">
+          <div class="field-label">이번 주 키워드</div>
+          <input type="text" id="keyword" placeholder="한 단어">
+        </div>
+      </div>
+
+      <!-- 2×2 그리드 -->
+      <div class="hard-grid">
+
+        <!-- H: HAVE -->
+        <div class="hard-q hard-q-H">
+          <div class="hard-q-title">H — HAVE</div>
+          <div class="hard-q-desc">지금 가진 것<br>너무 당연해서 잊고 사는 것들</div>
+          <input class="hard-line-input" type="text" id="h0" placeholder="건강한 몸">
+          <input class="hard-line-input" type="text" id="h1" placeholder="안전한 거처">
+          <input class="hard-line-input" type="text" id="h2" placeholder="곁의 사람">
+          <input class="hard-line-input" type="text" id="h3" placeholder="가진 재능">
+          <input class="hard-line-input" type="text" id="h4" placeholder="">
+        </div>
+
+        <!-- A: ACHIEVED -->
+        <div class="hard-q hard-q-A">
+          <div class="hard-q-title">A — ACHIEVED</div>
+          <div class="hard-q-desc">이미 이룬 것<br>5년 전의 내가 간절했던 지금</div>
+          <input class="hard-line-input" type="text" id="a0" placeholder="">
+          <input class="hard-line-input" type="text" id="a1" placeholder="">
+          <input class="hard-line-input" type="text" id="a2" placeholder="">
+          <input class="hard-line-input" type="text" id="a3" placeholder="">
+          <input class="hard-line-input" type="text" id="a4" placeholder="">
+        </div>
+
+        <!-- R: RECEIVE -->
+        <div class="hard-q hard-q-R">
+          <div class="hard-q-title">R — RECEIVE</div>
+          <div class="hard-q-desc">받게 되는 것<br>"받는다", "들어온다" — 현재형</div>
+          <input class="hard-line-input" type="text" id="r0" placeholder="">
+          <input class="hard-line-input" type="text" id="r1" placeholder="">
+          <input class="hard-line-input" type="text" id="r2" placeholder="">
+          <input class="hard-line-input" type="text" id="r3" placeholder="">
+          <input class="hard-line-input" type="text" id="r4" placeholder="">
+        </div>
+
+        <!-- D: DO -->
+        <div class="hard-q hard-q-D">
+          <div class="hard-q-title">D — DO</div>
+          <div class="hard-q-desc">이번 주 할 것<br>R로 가는 가장 작은 한 걸음</div>
+          <input class="hard-line-input" type="text" id="d0" placeholder="">
+          <input class="hard-line-input" type="text" id="d1" placeholder="">
+          <input class="hard-line-input" type="text" id="d2" placeholder="">
+          <input class="hard-line-input" type="text" id="d3" placeholder="">
+          <input class="hard-line-input" type="text" id="d4" placeholder="">
+        </div>
+
+      </div>
+
+      <button class="btn btn-28" id="saveBtn">저장하기</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import {
+      onAuthChange,
+      saveHardNote, getHardNote,
+      formatDate, getWeekKey,
+    } from './firebase.js';
+
+    // ── 테마 ──────────────────────────────────────────────────────────────
+    const root = document.documentElement;
+    const themeBtn = document.getElementById('themeBtn');
+    function applyTheme(t) {
+      root.setAttribute('data-theme', t);
+      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    }
+    applyTheme(localStorage.getItem('theme') || 'light');
+    themeBtn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      applyTheme(next);
+    });
+
+    // ── 날짜 / 주 키 ─────────────────────────────────────────────────────
+    const dateInput = document.getElementById('dateInput');
+    dateInput.value = formatDate(new Date());
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    function getInputs(prefix) {
+      return Array.from({ length: 5 }, (_, i) =>
+        (document.getElementById(`${prefix}${i}`)?.value || '').trim()
+      );
+    }
+
+    function fillInputs(prefix, arr) {
+      (arr || []).forEach((v, i) => {
+        const el = document.getElementById(`${prefix}${i}`);
+        if (el) el.value = v || '';
+      });
+    }
+
+    // ── 기존 데이터 로드 ──────────────────────────────────────────────────
+    let currentUid = null;
+
+    async function loadData(uid, date) {
+      const weekKey = getWeekKey(new Date(date));
+      const data = await getHardNote(uid, weekKey);
+      if (!data) return;
+      document.getElementById('keyword').value = data.keyword || '';
+      fillInputs('h', data.have);
+      fillInputs('a', data.achieved);
+      fillInputs('r', data.receive);
+      fillInputs('d', data.do);
+    }
+
+    dateInput.addEventListener('change', () => {
+      if (currentUid) loadData(currentUid, dateInput.value);
+    });
+
+    // ── 인증 ──────────────────────────────────────────────────────────────
+    onAuthChange(async user => {
+      if (!user) { window.location.replace('index.html'); return; }
+      currentUid = user.uid;
+      await loadData(user.uid, dateInput.value);
+    });
+
+    // ── 저장 ──────────────────────────────────────────────────────────────
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      if (!currentUid) return;
+
+      const weekKey = getWeekKey(new Date(dateInput.value));
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = '저장 중…';
+
+      try {
+        await saveHardNote(currentUid, weekKey, {
+          keyword:  document.getElementById('keyword').value.trim(),
+          have:     getInputs('h'),
+          achieved: getInputs('a'),
+          receive:  getInputs('r'),
+          do:       getInputs('d'),
+        });
+        showToast('✓ 저장되었습니다');
+        setTimeout(() => window.location.href = 'home.html', 1200);
+      } catch (e) {
+        showToast('저장에 실패했습니다. 다시 시도해주세요.');
+        saveBtn.disabled = false;
+        saveBtn.textContent = '저장하기';
+      }
+    });
+  </script>
+</body>
+</html>

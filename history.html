@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>기록 열람 — 끌어당김의 기록</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="header">
+      <button class="header-back" onclick="history.back()">‹</button>
+      <span class="header-title">기록 열람</span>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeBtn">🌙</button>
+      </div>
+    </div>
+
+    <!-- 탭 -->
+    <div class="tabs" style="margin:0;padding:0 20px;">
+      <button class="tab active" id="tabCal" onclick="switchTab('cal')">달력</button>
+      <button class="tab" id="tabList" onclick="switchTab('list')">목록</button>
+    </div>
+
+    <!-- 달력 탭 -->
+    <div class="page-content" id="panelCal">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" id="prevMonthBtn">‹</button>
+        <span class="cal-month" id="calMonthLabel"></span>
+        <button class="cal-nav-btn" id="nextMonthBtn">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <!-- 목록 탭 -->
+    <div class="page-content hidden" id="panelList">
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">전체</button>
+        <button class="filter-btn" data-filter="17">No.17</button>
+        <button class="filter-btn" data-filter="21">No.21</button>
+        <button class="filter-btn" data-filter="28">No.28</button>
+      </div>
+      <div id="listContent"></div>
+    </div>
+  </div>
+
+  <!-- 모달 -->
+  <div class="modal-overlay hidden" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal-sheet" id="modalSheet">
+      <div class="modal-handle"></div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import {
+      onAuthChange, getAllEntries,
+      getIdentityDiary, getGratitudeAdvance, getHardNote,
+      formatDate, getWeekKey, getISOMonday,
+    } from './firebase.js';
+
+    // ── 테마 ──────────────────────────────────────────────────────────────
+    const root = document.documentElement;
+    const themeBtn = document.getElementById('themeBtn');
+    function applyTheme(t) {
+      root.setAttribute('data-theme', t);
+      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    }
+    applyTheme(localStorage.getItem('theme') || 'light');
+    themeBtn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      applyTheme(next);
+    });
+
+    // ── 전역 상태 ─────────────────────────────────────────────────────────
+    let allData   = { diary: {}, gratitude: {}, hard: {} };
+    let currentUid = null;
+    let calYear   = new Date().getFullYear();
+    let calMonth  = new Date().getMonth(); // 0-based
+    let activeFilter = 'all';
+
+    // ── 탭 전환 ───────────────────────────────────────────────────────────
+    window.switchTab = function(tab) {
+      document.getElementById('tabCal').classList.toggle('active', tab === 'cal');
+      document.getElementById('tabList').classList.toggle('active', tab === 'list');
+      document.getElementById('panelCal').classList.toggle('hidden', tab !== 'cal');
+      document.getElementById('panelList').classList.toggle('hidden', tab !== 'list');
+    };
+
+    // ── 달력 렌더 ─────────────────────────────────────────────────────────
+    function renderCalendar() {
+      const todayStr = formatDate(new Date());
+      const label = `${calYear}년 ${calMonth + 1}월`;
+      document.getElementById('calMonthLabel').textContent = label;
+
+      const firstDay = new Date(calYear, calMonth, 1);
+      const lastDay  = new Date(calYear, calMonth + 1, 0);
+      // 월요일 시작: 0=월 … 6=일
+      const startOffset = (firstDay.getDay() + 6) % 7;
+
+      // HARD 주 키 → 일요일 날짜 매핑
+      const hardSundays = new Set();
+      Object.keys(allData.hard).forEach(wk => {
+        const monday = getISOMonday(wk);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        hardSundays.add(formatDate(sunday));
+      });
+
+      const HDRS = ['월', '화', '수', '목', '금', '토', '일'];
+      let html = HDRS.map(d => `<div class="cal-hdr">${d}</div>`).join('');
+
+      // 빈 칸
+      for (let i = 0; i < startOffset; i++) {
+        html += '<div class="cal-cell empty"></div>';
+      }
+
+      for (let d = 1; d <= lastDay.getDate(); d++) {
+        const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const isToday = dateStr === todayStr;
+        const has17 = !!allData.diary[dateStr];
+        const has21 = !!allData.gratitude[dateStr];
+        const has28 = hardSundays.has(dateStr);
+
+        const dots = [
+          has17 ? '<span class="cal-dot cal-dot-17"></span>' : '',
+          has21 ? '<span class="cal-dot cal-dot-21"></span>' : '',
+          has28 ? '<span class="cal-dot cal-dot-28"></span>' : '',
+        ].join('');
+
+        html += `
+          <div class="cal-cell${isToday ? ' today' : ''}"
+               onclick="openDateModal('${dateStr}')">
+            <span class="cal-num">${d}</span>
+            <div class="cal-dots">${dots}</div>
+          </div>`;
+      }
+
+      document.getElementById('calGrid').innerHTML = html;
+    }
+
+    document.getElementById('prevMonthBtn').addEventListener('click', () => {
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderCalendar();
+    });
+    document.getElementById('nextMonthBtn').addEventListener('click', () => {
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderCalendar();
+    });
+
+    // ── 날짜 모달 ─────────────────────────────────────────────────────────
+    window.openDateModal = async function(dateStr) {
+      const wk = getWeekKey(new Date(dateStr));
+      const [d17, d21, d28] = await Promise.all([
+        allData.diary[dateStr]     || null,
+        allData.gratitude[dateStr] || null,
+        allData.hard[wk]           || null,
+      ]);
+
+      if (!d17 && !d21 && !d28) return;
+
+      let body = `<div style="font-size:13px;color:var(--text-hint);margin-bottom:16px;">${dateStr}</div>`;
+
+      if (d17) {
+        body += `
+          <span class="badge badge-17" style="margin-bottom:12px;">No.17 자기증명</span>
+          <div class="modal-label mt-8">오늘의 나</div>
+          <div class="modal-value">나는 ${d17.declaration} 한 사람이다.</div>
+          <div class="modal-label">오늘의 증거</div>
+          <div class="modal-value">
+            ${(d17.evidence || []).filter(Boolean).map((e, i) =>
+              `<div>${String(i+1).padStart(2,'0')} ${e}</div>`).join('')}
+          </div>
+          ${d17.conclusion
+            ? `<div class="modal-label">한 줄 결론</div>
+               <div class="modal-value">오늘의 나는 분명히 ${d17.conclusion} 한 사람이었다.</div>`
+            : ''}
+          <div class="separator"></div>`;
+      }
+
+      if (d21) {
+        body += `
+          <span class="badge badge-21" style="margin-bottom:12px;">No.21 감사선행</span>
+          <div class="modal-label mt-8">미리 감사합니다</div>
+          <div class="modal-value">
+            ${(d21.gratitudes || []).filter(Boolean).map((g, i) =>
+              `<div>${String(i+1).padStart(2,'0')} ${g} 감사합니다.</div>`).join('')}
+          </div>
+          ${d21.feeling
+            ? `<div class="modal-label">지금 이 순간의 감정</div>
+               <div class="modal-value">${d21.feeling}</div>`
+            : ''}
+          <div class="separator"></div>`;
+      }
+
+      if (d28) {
+        const wkLabel = wk;
+        body += `
+          <span class="badge badge-28" style="margin-bottom:12px;">No.28 HARD</span>
+          <div class="modal-label mt-8">주차 / 키워드</div>
+          <div class="modal-value">${wkLabel} · ${d28.keyword || '–'}</div>
+          ${['have','achieved','receive','do'].map((k, idx) => {
+            const titles = ['H — HAVE', 'A — ACHIEVED', 'R — RECEIVE', 'D — DO'];
+            const items = (d28[k] || []).filter(Boolean);
+            return items.length
+              ? `<div class="modal-label">${titles[idx]}</div>
+                 <div class="modal-value">${items.map(v => `<div>· ${v}</div>`).join('')}</div>`
+              : '';
+          }).join('')}`;
+      }
+
+      document.getElementById('modalBody').innerHTML = body;
+      document.getElementById('modalOverlay').classList.remove('hidden');
+    };
+
+    window.closeModal = function(e) {
+      if (e.target === document.getElementById('modalOverlay')) {
+        document.getElementById('modalOverlay').classList.add('hidden');
+      }
+    };
+
+    // ── 목록 렌더 ─────────────────────────────────────────────────────────
+    function renderList() {
+      const todayStr = formatDate(new Date());
+      const thisWeekStart = (() => {
+        const d = new Date();
+        const dow = (d.getDay() + 6) % 7;
+        d.setDate(d.getDate() - dow);
+        return formatDate(d);
+      })();
+      const lastWeekStart = (() => {
+        const d = new Date(thisWeekStart);
+        d.setDate(d.getDate() - 7);
+        return formatDate(d);
+      })();
+
+      // 모든 항목 수집
+      const items = [];
+
+      if (activeFilter === 'all' || activeFilter === '17') {
+        Object.entries(allData.diary).forEach(([date, data]) => {
+          items.push({ date, type: '17', data });
+        });
+      }
+      if (activeFilter === 'all' || activeFilter === '21') {
+        Object.entries(allData.gratitude).forEach(([date, data]) => {
+          items.push({ date, type: '21', data });
+        });
+      }
+      if (activeFilter === 'all' || activeFilter === '28') {
+        Object.entries(allData.hard).forEach(([wk, data]) => {
+          // 주 키 → 월요일 날짜로 정렬용
+          const monday = getISOMonday(wk);
+          items.push({ date: formatDate(monday), weekKey: wk, type: '28', data });
+        });
+      }
+
+      // 최신순 정렬
+      items.sort((a, b) => b.date.localeCompare(a.date));
+
+      // 그룹화
+      function getGroup(date) {
+        if (date >= thisWeekStart) return '이번 주';
+        if (date >= lastWeekStart) return '지난 주';
+        return date.slice(0, 7); // YYYY-MM
+      }
+
+      let html = '';
+      let lastGroup = null;
+
+      items.forEach(item => {
+        const group = getGroup(item.date);
+        if (group !== lastGroup) {
+          html += `<div class="group-label">${group}</div>`;
+          lastGroup = group;
+        }
+
+        let preview = '';
+        let clickArg = '';
+        if (item.type === '17') {
+          preview = `나는 ${item.data.declaration || '…'} 한 사람이다.`;
+          clickArg = `'${item.date}'`;
+        } else if (item.type === '21') {
+          preview = (item.data.gratitudes?.[0] || '') + ' 감사합니다.';
+          clickArg = `'${item.date}'`;
+        } else {
+          preview = `키워드: ${item.data.keyword || '–'}`;
+          clickArg = `'${item.date}'`; // 일요일 기준 모달
+        }
+
+        html += `
+          <div class="history-item" onclick="openDateModal(${clickArg})">
+            <div class="history-item-top">
+              <span class="badge badge-${item.type}">No.${item.type}</span>
+              <span class="history-item-date">${item.weekKey || item.date}</span>
+            </div>
+            <div class="history-preview">${preview}</div>
+          </div>`;
+      });
+
+      if (!items.length) {
+        html = '<div style="text-align:center;padding:40px 0;color:var(--text-hint);">기록이 없습니다.</div>';
+      }
+
+      document.getElementById('listContent').innerHTML = html;
+    }
+
+    // ── 필터 버튼 ─────────────────────────────────────────────────────────
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        renderList();
+      });
+    });
+
+    // ── 인증 + 데이터 로드 ────────────────────────────────────────────────
+    onAuthChange(async user => {
+      if (!user) { window.location.replace('index.html'); return; }
+      currentUid = user.uid;
+      try {
+        allData = await getAllEntries(user.uid);
+        renderCalendar();
+        renderList();
+      } catch (e) {
+        document.getElementById('calGrid').innerHTML =
+          '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-hint);">불러오기 실패</div>';
+      }
+    });
+  </script>
+</body>
+</html>
