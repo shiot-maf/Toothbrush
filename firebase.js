@@ -50,6 +50,16 @@ export function onAuthChange(callback) {
   return onAuthStateChanged(auth, callback);
 }
 
+// Firebase가 localStorage에서 세션을 복구할 때까지 기다린 후 user 반환
+export function waitForAuth() {
+  return new Promise(resolve => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      unsubscribe();
+      resolve(user);
+    });
+  });
+}
+
 // ── 날짜 유틸 ─────────────────────────────────────────────────────────────
 export function formatDate(date) {
   const d = new Date(date);
