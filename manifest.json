@@ -1,0 +1,18 @@
+{
+  "name": "끌어당김의 기록",
+  "short_name": "끌어당김",
+  "description": "세 개의 노트로 시작하는 끌어당김의 법칙 저널",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1A1A18",
+  "theme_color": "#3B6D11",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
