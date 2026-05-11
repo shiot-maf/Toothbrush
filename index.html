@@ -40,7 +40,7 @@
   <div class="toast" id="toast"></div>
 
   <script type="module">
-    import { signInWithGoogle, onAuthChange } from './firebase.js';
+    import { signInWithGoogle, getGoogleRedirectResult, onAuthChange } from './firebase.js';
 
     // ── 테마 ──────────────────────────────────────────────────────────────
     const root = document.documentElement;
@@ -57,6 +57,12 @@
       localStorage.setItem('theme', next);
       applyTheme(next);
     });
+
+    // ── 리다이렉트 방식으로 돌아온 경우 처리 ────────────────────────────
+    try {
+      const result = await getGoogleRedirectResult();
+      if (result?.user) { window.location.replace('home.html'); }
+    } catch (e) { /* 리다이렉트 결과 없음 — 무시 */ }
 
     // ── 이미 로그인된 경우 이동 ──────────────────────────────────────────
     onAuthChange(user => {

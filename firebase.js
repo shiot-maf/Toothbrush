@@ -3,6 +3,8 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as authSignOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -34,8 +36,21 @@ const db       = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 // ── 인증 ──────────────────────────────────────────────────────────────────
-export function signInWithGoogle() {
-  return signInWithPopup(auth, provider);
+// 팝업 실패 시 자동으로 리다이렉트 방식으로 폴백
+export async function signInWithGoogle() {
+  try {
+    return await signInWithPopup(auth, provider);
+  } catch (e) {
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+      return signInWithRedirect(auth, provider);
+    }
+    throw e;
+  }
+}
+
+// 리다이렉트 방식으로 돌아왔을 때 결과 처리
+export function getGoogleRedirectResult() {
+  return getRedirectResult(auth);
 }
 
 export function signOutUser() {
