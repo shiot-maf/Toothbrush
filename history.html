@@ -42,9 +42,9 @@
     <div class="page-content hidden" id="panelList">
       <div class="filter-bar">
         <button class="filter-btn active" data-filter="all">전체</button>
-        <button class="filter-btn" data-filter="17">No.17</button>
-        <button class="filter-btn" data-filter="21">No.21</button>
-        <button class="filter-btn" data-filter="28">No.28</button>
+        <button class="filter-btn" data-filter="17">자기증명</button>
+        <button class="filter-btn" data-filter="21">감사선행</button>
+        <button class="filter-btn" data-filter="28">HARD</button>
       </div>
       <div id="listContent"></div>
     </div>
@@ -172,7 +172,7 @@
 
       if (d17) {
         body += `
-          <span class="badge badge-17" style="margin-bottom:12px;">No.17 자기증명</span>
+          <span class="badge badge-17" style="margin-bottom:12px;">자기증명</span>
           <div class="modal-label mt-8">오늘의 나</div>
           <div class="modal-value">나는 ${d17.declaration} 한 사람이다.</div>
           <div class="modal-label">오늘의 증거</div>
@@ -189,7 +189,7 @@
 
       if (d21) {
         body += `
-          <span class="badge badge-21" style="margin-bottom:12px;">No.21 감사선행</span>
+          <span class="badge badge-21" style="margin-bottom:12px;">감사선행</span>
           <div class="modal-label mt-8">미리 감사합니다</div>
           <div class="modal-value">
             ${(d21.gratitudes || []).filter(Boolean).map((g, i) =>
@@ -205,7 +205,7 @@
       if (d28) {
         const wkLabel = wk;
         body += `
-          <span class="badge badge-28" style="margin-bottom:12px;">No.28 HARD</span>
+          <span class="badge badge-28" style="margin-bottom:12px;">HARD</span>
           <div class="modal-label mt-8">주차 / 키워드</div>
           <div class="modal-value">${wkLabel} · ${d28.keyword || '–'}</div>
           ${['have','achieved','receive','do'].map((k, idx) => {
@@ -300,7 +300,7 @@
         html += `
           <div class="history-item" onclick="openDateModal(${clickArg})">
             <div class="history-item-top">
-              <span class="badge badge-${item.type}">No.${item.type}</span>
+              <span class="badge badge-${item.type}">${item.type === '17' ? '자기증명' : item.type === '21' ? '감사선행' : 'HARD'}</span>
               <span class="history-item-date">${item.weekKey || item.date}</span>
             </div>
             <div class="history-preview">${preview}</div>
