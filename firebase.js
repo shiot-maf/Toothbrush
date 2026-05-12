@@ -18,6 +18,18 @@ import {
   Timestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// ── 앱 공통 상수 ──────────────────────────────────────────────────────────
+export const APP_NAME = '끌어당김의 기록';
+
+// 노트 타입 정의 — 이름·CSS 클래스를 한 곳에서 관리
+export const NOTE_TYPES = {
+  diary:     { id: 'diary',     label: '자기증명', badgeClass: 'badge-17', chipClass: 'chip-17', dotClass: 'on-17' },
+  gratitude: { id: 'gratitude', label: '감사선행', badgeClass: 'badge-21', chipClass: 'chip-21', dotClass: 'on-21' },
+  hard:      { id: 'hard',      label: 'HARD',    badgeClass: 'badge-28', chipClass: 'chip-28', dotClass: 'on-28' },
+};
+
+export const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일']; // 0=월(ISO)
+
 // ── Firebase 설정 (직접 채워넣으세요) ─────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyBU7fCZcVxAre8FGB4j-vX50Oczyse5koU",

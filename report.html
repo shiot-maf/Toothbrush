@@ -28,7 +28,7 @@
   </div>
 
   <script type="module">
-    import { waitForAuth, onAuthChange, getThisWeekEntries, getWeekKey, formatDate } from './firebase.js';
+    import { waitForAuth, onAuthChange, getThisWeekEntries, getWeekKey, formatDate, NOTE_TYPES, WEEKDAYS } from './firebase.js';
 
     // ── 테마 ──────────────────────────────────────────────────────────────
     const root = document.documentElement;
@@ -45,7 +45,7 @@
     });
 
     // ── 유틸 ──────────────────────────────────────────────────────────────
-    const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
+    const DAYS = WEEKDAYS; // firebase.js에서 가져온 공통 상수
 
     function extractKeywords(text) {
       if (!text) return [];

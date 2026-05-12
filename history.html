@@ -42,9 +42,9 @@
     <div class="page-content hidden" id="panelList">
       <div class="filter-bar">
         <button class="filter-btn active" data-filter="all">전체</button>
-        <button class="filter-btn" data-filter="17">자기증명</button>
-        <button class="filter-btn" data-filter="21">감사선행</button>
-        <button class="filter-btn" data-filter="28">HARD</button>
+        <button class="filter-btn" data-filter="diary">자기증명</button>
+        <button class="filter-btn" data-filter="gratitude">감사선행</button>
+        <button class="filter-btn" data-filter="hard">HARD</button>
       </div>
       <div id="listContent"></div>
     </div>
@@ -63,7 +63,14 @@
       waitForAuth, onAuthChange, getAllEntries,
       getIdentityDiary, getGratitudeAdvance, getHardNote,
       formatDate, getWeekKey, getISOMonday,
+      NOTE_TYPES, WEEKDAYS,
     } from './firebase.js';
+
+    // 노트 타입별 헬퍼 (한 곳에서 관리)
+    const N = NOTE_TYPES;
+    function noteLabel(type)  { return N[type]?.label      || type; }
+    function noteBadge(type)  { return N[type]?.badgeClass || '';   }
+    function noteDot(type)    { return N[type]?.dotClass   || '';   }
 
     // ── 테마 ──────────────────────────────────────────────────────────────
     const root = document.documentElement;
@@ -114,8 +121,7 @@
         hardSundays.add(formatDate(sunday));
       });
 
-      const HDRS = ['월', '화', '수', '목', '금', '토', '일'];
-      let html = HDRS.map(d => `<div class="cal-hdr">${d}</div>`).join('');
+      let html = WEEKDAYS.map(d => `<div class="cal-hdr">${d}</div>`).join('');
 
       // 빈 칸
       for (let i = 0; i < startOffset; i++) {
@@ -125,15 +131,14 @@
       for (let d = 1; d <= lastDay.getDate(); d++) {
         const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const isToday = dateStr === todayStr;
-        const has17 = !!allData.diary[dateStr];
-        const has21 = !!allData.gratitude[dateStr];
-        const has28 = hardSundays.has(dateStr);
-
-        const dots = [
-          has17 ? '<span class="cal-dot cal-dot-17"></span>' : '',
-          has21 ? '<span class="cal-dot cal-dot-21"></span>' : '',
-          has28 ? '<span class="cal-dot cal-dot-28"></span>' : '',
-        ].join('');
+        const hasMap = {
+          diary:     !!allData.diary[dateStr],
+          gratitude: !!allData.gratitude[dateStr],
+          hard:      hardSundays.has(dateStr),
+        };
+        const dots = Object.entries(hasMap)
+          .map(([type, has]) => has ? `<span class="cal-dot ${noteDot(type)}"></span>` : '')
+          .join('');
 
         html += `
           <div class="cal-cell${isToday ? ' today' : ''}"
@@ -172,7 +177,7 @@
 
       if (d17) {
         body += `
-          <span class="badge badge-17" style="margin-bottom:12px;">자기증명</span>
+          <span class="badge ${noteBadge('diary')}" style="margin-bottom:12px;">${noteLabel('diary')}</span>
           <div class="modal-label mt-8">오늘의 나</div>
           <div class="modal-value">나는 ${d17.declaration} 한 사람이다.</div>
           <div class="modal-label">오늘의 증거</div>
@@ -189,7 +194,7 @@
 
       if (d21) {
         body += `
-          <span class="badge badge-21" style="margin-bottom:12px;">감사선행</span>
+          <span class="badge ${noteBadge('gratitude')}" style="margin-bottom:12px;">${noteLabel('gratitude')}</span>
           <div class="modal-label mt-8">미리 감사합니다</div>
           <div class="modal-value">
             ${(d21.gratitudes || []).filter(Boolean).map((g, i) =>
@@ -205,7 +210,7 @@
       if (d28) {
         const wkLabel = wk;
         body += `
-          <span class="badge badge-28" style="margin-bottom:12px;">HARD</span>
+          <span class="badge ${noteBadge('hard')}" style="margin-bottom:12px;">${noteLabel('hard')}</span>
           <div class="modal-label mt-8">주차 / 키워드</div>
           <div class="modal-value">${wkLabel} · ${d28.keyword || '–'}</div>
           ${['have','achieved','receive','do'].map((k, idx) => {
@@ -248,19 +253,18 @@
 
       if (activeFilter === 'all' || activeFilter === '17') {
         Object.entries(allData.diary).forEach(([date, data]) => {
-          items.push({ date, type: '17', data });
+          items.push({ date, type: 'diary', data });
         });
       }
-      if (activeFilter === 'all' || activeFilter === '21') {
+      if (activeFilter === 'all' || activeFilter === 'gratitude') {
         Object.entries(allData.gratitude).forEach(([date, data]) => {
-          items.push({ date, type: '21', data });
+          items.push({ date, type: 'gratitude', data });
         });
       }
-      if (activeFilter === 'all' || activeFilter === '28') {
+      if (activeFilter === 'all' || activeFilter === 'hard') {
         Object.entries(allData.hard).forEach(([wk, data]) => {
-          // 주 키 → 월요일 날짜로 정렬용
           const monday = getISOMonday(wk);
-          items.push({ date: formatDate(monday), weekKey: wk, type: '28', data });
+          items.push({ date: formatDate(monday), weekKey: wk, type: 'hard', data });
         });
       }
 
@@ -286,10 +290,10 @@
 
         let preview = '';
         let clickArg = '';
-        if (item.type === '17') {
+        if (item.type === 'diary') {
           preview = `나는 ${item.data.declaration || '…'} 한 사람이다.`;
           clickArg = `'${item.date}'`;
-        } else if (item.type === '21') {
+        } else if (item.type === 'gratitude') {
           preview = (item.data.gratitudes?.[0] || '') + ' 감사합니다.';
           clickArg = `'${item.date}'`;
         } else {
@@ -300,7 +304,7 @@
         html += `
           <div class="history-item" onclick="openDateModal(${clickArg})">
             <div class="history-item-top">
-              <span class="badge badge-${item.type}">${item.type === '17' ? '자기증명' : item.type === '21' ? '감사선행' : 'HARD'}</span>
+              <span class="badge ${noteBadge(item.type)}">${noteLabel(item.type)}</span>
               <span class="history-item-date">${item.weekKey || item.date}</span>
             </div>
             <div class="history-preview">${preview}</div>
