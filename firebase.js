@@ -204,6 +204,59 @@ export async function getThisWeekEntries(uid) {
   return { diary, gratitude, hard, startDate, endDate };
 }
 
+// ── 온보딩 ────────────────────────────────────────────────────────────────
+export async function getOnboardingStatus(uid) {
+  const snap = await getDoc(doc(db, "users", uid));
+  return snap.exists() ? snap.data()?.onboarded === true : false;
+}
+
+export function setOnboardingComplete(uid) {
+  return setDoc(doc(db, "users", uid), { onboarded: true, onboardedAt: Timestamp.now() }, { merge: true });
+}
+
+// ── 오늘의 실천 ───────────────────────────────────────────────────────────
+export function saveDailyAction(uid, date, data) {
+  const ref = doc(db, "users", uid, "daily_action", date);
+  return setDoc(ref, { ...data, updatedAt: Timestamp.now() });
+}
+
+export async function getDailyAction(uid, date) {
+  const snap = await getDoc(doc(db, "users", uid, "daily_action", date));
+  return snap.exists() ? snap.data() : null;
+}
+
+// ── 5년 계획 ──────────────────────────────────────────────────────────────
+export function saveVisionPlan(uid, data) {
+  const ref = doc(db, "users", uid, "vision_plan", "data");
+  return setDoc(ref, { ...data, updatedAt: Timestamp.now() });
+}
+
+export async function getVisionPlan(uid) {
+  const snap = await getDoc(doc(db, "users", uid, "vision_plan", "data"));
+  return snap.exists() ? snap.data() : null;
+}
+
+// ── 연속 기록 (스트릭) ────────────────────────────────────────────────────
+export async function getStreak(uid) {
+  const today = new Date();
+  let streak = 0;
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const dateStr = formatDate(d);
+    const [diary, grat] = await Promise.all([
+      getIdentityDiary(uid, dateStr),
+      getGratitudeAdvance(uid, dateStr),
+    ]);
+    if (diary || grat) {
+      streak++;
+    } else if (i > 0) {
+      break;
+    }
+  }
+  return streak;
+}
+
 // ── 기록 열람용 전체 데이터 ───────────────────────────────────────────────
 export async function getAllEntries(uid) {
   const [diarySnap, gratSnap, hardSnap] = await Promise.all([

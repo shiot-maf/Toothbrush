@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시작하기 — 끌어당김의 기록</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="theme-color" content="#2A4D0C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="끌어당김의 기록">
+</head>
+<body style="padding:24px 0 48px;">
+
+  <div class="onb-frame" id="onbFrame">
+
+    <!-- 화면 1 — 환영 -->
+    <div class="onb-screen active" id="screen0">
+      <div class="onb-icon">✦</div>
+      <h1 class="onb-title">끌어당김의 기록에<br>오신 걸 환영해요.</h1>
+      <p class="onb-desc">생각이 현실을 만든다는 믿음 위에서,<br>매일 조금씩 자신을 증명하는 공간이에요.</p>
+      <div style="flex:1;"></div>
+      <div class="onb-nav">
+        <button class="onb-btn-ghost" onclick="finish()">스킵</button>
+        <div class="onb-dots">
+          <div class="onb-dot active" id="dot0"></div>
+          <div class="onb-dot" id="dot1"></div>
+          <div class="onb-dot" id="dot2"></div>
+        </div>
+        <button class="onb-btn-main" onclick="goTo(1)">다음 →</button>
+      </div>
+    </div>
+
+    <!-- 화면 2 — 끌어당김의 법칙 -->
+    <div class="onb-screen" id="screen1">
+      <div class="onb-icon">🌀</div>
+      <h1 class="onb-title">끌어당김의<br>법칙이란</h1>
+      <p class="onb-desc">내가 집중하는 것, 느끼는 것, 믿는 것이<br>현실로 나타난다는 원리예요.</p>
+      <div class="onb-cards">
+        <div class="onb-card">
+          <div class="onb-num">①</div>
+          <div>
+            <div class="onb-card-title">구하라 — Ask</div>
+            <div class="onb-card-desc">원하는 것을 명확히 하세요.</div>
+          </div>
+        </div>
+        <div class="onb-card">
+          <div class="onb-num">②</div>
+          <div>
+            <div class="onb-card-title">믿어라 — Believe</div>
+            <div class="onb-card-desc">이미 이루어진 것처럼 느끼세요.</div>
+          </div>
+        </div>
+        <div class="onb-card">
+          <div class="onb-num">③</div>
+          <div>
+            <div class="onb-card-title">받아라 — Receive</div>
+            <div class="onb-card-desc">감사하며 행동으로 받아내세요.</div>
+          </div>
+        </div>
+      </div>
+      <div class="onb-nav">
+        <button class="onb-btn-ghost" onclick="goTo(0)">← 이전</button>
+        <div class="onb-dots">
+          <div class="onb-dot" id="dot0b"></div>
+          <div class="onb-dot active" id="dot1b"></div>
+          <div class="onb-dot" id="dot2b"></div>
+        </div>
+        <button class="onb-btn-main" onclick="goTo(2)">다음 →</button>
+      </div>
+    </div>
+
+    <!-- 화면 3 — 앱 구성 -->
+    <div class="onb-screen" id="screen2">
+      <div class="onb-icon">📖</div>
+      <h1 class="onb-title">매일 세 가지<br>루틴으로</h1>
+      <p class="onb-desc">짧지만 강력한 루틴들이에요.<br>하루 10분이면 충분해요.</p>
+      <div class="onb-cards">
+        <div class="onb-card">
+          <div class="onb-app-icon">✦</div>
+          <div>
+            <div class="onb-card-title">자기증명 일기</div>
+            <div class="onb-card-desc">매일 저녁 5분</div>
+          </div>
+        </div>
+        <div class="onb-card">
+          <div class="onb-app-icon">◎</div>
+          <div>
+            <div class="onb-card-title">감사 선행기법</div>
+            <div class="onb-card-desc">잠들기 전 3분</div>
+          </div>
+        </div>
+        <div class="onb-card">
+          <div class="onb-app-icon">▦</div>
+          <div>
+            <div class="onb-card-title">HARD 노트</div>
+            <div class="onb-card-desc">일요일 15분</div>
+          </div>
+        </div>
+      </div>
+      <div class="onb-nav">
+        <button class="onb-btn-ghost" onclick="goTo(1)">← 이전</button>
+        <div class="onb-dots">
+          <div class="onb-dot" id="dot0c"></div>
+          <div class="onb-dot" id="dot1c"></div>
+          <div class="onb-dot active" id="dot2c"></div>
+        </div>
+        <button class="onb-btn-main" id="startBtn" onclick="finish()">시작하기 →</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { waitForAuth, setOnboardingComplete } from './firebase.js';
+
+    // ── 배경 테마 ──────────────────────────────────────────────────────────
+    const BG = [
+      'linear-gradient(150deg, #1E3D0A 0%, #111410 100%)',
+      'linear-gradient(150deg, #0A1E3D 0%, #101418 100%)',
+      'linear-gradient(150deg, #3D1E0A 0%, #181410 100%)',
+    ];
+    const frame = document.getElementById('onbFrame');
+    frame.style.background = BG[0];
+
+    // ── 화면 전환 ──────────────────────────────────────────────────────────
+    let currentUid = null;
+    let cur = 0;
+
+    window.goTo = function(idx) {
+      document.getElementById(`screen${cur}`).classList.remove('active');
+      cur = idx;
+      document.getElementById(`screen${cur}`).classList.add('active');
+      frame.style.background = BG[cur];
+    };
+
+    // ── 온보딩 완료 ────────────────────────────────────────────────────────
+    window.finish = async function() {
+      document.getElementById('startBtn').disabled = true;
+      if (currentUid) {
+        await setOnboardingComplete(currentUid);
+      }
+      window.location.replace('home.html');
+    };
+
+    // ── 인증 확인 ──────────────────────────────────────────────────────────
+    const user = await waitForAuth();
+    if (!user) { window.location.replace('index.html'); }
+    else { currentUid = user.uid; }
+  </script>
+</body>
+</html>

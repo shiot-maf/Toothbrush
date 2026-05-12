@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5년 계획 — 끌어당김의 기록</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="theme-color" content="#3B6D11">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="끌어당김의 기록">
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="header">
+      <button class="header-back" onclick="history.back()">‹</button>
+      <span class="header-title">5 YEAR VISION</span>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeBtn">🌙</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="hint-box" style="margin-bottom:20px;">
+        5년 후의 나를 현재형으로 상상해요. "나는 ___이다"처럼 이미 이루어진 것처럼 적으세요.
+      </div>
+
+      <div id="categoriesWrap">
+        <!-- JS로 렌더링 -->
+      </div>
+
+      <button class="btn btn-17" id="saveBtn">저장하기</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import {
+      waitForAuth, onAuthChange,
+      saveVisionPlan, getVisionPlan,
+    } from './firebase.js';
+
+    // ── 카테고리 정의 (한 곳에서 관리) ───────────────────────────────────
+    const CATEGORIES = [
+      { key: 'career',   icon: '💼', name: '커리어 · 일',    hint: '어떤 일을 하고 있을까' },
+      { key: 'finance',  icon: '💰', name: '재정 · 풍요',    hint: '어떤 경제적 상태일까' },
+      { key: 'relation', icon: '❤️', name: '관계 · 사랑',    hint: '어떤 사람들과 함께일까' },
+      { key: 'health',   icon: '🌿', name: '건강 · 에너지',  hint: '몸과 마음은 어떤 상태일까' },
+      { key: 'growth',   icon: '🌱', name: '자기계발 · 성장', hint: '어떤 사람이 되어 있을까' },
+    ];
+    const YEARS = [
+      { key: 'y1', label: '1년' },
+      { key: 'y3', label: '3년' },
+      { key: 'y5', label: '5년' },
+    ];
+
+    // ── 테마 ──────────────────────────────────────────────────────────────
+    const root = document.documentElement;
+    const themeBtn = document.getElementById('themeBtn');
+    function applyTheme(t) {
+      root.setAttribute('data-theme', t);
+      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    }
+    applyTheme(localStorage.getItem('theme') || 'light');
+    themeBtn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      applyTheme(next);
+    });
+
+    // ── 토스트 ────────────────────────────────────────────────────────────
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // ── UI 렌더 ───────────────────────────────────────────────────────────
+    function renderCategories(data) {
+      const wrap = document.getElementById('categoriesWrap');
+      wrap.innerHTML = CATEGORIES.map(cat => `
+        <div class="vision-category card-shadow">
+          <div class="vision-cat-header">
+            <div class="vision-cat-icon">${cat.icon}</div>
+            <div>
+              <div class="vision-cat-name">${cat.name}</div>
+              <div class="vision-cat-hint">${cat.hint}</div>
+            </div>
+          </div>
+          ${YEARS.map(yr => `
+            <div class="vision-year-row">
+              <span class="vision-year-lbl">${yr.label}</span>
+              <input type="text"
+                id="${cat.key}_${yr.key}"
+                value="${(data?.[cat.key]?.[yr.key] || '').replace(/"/g, '&quot;')}"
+                placeholder="나는…">
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    function collectData() {
+      const result = {};
+      CATEGORIES.forEach(cat => {
+        result[cat.key] = {};
+        YEARS.forEach(yr => {
+          result[cat.key][yr.key] =
+            (document.getElementById(`${cat.key}_${yr.key}`)?.value || '').trim();
+        });
+      });
+      return result;
+    }
+
+    // ── 인증 + 데이터 로드 ────────────────────────────────────────────────
+    let currentUid = null;
+
+    const user = await waitForAuth();
+    if (!user) { window.location.replace('index.html'); }
+    else {
+      onAuthChange(u => { if (!u) window.location.replace('index.html'); });
+      currentUid = user.uid;
+      const data = await getVisionPlan(user.uid);
+      renderCategories(data);
+    }
+
+    // ── 저장 ──────────────────────────────────────────────────────────────
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      if (!currentUid) return;
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = '저장 중…';
+      try {
+        await saveVisionPlan(currentUid, collectData());
+        showToast('✓ 저장되었습니다');
+        setTimeout(() => window.location.href = 'home.html', 1200);
+      } catch (e) {
+        showToast('저장에 실패했습니다.');
+        saveBtn.disabled = false;
+        saveBtn.textContent = '저장하기';
+      }
+    });
+  </script>
+</body>
+</html>

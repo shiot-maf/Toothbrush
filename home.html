@@ -18,60 +18,109 @@
       <span class="header-title">끌어당김의 기록</span>
       <div class="header-actions">
         <button class="icon-btn" id="themeBtn" aria-label="테마 전환">🌙</button>
-        <button class="icon-btn" id="logoutBtn" aria-label="로그아웃" title="로그아웃">↩</button>
+        <button class="icon-btn" id="logoutBtn" title="로그아웃">↩</button>
       </div>
     </div>
 
-    <div class="page-content" id="mainContent">
-      <!-- 날짜 -->
-      <div class="date-hero">
-        <div class="ym" id="ymText"></div>
-        <div class="day-num" id="dayNum"></div>
-        <div class="weekday" id="weekdayText"></div>
+    <div class="page-content">
+
+      <!-- ① 히어로 카드 -->
+      <div class="hero-card card-shadow-lg">
+        <div style="font-size:11px;font-weight:700;color:var(--text-hint);letter-spacing:1px;margin-bottom:10px;">
+          TODAY'S QUOTE
+        </div>
+        <div class="hero-quote serif" id="heroQuote">불러오는 중…</div>
+        <div class="streak-badge" id="streakBadge">🔥 0일 연속</div>
       </div>
 
-      <!-- 노트 카드들 -->
-      <div class="section">
-        <div class="section-title">오늘의 노트</div>
-
-        <a class="note-card" href="note17.html" id="card17">
-          <div class="note-icon note-icon-17">✦</div>
-          <div class="note-card-body">
-            <div class="note-card-name">자기증명 일기</div>
-            <div class="note-card-sub">매일 저녁 · 5분</div>
-            <div class="note-card-preview" id="preview17">불러오는 중…</div>
-          </div>
-          <div class="note-status" id="status17">…</div>
-        </a>
-
-        <a class="note-card" href="note21.html" id="card21">
-          <div class="note-icon note-icon-21">◎</div>
-          <div class="note-card-body">
-            <div class="note-card-name">감사 선행기법</div>
-            <div class="note-card-sub">매일 잠들기 전 · 3분</div>
-            <div class="note-card-preview" id="preview21">불러오는 중…</div>
-          </div>
-          <div class="note-status" id="status21">…</div>
-        </a>
-
-        <a class="note-card" href="note28.html" id="card28">
-          <div class="note-icon note-icon-28">▦</div>
-          <div class="note-card-body">
-            <div class="note-card-name">HARD 노트</div>
-            <div class="note-card-sub">주 1회 일요일 · 15분</div>
-            <div class="note-card-preview" id="preview28">불러오는 중…</div>
-          </div>
-          <div class="note-status" id="status28">…</div>
-        </a>
+      <!-- ② 이번 주 스트릭 바 -->
+      <div class="streak-week" id="streakWeek">
+        <!-- JS 렌더 -->
       </div>
 
+      <!-- ③ 오늘의 실천 -->
+      <div class="section-label">TODAY'S PRACTICE</div>
+      <div class="card card-shadow" id="practiceCard" style="border-color:var(--c28);">
+        <div class="practice-header">
+          <span class="practice-label">오늘의 실천</span>
+          <button class="icon-btn" id="addPracticeBtn" style="font-size:13px;color:var(--c28);" title="직접 입력">＋</button>
+        </div>
+        <div id="practiceList">
+          <div style="color:var(--text-hint);font-size:13px;text-align:center;padding:8px 0;">불러오는 중…</div>
+        </div>
+      </div>
+
+      <!-- ④ TODAY'S NOTES -->
+      <div class="section-label">TODAY'S NOTES</div>
+
+      <a class="note-card card-shadow" href="note17.html">
+        <div class="note-icon note-icon-17" style="font-size:17px;">✦</div>
+        <div class="note-card-body">
+          <div class="note-card-name">자기증명 일기</div>
+          <div class="note-card-sub">매일 저녁 · 5분</div>
+          <div class="note-card-preview" id="preview17">불러오는 중…</div>
+        </div>
+        <div class="note-status" id="status17">…</div>
+      </a>
+
+      <a class="note-card card-shadow" href="note21.html">
+        <div class="note-icon note-icon-21" style="font-size:17px;">◎</div>
+        <div class="note-card-body">
+          <div class="note-card-name">감사 선행기법</div>
+          <div class="note-card-sub">매일 잠들기 전 · 3분</div>
+          <div class="note-card-preview" id="preview21">불러오는 중…</div>
+        </div>
+        <div class="note-status" id="status21">…</div>
+      </a>
+
+      <a class="note-card card-shadow" href="note28.html">
+        <div class="note-icon note-icon-28" style="font-size:17px;">▦</div>
+        <div class="note-card-body">
+          <div class="note-card-name">HARD 노트</div>
+          <div class="note-card-sub">주 1회 일요일 · 15분</div>
+          <div class="note-card-preview" id="preview28">불러오는 중…</div>
+        </div>
+        <div class="note-status" id="status28">…</div>
+      </a>
+
+      <!-- ⑤ MANIFESTATION -->
+      <div class="section-label">MANIFESTATION</div>
+      <div class="card card-shadow" id="manifestCard">
+        <div class="field-label" style="margin-bottom:10px;">이미 이룬 것</div>
+        <div id="achievedList">
+          <div style="color:var(--text-hint);font-size:13px;">불러오는 중…</div>
+        </div>
+      </div>
+
+      <!-- ⑥ 5 YEAR VISION -->
+      <div class="section-label">5 YEAR VISION</div>
+      <a class="card card-shadow" href="vision.html" style="display:block;text-decoration:none;color:inherit;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="field-label">1년 후 나는</div>
+          <span style="font-size:12px;color:var(--text-hint);">전체 보기 →</span>
+        </div>
+        <div id="visionPreview">
+          <div style="color:var(--text-hint);font-size:13px;">아직 작성하지 않았어요 → 탭해서 시작하기</div>
+        </div>
+      </a>
+
+      <!-- ⑦ 하단 버튼 -->
       <div class="separator"></div>
-
-      <!-- 이동 버튼 -->
-      <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:8px;">
         <a class="btn btn-outline" href="report.html">📊 이번 주 리포트 보기</a>
         <a class="btn btn-outline" href="history.html">📅 기록 열람</a>
       </div>
+
+    </div>
+  </div>
+
+  <!-- 실천 직접 입력 모달 -->
+  <div class="modal-overlay hidden" id="practiceModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="field-label" style="margin-bottom:8px;">오늘의 실천 입력</div>
+      <input type="text" id="practiceInput" placeholder="오늘 실천할 한 가지…" style="margin-bottom:16px;">
+      <button class="btn btn-28" id="savePracticeBtn">저장하기</button>
     </div>
   </div>
 
@@ -81,8 +130,66 @@
     import {
       waitForAuth, onAuthChange, signOutUser,
       getIdentityDiary, getGratitudeAdvance, getHardNote,
-      formatDate, getWeekKey,
+      getIdentityDiaryRange, getGratitudeAdvanceRange,
+      getDailyAction, saveDailyAction,
+      getVisionPlan, getStreak,
+      formatDate, getWeekKey, getThisWeekRange,
+      WEEKDAYS,
     } from './firebase.js';
+
+    // ── 오늘의 명언 40선 ──────────────────────────────────────────────────
+    const QUOTES = [
+      // 끌어당김 테마 (14)
+      "당신이 집중하는 것이 당신의 현실이 된다.",
+      "원하는 것을 이미 가진 것처럼 느껴라.",
+      "생각은 씨앗이다. 심은 대로 거둔다.",
+      "에너지는 집중하는 곳으로 흐른다.",
+      "당신의 감정이 당신의 나침반이다.",
+      "믿음은 보이지 않는 것을 보이게 만드는 힘이다.",
+      "우주는 당신의 가장 깊은 의도에 응답한다.",
+      "원하는 것에 저항하지 말고, 허용하라.",
+      "지금 이 순간의 감정이 내일의 현실을 만든다.",
+      "두려움에 집중하면 두려운 것을 끌어오고, 사랑에 집중하면 사랑을 끌어온다.",
+      "당신이 상상할 수 있다면, 이룰 수 있다.",
+      "풍요는 마음의 상태다.",
+      "바라는 것을 구하라. 그리고 이미 받은 것처럼 감사하라.",
+      "현실은 내 생각의 거울이다.",
+      // 시크릿 테마 (13)
+      "구하라, 믿어라, 받아라.",
+      "당신의 인생은 당신의 생각이 만들어낸 걸작이다.",
+      "감사는 끌어당김의 법칙을 활성화하는 가장 강력한 도구다.",
+      "당신 안에 있는 힘은 당신이 직면한 어떤 도전보다 크다.",
+      "기분이 좋아지는 것이 곧 원하는 것을 끌어당기는 것이다.",
+      "행복은 원인이지, 결과가 아니다.",
+      "당신이 원하는 것을 원하는 이유는, 그것이 이미 당신 것이기 때문이다.",
+      "부정적인 생각 하나를 긍정적인 생각 열 개로 지워라.",
+      "당신이 원하는 것을 느낄 때, 그것은 이미 오고 있다.",
+      "마음이 가는 곳에 에너지가 따른다.",
+      "매일 아침 눈을 뜰 때, 오늘 하루에 감사하라.",
+      "당신은 당신이 생각하는 것보다 훨씬 강하다.",
+      "원하는 것을 이미 이룬 사람처럼 행동하라.",
+      // 자기증명/성장 테마 (13)
+      "나는 매일 모든 면에서 점점 더 나아지고 있다.",
+      "당신이 되고 싶은 사람이 되는 것은 매일의 선택이 만든다.",
+      "자신을 믿는 것이 변화의 첫 번째 단계다.",
+      "당신의 정체성이 당신의 운명을 결정한다.",
+      "작은 행동이 쌓여 큰 변화가 된다.",
+      "오늘 한 걸음이 내일의 도약이 된다.",
+      "변화는 결심의 순간이 아닌, 매일의 실천에서 온다.",
+      "나는 내가 믿는 것이 된다.",
+      "두려움은 성장의 신호다.",
+      "완벽함이 아닌 일관성이 결과를 만든다.",
+      "오늘의 나는 어제보다 낫다. 내일의 나는 오늘보다 나을 것이다.",
+      "작은 증거들이 쌓여 큰 확신이 된다.",
+      "나는 내 이야기의 작가다.",
+    ];
+
+    function getTodayQuote() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 0);
+      const dayOfYear = Math.floor((now - start) / 86400000);
+      return QUOTES[dayOfYear % QUOTES.length];
+    }
 
     // ── 테마 ──────────────────────────────────────────────────────────────
     const root = document.documentElement;
@@ -98,71 +205,228 @@
       applyTheme(next);
     });
 
-    // ── 날짜 표시 ─────────────────────────────────────────────────────────
-    const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-    const today = new Date();
-    document.getElementById('ymText').textContent =
-      `${today.getFullYear()}년 ${today.getMonth() + 1}월`;
-    document.getElementById('dayNum').textContent = today.getDate();
-    document.getElementById('weekdayText').textContent =
-      `${WEEKDAYS[today.getDay()]}요일`;
+    // ── 명언 즉시 표시 (Firestore 기다리지 않고) ──────────────────────────
+    document.getElementById('heroQuote').textContent = getTodayQuote();
 
     // ── 유틸 ──────────────────────────────────────────────────────────────
     function showToast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg;
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2000);
+      setTimeout(() => t.classList.remove('show'), 2200);
     }
 
     function setCard(statusId, previewId, done, previewText) {
       const s = document.getElementById(statusId);
       const p = document.getElementById(previewId);
       if (done) {
-        s.textContent = '✓';
-        s.className = 'note-status status-done';
+        s.textContent = '✓'; s.className = 'note-status status-done';
         p.textContent = previewText || '';
       } else {
-        s.textContent = '미작성';
-        s.className = 'note-status status-todo';
+        s.textContent = '미작성'; s.className = 'note-status status-todo';
         p.textContent = '아직 작성하지 않았어요';
       }
     }
 
-    // ── 인증 + 데이터 로드 ────────────────────────────────────────────────
+    // ── 주간 스트릭 바 렌더 ───────────────────────────────────────────────
+    function renderStreakWeek(diaryRange, gratRange) {
+      const { startDate } = getThisWeekRange();
+      const todayStr = formatDate(new Date());
+      const wrap = document.getElementById('streakWeek');
+      wrap.innerHTML = WEEKDAYS.map((label, i) => {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        const dateStr = formatDate(d);
+        const done = !!(diaryRange[dateStr] || gratRange[dateStr]);
+        const isToday = dateStr === todayStr;
+        const isFuture = dateStr > todayStr;
+        let dotClass = '';
+        if (done && isToday) dotClass = 'today-done';
+        else if (done)       dotClass = 'done';
+        else if (isToday)    dotClass = 'today-ring';
+        return `
+          <div class="streak-day">
+            <span class="streak-day-lbl">${label}</span>
+            <div class="streak-dot ${dotClass}" title="${dateStr}">
+              ${done ? '✓' : ''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── 실천 카드 렌더 ────────────────────────────────────────────────────
+    let practiceItems = [];     // { text, completed, source }
+    let practiceData  = null;   // Firestore daily_action doc
+    let currentUid    = null;
+    let todayStr      = '';
+
+    async function savePracticeState() {
+      if (!currentUid || !todayStr) return;
+      await saveDailyAction(currentUid, todayStr, {
+        items: practiceItems,
+        source: practiceData?.source || 'hard_note',
+        completed: practiceItems.every(p => p.completed),
+      });
+    }
+
+    function renderPracticeList() {
+      const list = document.getElementById('practiceList');
+      if (!practiceItems.length) {
+        list.innerHTML = `
+          <button class="practice-add-btn" id="manualBtn">＋ 오늘 실천 입력하기</button>`;
+        document.getElementById('manualBtn')?.addEventListener('click', openPracticeModal);
+        return;
+      }
+      list.innerHTML = practiceItems.map((item, idx) => `
+        <div class="practice-item" id="pitem${idx}">
+          <button class="practice-check ${item.completed ? 'done' : ''}"
+                  data-idx="${idx}" title="완료 토글">
+            ${item.completed ? '✓' : ''}
+          </button>
+          <span class="practice-text ${item.completed ? 'done' : ''}">${item.text}</span>
+        </div>`).join('');
+
+      list.querySelectorAll('.practice-check').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const idx = +btn.dataset.idx;
+          practiceItems[idx].completed = !practiceItems[idx].completed;
+          renderPracticeList();
+          await savePracticeState();
+        });
+      });
+    }
+
+    function buildPracticeFromHard(d28) {
+      if (!d28) return [];
+      return (d28.do || [])
+        .filter(Boolean)
+        .slice(0, 3)
+        .map(text => ({ text, completed: false, source: 'hard_note' }));
+    }
+
+    // ── 실천 입력 모달 ────────────────────────────────────────────────────
+    function openPracticeModal() {
+      document.getElementById('practiceModal').classList.remove('hidden');
+      document.getElementById('practiceInput').focus();
+    }
+
+    document.getElementById('addPracticeBtn').addEventListener('click', openPracticeModal);
+
+    document.getElementById('practiceModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('practiceModal'))
+        document.getElementById('practiceModal').classList.add('hidden');
+    });
+
+    document.getElementById('savePracticeBtn').addEventListener('click', async () => {
+      const val = document.getElementById('practiceInput').value.trim();
+      if (!val) return;
+      practiceItems.push({ text: val, completed: false, source: 'manual' });
+      document.getElementById('practiceInput').value = '';
+      document.getElementById('practiceModal').classList.add('hidden');
+      renderPracticeList();
+      await savePracticeState();
+    });
+
+    // ── 비전 미리보기 렌더 ────────────────────────────────────────────────
+    const VISION_CATS = [
+      { key: 'career',   icon: '💼' },
+      { key: 'finance',  icon: '💰' },
+      { key: 'relation', icon: '❤️' },
+      { key: 'health',   icon: '🌿' },
+      { key: 'growth',   icon: '🌱' },
+    ];
+
+    function renderVisionPreview(data) {
+      const wrap = document.getElementById('visionPreview');
+      if (!data) return;
+      const items = VISION_CATS
+        .map(c => ({ icon: c.icon, text: data[c.key]?.y1 }))
+        .filter(c => c.text);
+      if (!items.length) return;
+      wrap.innerHTML = items.slice(0, 3).map(item => `
+        <div class="vision-preview-item">
+          <span class="vision-preview-icon">${item.icon}</span>
+          <span class="vision-preview-text serif">${item.text}</span>
+        </div>`).join('');
+    }
+
+    // ── 이미 이룬 것 (Manifestation) 렌더 ────────────────────────────────
+    function renderAchieved(d28) {
+      const wrap = document.getElementById('achievedList');
+      if (!d28) {
+        wrap.innerHTML = `<div style="color:var(--text-hint);font-size:13px;">
+          HARD 노트를 작성하면 자동으로 표시돼요.</div>`;
+        return;
+      }
+      const items = (d28.achieved || []).filter(Boolean).slice(0, 3);
+      if (!items.length) {
+        wrap.innerHTML = `<div style="color:var(--text-hint);font-size:13px;">
+          이번 주 HARD 노트의 A 항목을 채워보세요.</div>`;
+        return;
+      }
+      wrap.innerHTML = items.map(text =>
+        `<div style="font-size:14px;color:var(--text);padding:5px 0;
+          border-bottom:0.5px solid var(--border);">· ${text}</div>`
+      ).join('');
+    }
+
+    // ── 인증 + 전체 데이터 로드 ───────────────────────────────────────────
     const user = await waitForAuth();
     if (!user) { window.location.replace('index.html'); }
     else {
-    // 로그아웃 감지 (페이지 열려 있는 동안)
-    onAuthChange(u => { if (!u) window.location.replace('index.html'); });
-
-      const uid     = user.uid;
-      const todayStr = formatDate(today);
-      const weekKey  = getWeekKey(today);
+      onAuthChange(u => { if (!u) window.location.replace('index.html'); });
+      currentUid  = user.uid;
+      todayStr    = formatDate(new Date());
+      const today = new Date();
+      const weekKey = getWeekKey(today);
+      const { startDate, endDate } = getThisWeekRange();
 
       try {
-        const [d17, d21, d28] = await Promise.all([
-          getIdentityDiary(uid, todayStr),
-          getGratitudeAdvance(uid, todayStr),
-          getHardNote(uid, weekKey),
-        ]);
+        const [diaryRange, gratRange, d28, dailyAction, visionData, streak] =
+          await Promise.all([
+            getIdentityDiaryRange(currentUid, startDate, endDate),
+            getGratitudeAdvanceRange(currentUid, startDate, endDate),
+            getHardNote(currentUid, weekKey),
+            getDailyAction(currentUid, todayStr),
+            getVisionPlan(currentUid),
+            getStreak(currentUid),
+          ]);
 
-        setCard('status17', 'preview17',
-          !!d17, d17 ? `나는 ${d17.declaration} 한 사람이다.` : '');
+        const d17 = diaryRange[todayStr] || null;
+        const d21 = gratRange[todayStr]  || null;
 
-        setCard('status21', 'preview21',
-          !!d21, d21 ? (d21.gratitudes?.[0] || '') + ' 감사합니다.' : '');
+        // 스트릭 배지
+        document.getElementById('streakBadge').textContent = `🔥 ${streak}일 연속`;
 
-        setCard('status28', 'preview28',
-          !!d28, d28 ? `키워드: ${d28.keyword || ''}` : '');
+        // 스트릭 바
+        renderStreakWeek(diaryRange, gratRange);
+
+        // 실천 카드
+        practiceData = dailyAction;
+        if (dailyAction?.items?.length) {
+          practiceItems = dailyAction.items;
+        } else {
+          practiceItems = buildPracticeFromHard(d28);
+          if (practiceItems.length) await savePracticeState();
+        }
+        renderPracticeList();
+
+        // 노트 카드
+        setCard('status17', 'preview17', !!d17,
+          d17 ? `나는 ${d17.declaration} 한 사람이다.` : '');
+        setCard('status21', 'preview21', !!d21,
+          d21 ? (d21.gratitudes?.[0] || '') + ' 감사합니다.' : '');
+        setCard('status28', 'preview28', !!d28,
+          d28 ? `키워드: ${d28.keyword || ''}` : '');
+
+        // Manifestation
+        renderAchieved(d28);
+
+        // Vision
+        renderVisionPreview(visionData);
+
       } catch (e) {
-        showToast('데이터를 불러오지 못했습니다.');
-        ['preview17', 'preview21', 'preview28'].forEach(id => {
-          document.getElementById(id).textContent = '불러오기 실패';
-        });
-        ['status17', 'status21', 'status28'].forEach(id => {
-          document.getElementById(id).textContent = '–';
-        });
+        showToast('일부 데이터를 불러오지 못했습니다.');
       }
     }
 

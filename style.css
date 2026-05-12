@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;600;700&display=swap');
+
 /* ── 테마 변수 ─────────────────────────────────────────────────────────── */
 :root {
   --bg:             #F2EFE9;
@@ -20,7 +22,8 @@
   --r-sm:    10px;
   --r:       14px;
   --r-lg:    18px;
-  --r-frame: 36px;
+  --r-hero:  24px;
+  --r-frame: 44px;
 }
 
 [data-theme="dark"] {
@@ -668,3 +671,222 @@ textarea { resize: none; line-height: 1.6; }
 .mt-16 { margin-top: 16px; }
 .mb-12 { margin-bottom: 12px; }
 .mb-16 { margin-bottom: 16px; }
+
+/* ── 세리프 폰트 ────────────────────────────────────────────────────────── */
+.serif {
+  font-family: 'Noto Serif KR', Georgia, 'Times New Roman', serif;
+}
+
+/* ── 그림자 ─────────────────────────────────────────────────────────────── */
+.card-shadow    { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+.card-shadow-lg { box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+[data-theme="dark"] .card-shadow    { box-shadow: 0 2px 10px rgba(0,0,0,0.25); }
+[data-theme="dark"] .card-shadow-lg { box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
+.btn-17:not(:disabled) { box-shadow: 0 4px 16px rgba(59,109,17,0.28); }
+.btn-21:not(:disabled) { box-shadow: 0 4px 16px rgba(153,60,29,0.28); }
+.btn-28:not(:disabled) { box-shadow: 0 4px 16px rgba(24,95,165,0.28); }
+
+/* ── 히어로 카드 ────────────────────────────────────────────────────────── */
+.hero-card {
+  border-radius: var(--r-hero);
+  padding: 22px 20px 18px;
+  margin-bottom: 12px;
+  background: var(--card-bg);
+  border: 0.5px solid var(--border);
+}
+.hero-quote {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--c17-bg);
+  color: var(--c17);
+  border: 0.5px solid var(--c17);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ── 섹션 라벨 ──────────────────────────────────────────────────────────── */
+.section-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-hint);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin: 20px 0 10px;
+}
+
+/* ── 주간 스트릭 바 ─────────────────────────────────────────────────────── */
+.streak-week {
+  display: flex;
+  justify-content: space-between;
+  background: var(--card-bg);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.streak-day { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.streak-day-lbl { font-size: 9px; font-weight: 700; color: var(--text-hint); }
+.streak-dot {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.streak-dot.done        { background: var(--c17); border-color: var(--c17); color: #fff; }
+.streak-dot.today-ring  { border-color: var(--text-secondary); border-style: dashed; }
+.streak-dot.today-done  { background: var(--c17); border-color: var(--c17); color: #fff;
+                          box-shadow: 0 0 0 3px var(--c17-bg); }
+
+/* ── 실천 카드 ──────────────────────────────────────────────────────────── */
+.practice-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.practice-label { font-size: 11px; font-weight: 800; color: var(--c28); letter-spacing: 0.8px; }
+.practice-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.practice-item:last-child { border-bottom: none; }
+.practice-check {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--c28);
+  background: transparent;
+  cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: transparent;
+  transition: all 0.15s;
+}
+.practice-check.done { background: var(--c28); color: #fff; border-color: var(--c28); }
+.practice-text { font-size: 14px; color: var(--text); flex: 1; }
+.practice-text.done { text-decoration: line-through; color: var(--text-hint); }
+.practice-add-btn {
+  width: 100%; padding: 13px;
+  border-radius: var(--r);
+  border: 1.5px dashed var(--c28);
+  background: transparent;
+  color: var(--c28);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+
+/* ── 비전 카드 (홈 미리보기) ──────────────────────────────────────────────── */
+.vision-preview-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 13px;
+}
+.vision-preview-item:last-child { border-bottom: none; }
+.vision-preview-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
+.vision-preview-text { color: var(--text); line-height: 1.4; }
+
+/* ── 비전 계획 페이지 ───────────────────────────────────────────────────── */
+.vision-category {
+  background: var(--card-bg);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.vision-cat-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.vision-cat-icon {
+  font-size: 18px; width: 38px; height: 38px;
+  background: var(--bg); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.vision-cat-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.vision-cat-hint { font-size: 11px; color: var(--text-hint); margin-top: 1px; }
+.vision-year-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.vision-year-lbl {
+  font-size: 10px; font-weight: 800; color: var(--text-hint);
+  min-width: 30px; letter-spacing: 0.5px;
+}
+
+/* ── 온보딩 ─────────────────────────────────────────────────────────────── */
+.onb-frame {
+  width: 100%; max-width: 390px;
+  min-height: calc(100vh - 72px);
+  border-radius: var(--r-frame);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: background 0.4s;
+}
+@media (max-width: 430px) { .onb-frame { border-radius: 0; min-height: 100vh; } }
+
+.onb-screen {
+  display: none; flex: 1;
+  flex-direction: column;
+  padding: 52px 28px 36px;
+}
+.onb-screen.active { display: flex; }
+
+.onb-icon  { font-size: 44px; margin-bottom: 20px; line-height: 1; }
+.onb-title { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 10px; line-height: 1.35; }
+.onb-desc  { font-size: 14px; color: rgba(255,255,255,0.78); line-height: 1.7; margin-bottom: 28px; }
+
+.onb-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+.onb-card {
+  background: rgba(255,255,255,0.13);
+  border-radius: 14px; padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+  border: 0.5px solid rgba(255,255,255,0.15);
+}
+.onb-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(255,255,255,0.22);
+  color: #fff; font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.onb-card-title { font-size: 13px; font-weight: 700; color: #fff; }
+.onb-card-desc  { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 2px; line-height: 1.45; }
+
+.onb-app-icon {
+  font-size: 18px; width: 38px; height: 38px;
+  background: rgba(255,255,255,0.18); border-radius: 11px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.onb-nav {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-top: auto;
+}
+.onb-dots { display: flex; gap: 6px; align-items: center; }
+.onb-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.3); transition: all 0.2s;
+}
+.onb-dot.active { background: #fff; width: 18px; border-radius: 3px; }
+.onb-btn-ghost {
+  background: rgba(255,255,255,0.14); border: none;
+  color: rgba(255,255,255,0.8); padding: 10px 18px;
+  border-radius: 12px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+.onb-btn-main {
+  background: rgba(255,255,255,0.92); border: none;
+  color: #1A1A18; padding: 12px 24px;
+  border-radius: 14px; font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: 6px;
+}
