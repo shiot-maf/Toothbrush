@@ -96,6 +96,7 @@
               <span class="vision-year-lbl">${yr.label}</span>
               <input type="text"
                 id="${cat.key}_${yr.key}"
+                maxlength="100"
                 value="${(data?.[cat.key]?.[yr.key] || '').replace(/"/g, '&quot;')}"
                 placeholder="나는…">
             </div>
@@ -127,6 +128,14 @@
       const data = await getVisionPlan(user.uid);
       renderCategories(data);
     }
+
+    // ── 특수문자 필터링 ───────────────────────────────────────────────────
+    // renderCategories() 이후 동적 생성된 input에도 적용하기 위해 이벤트 위임 사용
+    document.getElementById('categoriesWrap').addEventListener('input', e => {
+      if (e.target.tagName === 'INPUT') {
+        e.target.value = e.target.value.replace(/[<>&]/g, '');
+      }
+    });
 
     // ── 저장 ──────────────────────────────────────────────────────────────
     document.getElementById('saveBtn').addEventListener('click', async () => {

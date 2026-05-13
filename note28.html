@@ -36,7 +36,7 @@
         </div>
         <div style="flex:1;">
           <div class="field-label">이번 주 키워드</div>
-          <input type="text" id="keyword" placeholder="한 단어">
+          <input type="text" id="keyword" placeholder="한 단어" maxlength="20">
         </div>
       </div>
 
@@ -47,44 +47,44 @@
         <div class="hard-q hard-q-H">
           <div class="hard-q-title">H — HAVE</div>
           <div class="hard-q-desc">지금 가진 것<br>너무 당연해서 잊고 사는 것들</div>
-          <input class="hard-line-input" type="text" id="h0" placeholder="건강한 몸">
-          <input class="hard-line-input" type="text" id="h1" placeholder="안전한 거처">
-          <input class="hard-line-input" type="text" id="h2" placeholder="곁의 사람">
-          <input class="hard-line-input" type="text" id="h3" placeholder="가진 재능">
-          <input class="hard-line-input" type="text" id="h4" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="h0" placeholder="건강한 몸">
+          <input class="hard-line-input" type="text" maxlength="100" id="h1" placeholder="안전한 거처">
+          <input class="hard-line-input" type="text" maxlength="100" id="h2" placeholder="곁의 사람">
+          <input class="hard-line-input" type="text" maxlength="100" id="h3" placeholder="가진 재능">
+          <input class="hard-line-input" type="text" maxlength="100" id="h4" placeholder="">
         </div>
 
         <!-- A: ACHIEVED -->
         <div class="hard-q hard-q-A">
           <div class="hard-q-title">A — ACHIEVED</div>
           <div class="hard-q-desc">이미 이룬 것<br>5년 전의 내가 간절했던 지금</div>
-          <input class="hard-line-input" type="text" id="a0" placeholder="">
-          <input class="hard-line-input" type="text" id="a1" placeholder="">
-          <input class="hard-line-input" type="text" id="a2" placeholder="">
-          <input class="hard-line-input" type="text" id="a3" placeholder="">
-          <input class="hard-line-input" type="text" id="a4" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="a0" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="a1" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="a2" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="a3" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="a4" placeholder="">
         </div>
 
         <!-- R: RECEIVE -->
         <div class="hard-q hard-q-R">
           <div class="hard-q-title">R — RECEIVE</div>
           <div class="hard-q-desc">받게 되는 것<br>"받는다", "들어온다" — 현재형</div>
-          <input class="hard-line-input" type="text" id="r0" placeholder="">
-          <input class="hard-line-input" type="text" id="r1" placeholder="">
-          <input class="hard-line-input" type="text" id="r2" placeholder="">
-          <input class="hard-line-input" type="text" id="r3" placeholder="">
-          <input class="hard-line-input" type="text" id="r4" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="r0" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="r1" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="r2" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="r3" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="r4" placeholder="">
         </div>
 
         <!-- D: DO -->
         <div class="hard-q hard-q-D">
           <div class="hard-q-title">D — DO</div>
           <div class="hard-q-desc">이번 주 할 것<br>R로 가는 가장 작은 한 걸음</div>
-          <input class="hard-line-input" type="text" id="d0" placeholder="">
-          <input class="hard-line-input" type="text" id="d1" placeholder="">
-          <input class="hard-line-input" type="text" id="d2" placeholder="">
-          <input class="hard-line-input" type="text" id="d3" placeholder="">
-          <input class="hard-line-input" type="text" id="d4" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="d0" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="d1" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="d2" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="d3" placeholder="">
+          <input class="hard-line-input" type="text" maxlength="100" id="d4" placeholder="">
         </div>
 
       </div>
@@ -119,6 +119,13 @@
     // ── 날짜 / 주 키 ─────────────────────────────────────────────────────
     const dateInput = document.getElementById('dateInput');
     dateInput.value = formatDate(new Date());
+
+    // ── 특수문자 필터링 ───────────────────────────────────────────────────
+    document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+      el.addEventListener('input', () => {
+        el.value = el.value.replace(/[<>&]/g, '');
+      });
+    });
 
     function showToast(msg) {
       const t = document.getElementById('toast');

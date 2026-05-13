@@ -52,7 +52,7 @@
         <p style="font-size:12px;color:var(--text-hint);margin-bottom:8px;">
           이 감사들을 적고 나니 가슴에 남는 느낌. 감정이 안 올라오면 항목을 바꾸세요.
         </p>
-        <textarea id="feeling" rows="3" placeholder="지금 이 순간 느껴지는 감정을 적어주세요…"></textarea>
+        <textarea id="feeling" rows="3" maxlength="300" placeholder="지금 이 순간 느껴지는 감정을 적어주세요…"></textarea>
       </div>
 
       <!-- 주의사항 -->
@@ -100,12 +100,19 @@
           background:var(--card-bg);border:0.5px solid var(--border);
           border-radius:var(--r);padding:11px 14px;">
           <input type="text" id="g${i}"
-            placeholder="감사한 일을 적어주세요"
+            placeholder="감사한 일을 적어주세요" maxlength="100"
             style="flex:1;border:none;border-radius:0;padding:0;background:transparent;">
           <span style="font-size:14px;color:var(--c21);white-space:nowrap;font-weight:600;">감사합니다.</span>
         </div>`;
       container.appendChild(row);
     }
+
+    // ── 특수문자 필터링 ───────────────────────────────────────────────────
+    document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+      el.addEventListener('input', () => {
+        el.value = el.value.replace(/[<>&]/g, '');
+      });
+    });
 
     // ── 날짜 ─────────────────────────────────────────────────────────────
     const dateInput = document.getElementById('dateInput');

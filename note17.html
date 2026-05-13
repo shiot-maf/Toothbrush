@@ -39,7 +39,7 @@
         <div class="field-label">오늘의 나</div>
         <div class="sentence-row card-17">
           <span>나는</span>
-          <input type="text" id="declaration" placeholder="어떤" style="flex:1;min-width:60px;">
+          <input type="text" id="declaration" placeholder="어떤" maxlength="50" style="flex:1;min-width:60px;">
           <span>한 사람이다.</span>
         </div>
       </div>
@@ -52,15 +52,15 @@
         </p>
         <div class="num-field">
           <span class="num-label">01</span>
-          <input type="text" id="ev0" placeholder="오늘 있었던 일">
+          <input type="text" id="ev0" placeholder="오늘 있었던 일" maxlength="100">
         </div>
         <div class="num-field">
           <span class="num-label">02</span>
-          <input type="text" id="ev1" placeholder="오늘 있었던 일">
+          <input type="text" id="ev1" placeholder="오늘 있었던 일" maxlength="100">
         </div>
         <div class="num-field">
           <span class="num-label">03</span>
-          <input type="text" id="ev2" placeholder="오늘 있었던 일">
+          <input type="text" id="ev2" placeholder="오늘 있었던 일" maxlength="100">
         </div>
       </div>
 
@@ -69,7 +69,7 @@
         <div class="field-label">한 줄 결론</div>
         <div class="sentence-row card-17">
           <span>오늘의 나는 분명히</span>
-          <input type="text" id="conclusion" placeholder="어떤" style="flex:1;min-width:60px;">
+          <input type="text" id="conclusion" placeholder="어떤" maxlength="50" style="flex:1;min-width:60px;">
           <span>한 사람이었다.</span>
         </div>
       </div>
@@ -138,6 +138,13 @@
       currentUid = user.uid;
       await loadData(user.uid, dateInput.value);
     }
+
+    // ── 특수문자 필터링 ───────────────────────────────────────────────────
+    document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+      el.addEventListener('input', () => {
+        el.value = el.value.replace(/[<>&]/g, '');
+      });
+    });
 
     // ── 저장 ──────────────────────────────────────────────────────────────
     document.getElementById('saveBtn').addEventListener('click', async () => {
