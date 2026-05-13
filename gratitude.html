@@ -88,23 +88,33 @@
       applyTheme(next);
     });
 
+    // ── 텍스트박스 auto-resize ────────────────────────────────────────────
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    }
+
     // ── 감사 입력 필드 5개 생성 ──────────────────────────────────────────
     const container = document.getElementById('gratitudeFields');
     for (let i = 0; i < 5; i++) {
       const row = document.createElement('div');
       row.className = 'num-field';
-      row.style.alignItems = 'center';
+      row.style.alignItems = 'flex-start';
       row.innerHTML = `
-        <span class="num-label">${String(i + 1).padStart(2, '0')}</span>
-        <div style="flex:1;display:flex;align-items:center;gap:6px;
-          background:var(--card-bg);border:0.5px solid var(--border);
+        <span class="num-label" style="padding-top:12px;">${String(i + 1).padStart(2, '0')}</span>
+        <div style="flex:1;background:var(--card-bg);border:0.5px solid var(--border);
           border-radius:var(--r);padding:11px 14px;">
-          <input type="text" id="g${i}"
+          <textarea id="g${i}" rows="1"
             placeholder="감사한 일을 적어주세요" maxlength="100"
-            style="flex:1;border:none;border-radius:0;padding:0;background:transparent;">
-          <span style="font-size:14px;color:var(--c21);white-space:nowrap;font-weight:600;">감사합니다.</span>
+            style="width:100%;border:none;border-radius:0;padding:0;background:transparent;
+              resize:none;overflow:hidden;font-family:inherit;font-size:15px;
+              color:var(--text);line-height:1.6;display:block;"></textarea>
+          <div style="font-size:13px;color:var(--c21);font-weight:600;
+            margin-top:6px;text-align:right;">감사합니다.</div>
         </div>`;
       container.appendChild(row);
+      const ta = row.querySelector('textarea');
+      ta.addEventListener('input', () => autoResize(ta));
     }
 
     // ── 특수문자 필터링 ───────────────────────────────────────────────────
@@ -112,6 +122,11 @@
       el.addEventListener('input', () => {
         el.value = el.value.replace(/[<>&]/g, '');
       });
+    });
+
+    // feeling textarea auto-resize
+    document.getElementById('feeling').addEventListener('input', function() {
+      autoResize(this);
     });
 
     // ── 날짜 ─────────────────────────────────────────────────────────────
@@ -134,9 +149,11 @@
       if (!data) return;
       (data.gratitudes || []).forEach((v, i) => {
         const el = document.getElementById(`g${i}`);
-        if (el) el.value = v || '';
+        if (el) { el.value = v || ''; autoResize(el); }
       });
-      document.getElementById('feeling').value = data.feeling || '';
+      const feeling = document.getElementById('feeling');
+      feeling.value = data.feeling || '';
+      autoResize(feeling);
     }
 
     dateInput.addEventListener('change', () => {

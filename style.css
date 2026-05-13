@@ -196,7 +196,7 @@ textarea {
 
 input:focus, textarea:focus { border-color: var(--text-secondary); }
 
-textarea { resize: none; line-height: 1.6; }
+textarea { resize: none; line-height: 1.6; overflow: hidden; }
 
 /* 선언문 inline 입력 */
 .sentence-row {

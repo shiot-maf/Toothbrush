@@ -52,15 +52,15 @@
         </p>
         <div class="num-field">
           <span class="num-label">01</span>
-          <input type="text" id="ev0" placeholder="오늘 있었던 일" maxlength="100">
+          <textarea id="ev0" placeholder="오늘 있었던 일" maxlength="100" rows="1"></textarea>
         </div>
         <div class="num-field">
           <span class="num-label">02</span>
-          <input type="text" id="ev1" placeholder="오늘 있었던 일" maxlength="100">
+          <textarea id="ev1" placeholder="오늘 있었던 일" maxlength="100" rows="1"></textarea>
         </div>
         <div class="num-field">
           <span class="num-label">03</span>
-          <input type="text" id="ev2" placeholder="오늘 있었던 일" maxlength="100">
+          <textarea id="ev2" placeholder="오늘 있었던 일" maxlength="100" rows="1"></textarea>
         </div>
       </div>
 
@@ -124,6 +124,7 @@
       document.getElementById('ev1').value          = data.evidence?.[1] || '';
       document.getElementById('ev2').value          = data.evidence?.[2] || '';
       document.getElementById('conclusion').value   = data.conclusion   || '';
+      document.querySelectorAll('textarea').forEach(el => autoResize(el));
     }
 
     dateInput.addEventListener('change', () => {
@@ -138,6 +139,15 @@
       currentUid = user.uid;
       await loadData(user.uid, dateInput.value);
     }
+
+    // ── 텍스트박스 auto-resize ────────────────────────────────────────────
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    }
+    document.querySelectorAll('textarea').forEach(el => {
+      el.addEventListener('input', () => autoResize(el));
+    });
 
     // ── 특수문자 필터링 ───────────────────────────────────────────────────
     document.querySelectorAll('input[type="text"], textarea').forEach(el => {
