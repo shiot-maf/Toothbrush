@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>No.21 감사 선행기법</title>
+  <title>오늘의 나 — 끌어당김의 기록</title>
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.svg">
@@ -16,7 +16,7 @@
   <div class="phone-frame">
     <div class="header">
       <button class="header-back" onclick="history.back()">‹</button>
-      <span class="header-title" style="color:var(--c21);">No.21 감사 선행기법</span>
+      <span class="header-title" style="color:var(--c17);">오늘의 나</span>
       <div class="header-actions">
         <button class="icon-btn" id="themeBtn">🌙</button>
       </div>
@@ -24,8 +24,8 @@
 
     <div class="page-content">
       <!-- 힌트 -->
-      <div class="hint-box" style="border-color:var(--c21);">
-        <strong>미래의 감정을 현재로.</strong> 아직 일어나지 않았지만 이미 일어난 것처럼, 무조건 현재형·완료형으로 적으세요.
+      <div class="hint-box">
+        정체성을 행동의 출발점으로. 같은 선언을 며칠씩 이어가도 좋습니다.
       </div>
 
       <!-- DATE -->
@@ -34,34 +34,47 @@
         <input type="date" id="dateInput">
       </div>
 
-      <!-- 미리 감사합니다 -->
+      <!-- 오늘의 나 -->
       <div class="section">
-        <div class="field-label">미리 감사합니다</div>
-        <p style="font-size:12px;color:var(--text-hint);margin-bottom:10px;">
-          디테일이 살아 있을수록 강해요. "돈이 들어와서"보다 "OO월 OO일에 OOO만 원이 통장에 들어와서".
-        </p>
-
-        <div id="gratitudeFields">
-          <!-- 01~05 동적 생성 -->
+        <div class="field-label">오늘의 나</div>
+        <div class="sentence-row card-17">
+          <span>나는</span>
+          <input type="text" id="declaration" placeholder="어떤" maxlength="50" style="flex:1;min-width:60px;">
+          <span>한 사람이다.</span>
         </div>
       </div>
 
-      <!-- 지금 이 순간의 감정 -->
+      <!-- 오늘의 증거 -->
       <div class="section">
-        <div class="field-label">지금 이 순간의 감정</div>
-        <p style="font-size:12px;color:var(--text-hint);margin-bottom:8px;">
-          이 감사들을 적고 나니 가슴에 남는 느낌. 감정이 안 올라오면 항목을 바꾸세요.
+        <div class="field-label">오늘의 증거</div>
+        <p style="font-size:12px;color:var(--text-hint);margin-bottom:10px;">
+          이 정체성을 뒷받침하는 오늘의 작은 사실. 평가가 아닌 일어난 일만.
         </p>
-        <textarea id="feeling" rows="3" maxlength="300" placeholder="지금 이 순간 느껴지는 감정을 적어주세요…"></textarea>
+        <div class="num-field">
+          <span class="num-label">01</span>
+          <input type="text" id="ev0" placeholder="오늘 있었던 일" maxlength="100">
+        </div>
+        <div class="num-field">
+          <span class="num-label">02</span>
+          <input type="text" id="ev1" placeholder="오늘 있었던 일" maxlength="100">
+        </div>
+        <div class="num-field">
+          <span class="num-label">03</span>
+          <input type="text" id="ev2" placeholder="오늘 있었던 일" maxlength="100">
+        </div>
       </div>
 
-      <!-- 주의사항 -->
-      <div class="hint-box" style="border-color:var(--c21);margin-bottom:20px;">
-        ⚠️ <strong>"받을 거예요" 금지</strong>, "받았습니다"만. 감정을 미래가 아닌 지금으로 끌어옵니다.<br>
-        마지막 감정 한 줄이 핵심입니다.
+      <!-- 한 줄 결론 -->
+      <div class="section">
+        <div class="field-label">한 줄 결론</div>
+        <div class="sentence-row card-17">
+          <span>오늘의 나는 분명히</span>
+          <input type="text" id="conclusion" placeholder="어떤" maxlength="50" style="flex:1;min-width:60px;">
+          <span>한 사람이었다.</span>
+        </div>
       </div>
 
-      <button class="btn btn-21" id="saveBtn">저장하기</button>
+      <button class="btn btn-17" id="saveBtn">저장하기</button>
     </div>
   </div>
 
@@ -70,7 +83,7 @@
   <script type="module">
     import {
       waitForAuth, onAuthChange,
-      saveGratitudeAdvance, getGratitudeAdvance,
+      saveIdentityDiary, getIdentityDiary,
       formatDate,
     } from './firebase.js';
 
@@ -88,33 +101,7 @@
       applyTheme(next);
     });
 
-    // ── 감사 입력 필드 5개 생성 ──────────────────────────────────────────
-    const container = document.getElementById('gratitudeFields');
-    for (let i = 0; i < 5; i++) {
-      const row = document.createElement('div');
-      row.className = 'num-field';
-      row.style.alignItems = 'center';
-      row.innerHTML = `
-        <span class="num-label">${String(i + 1).padStart(2, '0')}</span>
-        <div style="flex:1;display:flex;align-items:center;gap:6px;
-          background:var(--card-bg);border:0.5px solid var(--border);
-          border-radius:var(--r);padding:11px 14px;">
-          <input type="text" id="g${i}"
-            placeholder="감사한 일을 적어주세요" maxlength="100"
-            style="flex:1;border:none;border-radius:0;padding:0;background:transparent;">
-          <span style="font-size:14px;color:var(--c21);white-space:nowrap;font-weight:600;">감사합니다.</span>
-        </div>`;
-      container.appendChild(row);
-    }
-
-    // ── 특수문자 필터링 ───────────────────────────────────────────────────
-    document.querySelectorAll('input[type="text"], textarea').forEach(el => {
-      el.addEventListener('input', () => {
-        el.value = el.value.replace(/[<>&]/g, '');
-      });
-    });
-
-    // ── 날짜 ─────────────────────────────────────────────────────────────
+    // ── 날짜 기본값 ───────────────────────────────────────────────────────
     const dateInput = document.getElementById('dateInput');
     dateInput.value = formatDate(new Date());
 
@@ -130,13 +117,13 @@
     let currentUid = null;
 
     async function loadData(uid, date) {
-      const data = await getGratitudeAdvance(uid, date);
+      const data = await getIdentityDiary(uid, date);
       if (!data) return;
-      (data.gratitudes || []).forEach((v, i) => {
-        const el = document.getElementById(`g${i}`);
-        if (el) el.value = v || '';
-      });
-      document.getElementById('feeling').value = data.feeling || '';
+      document.getElementById('declaration').value  = data.declaration  || '';
+      document.getElementById('ev0').value          = data.evidence?.[0] || '';
+      document.getElementById('ev1').value          = data.evidence?.[1] || '';
+      document.getElementById('ev2').value          = data.evidence?.[2] || '';
+      document.getElementById('conclusion').value   = data.conclusion   || '';
     }
 
     dateInput.addEventListener('change', () => {
@@ -152,16 +139,22 @@
       await loadData(user.uid, dateInput.value);
     }
 
+    // ── 특수문자 필터링 ───────────────────────────────────────────────────
+    document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+      el.addEventListener('input', () => {
+        el.value = el.value.replace(/[<>&]/g, '');
+      });
+    });
+
     // ── 저장 ──────────────────────────────────────────────────────────────
     document.getElementById('saveBtn').addEventListener('click', async () => {
       if (!currentUid) return;
 
-      const gratitudes = Array.from({ length: 5 }, (_, i) =>
-        (document.getElementById(`g${i}`)?.value || '').trim()
-      );
+      const declaration = document.getElementById('declaration').value.trim();
+      const conclusion  = document.getElementById('conclusion').value.trim();
 
-      if (gratitudes.every(g => !g)) {
-        showToast('감사한 일을 하나 이상 입력해주세요.');
+      if (!declaration) {
+        showToast('오늘의 나를 입력해주세요.');
         return;
       }
 
@@ -170,9 +163,14 @@
       saveBtn.textContent = '저장 중…';
 
       try {
-        await saveGratitudeAdvance(currentUid, dateInput.value, {
-          gratitudes,
-          feeling: document.getElementById('feeling').value.trim(),
+        await saveIdentityDiary(currentUid, dateInput.value, {
+          declaration,
+          evidence: [
+            document.getElementById('ev0').value.trim(),
+            document.getElementById('ev1').value.trim(),
+            document.getElementById('ev2').value.trim(),
+          ],
+          conclusion,
         });
         showToast('✓ 저장되었습니다');
         setTimeout(() => window.location.href = 'home.html', 1200);
