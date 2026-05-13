@@ -1,23 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;600;700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
 
 /* ── 테마 변수 ─────────────────────────────────────────────────────────── */
 :root {
-  --bg:             #F2EFE9;
+  /* 배경 */
+  --bg:             #F8F5FF;   /* 연보라빛 화이트 */
   --frame-bg:       #FFFFFF;
   --card-bg:        #FFFFFF;
-  --border:         rgba(0, 0, 0, 0.09);
-  --text:           #1A1A18;
-  --text-secondary: #666664;
-  --text-hint:      #999997;
+  --border:         #DDD5F5;
+  --text:           #1A1428;
+  --text-secondary: #5A4E78;
+  --text-hint:      #9A8CB8;
 
-  --c17:    #3B6D11;
-  --c17-bg: #EAF3DE;
-  --c21:    #993C1D;
-  --c21-bg: #FAECE7;
-  --c28:    #185FA5;
-  --c28-bg: #E6F1FB;
-  --cd:     #854F0B;
-  --cd-bg:  #FAEEDA;
+  /* 노트 컬러 — 보라/코랄/인디고/앰버 */
+  --c17:    #6A3EC0;   /* 보라 — 자기증명 */
+  --c17-bg: #EDE5FF;
+  --c21:    #C03060;   /* 코랄 — 감사선행 */
+  --c21-bg: #FFE8F0;
+  --c28:    #3050B0;   /* 인디고 — HARD */
+  --c28-bg: #E0E8FF;
+  --cd:     #A06010;   /* 앰버 — 실천 */
+  --cd-bg:  #FFF0D8;
+
+  /* 히어로 그라디언트 */
+  --hero-grad: linear-gradient(135deg, #F0EAFF 0%, #FFE8F2 50%, #F5EEFF 100%);
+  --hero-border: #DDD5F5;
 
   --r-sm:    10px;
   --r:       14px;
@@ -27,18 +33,28 @@
 }
 
 [data-theme="dark"] {
-  --bg:             #111110;
-  --frame-bg:       #1A1A18;
-  --card-bg:        #242422;
-  --border:         #3A3A38;
-  --text:           #F1EFE8;
-  --text-secondary: #B4B2A9;
-  --text-hint:      #888780;
+  /* 배경 — 딥 퍼플 블랙 */
+  --bg:             #110E1A;
+  --frame-bg:       #1A1628;
+  --card-bg:        #221E30;
+  --border:         #2A2040;
+  --text:           #EAE4F8;
+  --text-secondary: #A89CC8;
+  --text-hint:      #6A5E88;
 
-  --c17-bg: #1D2D14;
-  --c21-bg: #2D1810;
-  --c28-bg: #0E2240;
-  --cd-bg:  #2D1E08;
+  /* 노트 컬러 — 다크 모드용 (더 밝게) */
+  --c17:    #7C50D0;
+  --c17-bg: #1E1438;
+  --c21:    #D04870;
+  --c21-bg: #2A1428;
+  --c28:    #4060C0;
+  --c28-bg: #0E1430;
+  --cd:     #C07820;
+  --cd-bg:  #201808;
+
+  /* 히어로 그라디언트 — 다크 */
+  --hero-grad:   linear-gradient(135deg, #1E1430 0%, #2A1A40 50%, #1A1428 100%);
+  --hero-border: #3A2A5A;
 }
 
 /* ── 기본 ──────────────────────────────────────────────────────────────── */
@@ -47,7 +63,7 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+  font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -672,9 +688,11 @@ textarea { resize: none; line-height: 1.6; }
 .mb-12 { margin-bottom: 12px; }
 .mb-16 { margin-bottom: 16px; }
 
-/* ── 세리프 폰트 ────────────────────────────────────────────────────────── */
+/* ── 확언/선언문 — 라이트 웨이트 Pretendard ─────────────────────────────── */
 .serif {
-  font-family: 'Noto Serif KR', Georgia, 'Times New Roman', serif;
+  font-family: 'Pretendard Variable', sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.01em;
 }
 
 /* ── 그림자 ─────────────────────────────────────────────────────────────── */
@@ -682,17 +700,39 @@ textarea { resize: none; line-height: 1.6; }
 .card-shadow-lg { box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
 [data-theme="dark"] .card-shadow    { box-shadow: 0 2px 10px rgba(0,0,0,0.25); }
 [data-theme="dark"] .card-shadow-lg { box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
-.btn-17:not(:disabled) { box-shadow: 0 4px 16px rgba(59,109,17,0.28); }
-.btn-21:not(:disabled) { box-shadow: 0 4px 16px rgba(153,60,29,0.28); }
-.btn-28:not(:disabled) { box-shadow: 0 4px 16px rgba(24,95,165,0.28); }
+.btn-17:not(:disabled) { box-shadow: 0 4px 16px rgba(106,62,192,0.30); }
+.btn-21:not(:disabled) { box-shadow: 0 4px 16px rgba(192,48,96,0.28); }
+.btn-28:not(:disabled) { box-shadow: 0 4px 16px rgba(48,80,176,0.28); }
 
 /* ── 히어로 카드 ────────────────────────────────────────────────────────── */
 .hero-card {
   border-radius: var(--r-hero);
   padding: 22px 20px 18px;
   margin-bottom: 12px;
-  background: var(--card-bg);
-  border: 0.5px solid var(--border);
+  background: var(--hero-grad);
+  border: 0.5px solid var(--hero-border);
+  position: relative;
+  overflow: hidden;
+}
+/* 보라 글로우 — 오른쪽 상단 */
+[data-theme="dark"] .hero-card::before {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, #8060D0 0%, transparent 70%);
+  opacity: 0.4;
+  pointer-events: none;
+}
+/* 코랄 글로우 — 왼쪽 하단 */
+[data-theme="dark"] .hero-card::after {
+  content: '';
+  position: absolute;
+  bottom: -20px; left: 10px;
+  width: 100px; height: 100px;
+  background: radial-gradient(circle, #D05070 0%, transparent 70%);
+  opacity: 0.25;
+  pointer-events: none;
 }
 .hero-quote {
   font-size: 15px;
@@ -704,9 +744,9 @@ textarea { resize: none; line-height: 1.6; }
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--c17-bg);
+  background: rgba(124, 80, 208, 0.15);
   color: var(--c17);
-  border: 0.5px solid var(--c17);
+  border: 0.5px solid rgba(124, 80, 208, 0.35);
   border-radius: 20px;
   padding: 4px 12px;
   font-size: 12px;
