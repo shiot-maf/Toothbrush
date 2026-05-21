@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Hair (behind face) -->
+  <rect x="54" y="10" width="92" height="46" rx="20" fill="#5a3d7a"/>
+  <!-- Face -->
+  <rect x="60" y="28" width="80" height="76" rx="14" fill="#f0b8a0"/>
+  <!-- Ear left -->
+  <rect x="46" y="42" width="16" height="22" rx="8" fill="#f0b8a0"/>
+  <!-- Ear right -->
+  <rect x="138" y="42" width="16" height="22" rx="8" fill="#f0b8a0"/>
+  <!-- Eye left -->
+  <rect x="74" y="55" width="16" height="16" rx="8" fill="#1a1a2e"/>
+  <rect x="77" y="57" width="5" height="5" rx="2" fill="white"/>
+  <!-- Eye right -->
+  <rect x="110" y="55" width="16" height="16" rx="8" fill="#1a1a2e"/>
+  <rect x="113" y="57" width="5" height="5" rx="2" fill="white"/>
+  <!-- Blush -->
+  <ellipse cx="76" cy="79" rx="12" ry="6" fill="#f5a080" opacity="0.45"/>
+  <ellipse cx="124" cy="79" rx="12" ry="6" fill="#f5a080" opacity="0.45"/>
+  <!-- Mouth gentle smile -->
+  <path d="M 88 87 Q 100 95 112 87" stroke="#d07060" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <!-- Body -->
+  <rect x="65" y="108" width="70" height="58" rx="12" fill="#a0e8d4"/>
+  <rect x="65" y="108" width="70" height="18" rx="12" fill="#b8f0e4" opacity="0.4"/>
+  <!-- Left arm -->
+  <rect x="33" y="112" width="33" height="52" rx="14" fill="#c9a0e8"/>
+  <rect x="37" y="156" width="25" height="16" rx="8" fill="#f0b8a0"/>
+  <!-- Right arm -->
+  <rect x="134" y="112" width="33" height="52" rx="14" fill="#c9a0e8"/>
+  <rect x="138" y="156" width="25" height="16" rx="8" fill="#f0b8a0"/>
+  <!-- Left leg -->
+  <rect x="72" y="164" width="26" height="28" rx="10" fill="#7a5c99"/>
+  <!-- Right leg -->
+  <rect x="102" y="164" width="26" height="28" rx="10" fill="#7a5c99"/>
+  <!-- Left shoe -->
+  <rect x="64" y="184" width="40" height="13" rx="6" fill="#2a2a4a"/>
+  <!-- Right shoe -->
+  <rect x="96" y="184" width="40" height="13" rx="6" fill="#2a2a4a"/>
+  <!-- Speech bubble -->
+  <rect x="126" y="4" width="66" height="36" rx="12" fill="white" opacity="0.93"/>
+  <polygon points="136,38 148,38 140,48" fill="white" opacity="0.93"/>
+  <circle cx="144" cy="22" r="4.5" fill="#9988aa"/>
+  <circle cx="159" cy="22" r="4.5" fill="#9988aa"/>
+  <circle cx="174" cy="22" r="4.5" fill="#9988aa"/>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <clipPath id="c2"><circle cx="20" cy="20" r="20"/></clipPath>
+  <g clip-path="url(#c2)">
+    <!-- BG: teal/blue -->
+    <rect width="40" height="40" fill="#5b9bd5"/>
+    <rect y="24" width="40" height="16" fill="#3d7ab5"/>
+    <!-- Hair (dark, swept back) -->
+    <rect x="5" y="3" width="30" height="14" rx="7" fill="#1a2a4a"/>
+    <!-- Face -->
+    <rect x="10" y="11" width="20" height="20" rx="6" fill="#f0d0b8"/>
+    <!-- Glasses frame -->
+    <rect x="11" y="18" width="7" height="6" rx="2" fill="none" stroke="#1a2a4a" stroke-width="1.5"/>
+    <rect x="22" y="18" width="7" height="6" rx="2" fill="none" stroke="#1a2a4a" stroke-width="1.5"/>
+    <line x1="18" y1="21" x2="22" y2="21" stroke="#1a2a4a" stroke-width="1.5"/>
+    <!-- Eyes behind glasses -->
+    <rect x="13" y="20" width="3" height="3" rx="1" fill="#1a2a4a"/>
+    <rect x="24" y="20" width="3" height="3" rx="1" fill="#1a2a4a"/>
+    <!-- Smile (studious calm) -->
+    <path d="M 16 26 Q 20 29 24 26" stroke="#c07050" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

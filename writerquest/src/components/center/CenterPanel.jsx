@@ -35,7 +35,7 @@ export default function CenterPanel({ focusMode = false, onFocusModeToggle }) {
       <div className={styles.characterArea}>
         <div className={styles.characterWrap}>
           <img
-            src={running ? '/assets/character_writing.png' : '/assets/character_idle.png'}
+            src={running ? '/assets/character_writing.svg' : '/assets/character_idle.svg'}
             alt="캐릭터"
             className={styles.character}
             onError={(e) => { e.target.style.display = 'none'; }}

@@ -63,7 +63,7 @@ export default function OnboardingPage() {
           <>
             <div className={styles.characterWrap}>
               <img
-                src="/assets/character_happy.png"
+                src="/assets/character_happy.svg"
                 alt="캐릭터"
                 className={styles.character}
                 onError={(e) => { e.target.style.display = 'none'; }}

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Stars background -->
+  <text x="10" y="40" font-size="14" fill="#f2c94c" opacity="0.8">✦</text>
+  <text x="170" y="30" font-size="12" fill="#f2c94c" opacity="0.8">✦</text>
+  <text x="20" y="75" font-size="10" fill="#c9a0e8" opacity="0.7">✦</text>
+  <text x="162" y="65" font-size="16" fill="#f2c94c" opacity="0.9">★</text>
+  <text x="8" y="110" font-size="11" fill="#a0e8d4" opacity="0.6">✦</text>
+  <!-- Jump sparkles at feet -->
+  <line x1="70" y1="192" x2="60" y2="200" stroke="#f2c94c" stroke-width="2" opacity="0.6"/>
+  <line x1="130" y1="192" x2="140" y2="200" stroke="#f2c94c" stroke-width="2" opacity="0.6"/>
+  <circle cx="65" cy="195" r="3" fill="#f2c94c" opacity="0.5"/>
+  <circle cx="135" cy="195" r="3" fill="#f2c94c" opacity="0.5"/>
+  <!-- Hair (slightly bouncy up) -->
+  <rect x="52" y="5" width="96" height="48" rx="22" fill="#7040a0"/>
+  <!-- Hair ahoge (sticking up, happy) -->
+  <rect x="96" y="0" width="8" height="18" rx="4" fill="#7040a0"/>
+  <rect x="94" y="0" width="12" height="8" rx="6" fill="#7040a0"/>
+  <!-- Face -->
+  <rect x="58" y="22" width="84" height="78" rx="16" fill="#f0b8a0"/>
+  <!-- Ear left -->
+  <rect x="44" y="38" width="16" height="22" rx="8" fill="#f0b8a0"/>
+  <!-- Ear right -->
+  <rect x="140" y="38" width="16" height="22" rx="8" fill="#f0b8a0"/>
+  <!-- Eyes (big happy = larger) -->
+  <rect x="70" y="48" width="20" height="20" rx="10" fill="#1a1a2e"/>
+  <rect x="74" y="50" width="7" height="7" rx="3" fill="white"/>
+  <rect x="110" y="48" width="20" height="20" rx="10" fill="#1a1a2e"/>
+  <rect x="114" y="50" width="7" height="7" rx="3" fill="white"/>
+  <!-- Happy blush (bigger) -->
+  <ellipse cx="72" cy="76" rx="15" ry="8" fill="#f5a080" opacity="0.55"/>
+  <ellipse cx="128" cy="76" rx="15" ry="8" fill="#f5a080" opacity="0.55"/>
+  <!-- Big smile -->
+  <path d="M 82 84 Q 100 100 118 84" stroke="#d07060" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Smile fill -->
+  <path d="M 84 86 Q 100 98 116 86 Q 100 103 84 86" fill="#e87070" opacity="0.3"/>
+  <!-- Body (slightly up = jumping) -->
+  <rect x="63" y="103" width="74" height="56" rx="12" fill="#a0e8d4"/>
+  <rect x="63" y="103" width="74" height="18" rx="12" fill="#b8f0e4" opacity="0.45"/>
+  <!-- Left arm raised (V pose) -->
+  <rect x="28" y="70" width="30" height="52" rx="14" fill="#c9a0e8" transform="rotate(-40 43 96)"/>
+  <rect x="12" y="74" width="24" height="16" rx="8" fill="#f0b8a0" transform="rotate(-40 24 82)"/>
+  <!-- Right arm raised (V pose) -->
+  <rect x="142" y="70" width="30" height="52" rx="14" fill="#c9a0e8" transform="rotate(40 157 96)"/>
+  <rect x="160" y="70" width="24" height="16" rx="8" fill="#f0b8a0" transform="rotate(40 172 78)"/>
+  <!-- Left leg (jumping = bent) -->
+  <rect x="72" y="157" width="26" height="30" rx="10" fill="#7a5c99" transform="rotate(-8 85 172)"/>
+  <!-- Right leg (jumping = bent other way) -->
+  <rect x="102" y="157" width="26" height="30" rx="10" fill="#7a5c99" transform="rotate(8 115 172)"/>
+  <!-- Shoes -->
+  <rect x="62" y="182" width="38" height="13" rx="6" fill="#2a2a4a" transform="rotate(-8 81 188)"/>
+  <rect x="100" y="182" width="38" height="13" rx="6" fill="#2a2a4a" transform="rotate(8 119 188)"/>
+</svg>

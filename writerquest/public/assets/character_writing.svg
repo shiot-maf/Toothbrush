@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Hair -->
+  <rect x="54" y="8" width="92" height="46" rx="20" fill="#5a3d7a"/>
+  <!-- Face (slightly leaning: shifted right 2px) -->
+  <rect x="62" y="26" width="80" height="76" rx="14" fill="#f0b8a0"/>
+  <!-- Ear left -->
+  <rect x="48" y="40" width="16" height="22" rx="8" fill="#f0b8a0"/>
+  <!-- Ear right -->
+  <rect x="136" y="40" width="16" height="22" rx="8" fill="#f0b8a0"/>
+  <!-- Eyebrow left (concentration) -->
+  <rect x="75" y="47" width="16" height="4" rx="2" fill="#5a3d7a" transform="rotate(-5 83 49)"/>
+  <!-- Eyebrow right -->
+  <rect x="111" y="47" width="16" height="4" rx="2" fill="#5a3d7a" transform="rotate(5 119 49)"/>
+  <!-- Eye left (slightly narrowed = focused) -->
+  <rect x="76" y="54" width="16" height="12" rx="6" fill="#1a1a2e"/>
+  <rect x="79" y="55" width="5" height="4" rx="2" fill="white"/>
+  <!-- Eye right -->
+  <rect x="112" y="54" width="16" height="12" rx="6" fill="#1a1a2e"/>
+  <rect x="115" y="55" width="5" height="4" rx="2" fill="white"/>
+  <!-- Blush -->
+  <ellipse cx="78" cy="77" rx="10" ry="5" fill="#f5a080" opacity="0.4"/>
+  <ellipse cx="126" cy="77" rx="10" ry="5" fill="#f5a080" opacity="0.4"/>
+  <!-- Mouth (small focused line) -->
+  <path d="M 92 83 Q 102 87 112 83" stroke="#d07060" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Body (slightly forward lean) -->
+  <rect x="67" y="105" width="70" height="55" rx="12" fill="#a0e8d4"/>
+  <rect x="67" y="105" width="70" height="16" rx="12" fill="#b8f0e4" opacity="0.4"/>
+  <!-- Left arm (forward/down toward keyboard) -->
+  <rect x="40" y="120" width="28" height="38" rx="12" fill="#c9a0e8" transform="rotate(25 54 139)"/>
+  <rect x="30" y="148" width="24" height="14" rx="7" fill="#f0b8a0"/>
+  <!-- Right arm (forward/down toward keyboard) -->
+  <rect x="132" y="120" width="28" height="38" rx="12" fill="#c9a0e8" transform="rotate(-25 146 139)"/>
+  <rect x="146" y="148" width="24" height="14" rx="7" fill="#f0b8a0"/>
+  <!-- Laptop/keyboard base -->
+  <rect x="24" y="162" width="152" height="24" rx="8" fill="#2a2a4a"/>
+  <!-- Keyboard keys row 1 -->
+  <rect x="32" y="166" width="8" height="6" rx="2" fill="#3a3a5a"/>
+  <rect x="44" y="166" width="8" height="6" rx="2" fill="#3a3a5a"/>
+  <rect x="56" y="166" width="8" height="6" rx="2" fill="#3a3a5a"/>
+  <rect x="68" y="166" width="8" height="6" rx="2" fill="#3a3a5a"/>
+  <rect x="80" y="166" width="8" height="6" rx="2" fill="#3a3a5a"/>
+  <rect x="92" y="166" width="8" height="6" rx="2" fill="#3a3a5a"/>
+  <rect x="104" y="166" width="8" height="6" rx="2" fill="#3a3a5a"/>
+  <rect x="116" y="166" width="8" height="6" rx="2" fill="#3a3a5a"/>
+  <rect x="128" y="166" width="8" height="6" rx="2" fill="#3a3a5a"/>
+  <rect x="140" y="166" width="8" height="6" rx="2" fill="#3a3a5a"/>
+  <rect x="152" y="166" width="14" height="6" rx="2" fill="#3a3a5a"/>
+  <!-- Spacebar -->
+  <rect x="60" y="176" width="80" height="6" rx="2" fill="#3a3a5a"/>
+  <!-- Screen glow effect -->
+  <ellipse cx="100" cy="110" rx="30" ry="8" fill="#c9a0e8" opacity="0.15"/>
+  <!-- Sweat drop (concentration) -->
+  <ellipse cx="55" cy="35" rx="5" ry="7" fill="#80c8e8" opacity="0.8"/>
+  <ellipse cx="55" cy="30" rx="3" ry="3" fill="#80c8e8" opacity="0.8"/>
+</svg>

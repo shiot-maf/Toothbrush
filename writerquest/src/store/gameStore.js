@@ -386,10 +386,10 @@ function getMilestoneTitle(level) {
 
 function getMockComments() {
   return [
-    { id: '1', avatar: 'avatar_1.png', name: '별빛독자', time: '방금 전',  message: '오늘 업데이트 너무 기대돼요! 빨리 다음화 보고 싶어요 🌟' },
-    { id: '2', avatar: 'avatar_2.png', name: '달빛서생', time: '5분 전',   message: '주인공이 드디어 결심하는 장면에서 눈물날 뻔했어요...' },
-    { id: '3', avatar: 'avatar_3.png', name: '글쟁이냥', time: '12분 전',  message: '작가님 문체가 너무 좋아요. 계속 읽히는 느낌?' },
-    { id: '4', avatar: 'avatar_4.png', name: '책벌레',   time: '1시간 전', message: '이번 주 안에 완결나나요? 궁금해서 잠 못 자겠어요 ㅠ' },
-    { id: '5', avatar: 'avatar_5.png', name: '밤독자',   time: '3시간 전', message: '정주행하고 왔는데 진짜 명작이에요. 추천 10만번!' },
+    { id: '1', avatar: 'avatar_1.svg', name: '별빛독자', time: '방금 전',  message: '오늘 업데이트 너무 기대돼요! 빨리 다음화 보고 싶어요 🌟' },
+    { id: '2', avatar: 'avatar_2.svg', name: '달빛서생', time: '5분 전',   message: '주인공이 드디어 결심하는 장면에서 눈물날 뻔했어요...' },
+    { id: '3', avatar: 'avatar_3.svg', name: '글쟁이냥', time: '12분 전',  message: '작가님 문체가 너무 좋아요. 계속 읽히는 느낌?' },
+    { id: '4', avatar: 'avatar_4.svg', name: '책벌레',   time: '1시간 전', message: '이번 주 안에 완결나나요? 궁금해서 잠 못 자겠어요 ㅠ' },
+    { id: '5', avatar: 'avatar_5.svg', name: '밤독자',   time: '3시간 전', message: '정주행하고 왔는데 진짜 명작이에요. 추천 10만번!' },
   ];
 }

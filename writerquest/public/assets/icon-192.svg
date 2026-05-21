@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Background -->
+  <rect width="192" height="192" rx="40" fill="#1a1a2e"/>
+  <!-- Glow bg circle -->
+  <circle cx="96" cy="88" r="72" fill="#16213e"/>
+  <!-- Book base -->
+  <rect x="40" y="70" width="112" height="80" rx="10" fill="#0f3460"/>
+  <rect x="40" y="70" width="56" height="80" rx="10" fill="#162848"/>
+  <!-- Book spine -->
+  <rect x="93" y="70" width="6" height="80" fill="#0a1a30"/>
+  <!-- Book pages (right side lines) -->
+  <line x1="108" y1="84" x2="138" y2="84" stroke="#c9a0e8" stroke-width="3" opacity="0.5" stroke-linecap="round"/>
+  <line x1="108" y1="96" x2="138" y2="96" stroke="#c9a0e8" stroke-width="3" opacity="0.5" stroke-linecap="round"/>
+  <line x1="108" y1="108" x2="128" y2="108" stroke="#c9a0e8" stroke-width="3" opacity="0.5" stroke-linecap="round"/>
+  <!-- Book pages (left side lines) -->
+  <line x1="54" y1="84" x2="84" y2="84" stroke="#a0c8e8" stroke-width="3" opacity="0.4" stroke-linecap="round"/>
+  <line x1="54" y1="96" x2="84" y2="96" stroke="#a0c8e8" stroke-width="3" opacity="0.4" stroke-linecap="round"/>
+  <line x1="54" y1="108" x2="74" y2="108" stroke="#a0c8e8" stroke-width="3" opacity="0.4" stroke-linecap="round"/>
+  <!-- Quill pen -->
+  <line x1="120" y1="40" x2="76" y2="120" stroke="#c9a0e8" stroke-width="4" stroke-linecap="round"/>
+  <!-- Feather -->
+  <path d="M 120 40 Q 138 20 155 14 Q 148 30 140 42 Q 132 50 120 40 Z" fill="#c9a0e8" opacity="0.9"/>
+  <path d="M 120 40 Q 130 28 144 22 Q 138 34 130 42 Q 122 48 120 40 Z" fill="white" opacity="0.3"/>
+  <!-- Pen tip spark -->
+  <circle cx="78" cy="118" r="4" fill="#f2c94c"/>
+  <circle cx="78" cy="118" r="7" fill="#f2c94c" opacity="0.3"/>
+  <!-- Stars -->
+  <circle cx="34" cy="38" r="2.5" fill="#f2c94c" opacity="0.8"/>
+  <circle cx="160" cy="52" r="2" fill="#a0e8d4" opacity="0.7"/>
+  <circle cx="26" cy="110" r="1.5" fill="#c9a0e8" opacity="0.5"/>
+  <circle cx="168" cy="130" r="2" fill="#f2c94c" opacity="0.6"/>
+</svg>
