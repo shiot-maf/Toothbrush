@@ -192,7 +192,8 @@ function NovelItem({ novel, navigate }) {
 }
 
 export default function LeftPanel() {
-  const player = useGameStore((s) => s.player);
+  const nickname = useGameStore((s) => s.player.nickname);
+  const level = useGameStore((s) => s.player.level);
   const novels = useGameStore((s) => s.novels);
   const addNovel = useGameStore((s) => s.addNovel);
   const trash = useGameStore((s) => s.trash);
@@ -209,8 +210,8 @@ export default function LeftPanel() {
   return (
     <aside className={styles.panel}>
       <div className={styles.header}>
-        <span className={styles.nickname}>{player.nickname} 작가</span>
-        <span className={styles.level}>Lv.{player.level}</span>
+        <span className={styles.nickname}>{nickname} 작가</span>
+        <span className={styles.level}>Lv.{level}</span>
         <button className={styles.logoutBtn} onClick={() => signOut(auth)} title="로그아웃">↩</button>
       </div>
 

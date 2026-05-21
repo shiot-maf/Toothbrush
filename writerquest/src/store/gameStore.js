@@ -55,6 +55,7 @@ export const useGameStore = create((set, get) => ({
   // ── 인증 ──────────────────────────────────────────────────────────
 
   initUser: async (uid) => {
+    if (get().uid === uid) return; // Strict Mode 이중 호출 방지
     set({ uid, loading: true });
     try {
       const { userData, novels } = await loadUserData(uid);
