@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithRedirect, getRedirectResult, signOut } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
 import { useGameStore } from '../store/gameStore';
 
@@ -10,6 +10,7 @@ export function useAuth() {
   const loading = useGameStore((s) => s.loading);
 
   useEffect(() => {
+    getRedirectResult(auth).catch(() => {});
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user) {
         initUser(user.uid);
@@ -24,7 +25,7 @@ export function useAuth() {
     uid,
     loading,
     user: auth.currentUser,
-    login: () => signInWithPopup(auth, googleProvider),
+    login: () => signInWithRedirect(auth, googleProvider),
     logout: () => signOut(auth),
   };
 }
