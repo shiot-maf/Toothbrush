@@ -8,6 +8,8 @@
   flex-direction: column;
   gap: var(--space-md);
   position: relative;
+  height: 100%;
+  box-shadow: var(--shadow-sm);
 }
 
 .header {
@@ -125,6 +127,7 @@
 }
 
 .chapterItem:last-child { border-bottom: none; }
+.chapterSelected { background: rgba(155, 127, 212, 0.08); }
 
 .chapterRow {
   display: flex;
@@ -182,6 +185,7 @@
   transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
 .writeBtn:hover { opacity: 0.9; transform: scale(1.04); }
+.writeBtnActive { background: var(--color-accent-mint); }
 
 .deleteBtn {
   background: none;

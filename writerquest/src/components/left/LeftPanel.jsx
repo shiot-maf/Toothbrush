@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import styles from './LeftPanel.module.css';
@@ -45,9 +44,10 @@ function SynopsisField({ value, onChange }) {
   );
 }
 
-function ChapterItem({ novel, chapter, navigate }) {
+function ChapterItem({ novel, chapter, onSelectChapter, selectedChapterId }) {
   const updateChapterMeta = useGameStore((s) => s.updateChapterMeta);
   const deleteChapter = useGameStore((s) => s.deleteChapter);
+  const isSelected = chapter.id === selectedChapterId;
 
   function cycleStatus(e) {
     e.stopPropagation();
@@ -68,7 +68,7 @@ function ChapterItem({ novel, chapter, navigate }) {
   }
 
   return (
-    <div className={styles.chapterItem}>
+    <div className={`${styles.chapterItem} ${isSelected ? styles.chapterSelected : ''}`}>
       <div className={styles.chapterRow}>
         <button
           className={styles.statusIcon}
@@ -86,10 +86,10 @@ function ChapterItem({ novel, chapter, navigate }) {
           </div>
         )}
         <button
-          className={styles.writeBtn}
-          onClick={() => navigate(`/editor/${chapter.id}`)}
+          className={`${styles.writeBtn} ${isSelected ? styles.writeBtnActive : ''}`}
+          onClick={() => onSelectChapter(novel.id, chapter.id)}
         >
-          집필
+          {isSelected ? '집필 중' : '집필'}
         </button>
         <button
           className={styles.deleteBtn}
@@ -153,7 +153,7 @@ function TrashDrawer({ onClose }) {
   );
 }
 
-function NovelItem({ novel, navigate }) {
+function NovelItem({ novel, onSelectChapter, selectedChapterId }) {
   const [expanded, setExpanded] = useState(true);
   const addChapter = useGameStore((s) => s.addChapter);
 
@@ -182,7 +182,13 @@ function NovelItem({ novel, navigate }) {
           {novel.chapters.length === 0
             ? <p className={styles.chapterEmpty}>챕터가 없습니다</p>
             : novel.chapters.map((ch) => (
-              <ChapterItem key={ch.id} novel={novel} chapter={ch} navigate={navigate} />
+              <ChapterItem
+                key={ch.id}
+                novel={novel}
+                chapter={ch}
+                onSelectChapter={onSelectChapter}
+                selectedChapterId={selectedChapterId}
+              />
             ))
           }
         </div>
@@ -191,13 +197,12 @@ function NovelItem({ novel, navigate }) {
   );
 }
 
-export default function LeftPanel() {
+export default function LeftPanel({ onSelectChapter, selectedChapterId }) {
   const nickname = useGameStore((s) => s.player.nickname);
   const level = useGameStore((s) => s.player.level);
   const novels = useGameStore((s) => s.novels);
   const addNovel = useGameStore((s) => s.addNovel);
   const trash = useGameStore((s) => s.trash);
-  const navigate = useNavigate();
   const [showTrash, setShowTrash] = useState(false);
 
   const todayIdx = (new Date().getDay() + 6) % 7;
@@ -230,7 +235,12 @@ export default function LeftPanel() {
         </div>
         {novels.length === 0 && <p className={styles.empty}>작품이 없습니다</p>}
         {novels.map((novel) => (
-          <NovelItem key={novel.id} novel={novel} navigate={navigate} />
+          <NovelItem
+            key={novel.id}
+            novel={novel}
+            onSelectChapter={onSelectChapter}
+            selectedChapterId={selectedChapterId}
+          />
         ))}
       </div>
 

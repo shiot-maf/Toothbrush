@@ -1,19 +1,27 @@
 :root {
-  /* Colors */
-  --color-bg: #1a1a2e;
-  --color-surface: #16213e;
-  --color-panel: #0f3460;
-  --color-accent: #c9a0e8;
-  --color-accent-mint: #a0e8d4;
-  --color-accent-peach: #f0b8a0;
-  --color-text: #e8e0f0;
-  --color-text-sub: #9988aa;
-  --color-border: #2a2a4a;
-  --color-success: #6fcf97;
-  --color-warning: #f2c94c;
-  --color-danger: #eb5757;
+  /* ── 파스텔 컬러 팔레트 ───────────────────────────────── */
+  --color-bg:          #fbf7ff;   /* 연한 라벤더 배경 */
+  --color-surface:     #ffffff;   /* 흰색 카드 */
+  --color-panel:       #f3eeff;   /* 패널 배경 */
+  --color-panel-alt:   #fff0f5;   /* 우측 패널 (복숭아 틴트) */
 
-  /* Breakpoints (reference only — use media queries) */
+  --color-accent:      #9b7fd4;   /* 메인 퍼플 */
+  --color-accent-light:#c7b8ea;   /* 소프트 라벤더 */
+  --color-accent-mint: #7ec8b8;   /* 민트 */
+  --color-accent-peach:#f4a58a;   /* 복숭아 */
+
+  --color-text:        #3d2b6b;   /* 딥 퍼플 텍스트 */
+  --color-text-sub:    #8b7bad;   /* 뮤트 퍼플 */
+  --color-text-light:  #b8a8d0;   /* 연한 텍스트 */
+
+  --color-border:      #e8def8;   /* 라벤더 보더 */
+  --color-border-light:#f0e8ff;   /* 더 연한 보더 */
+
+  --color-success:     #5bbf9c;   /* 민트 그린 */
+  --color-warning:     #f5a623;   /* 따뜻한 오렌지 */
+  --color-danger:      #e8607a;   /* 소프트 핑크-레드 */
+
+  /* Breakpoints */
   --bp-mobile: 375px;
   --bp-tablet: 768px;
   --bp-desktop: 1024px;
@@ -25,25 +33,26 @@
   --space-lg: 24px;
   --space-xl: 40px;
 
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  /* Radius — 더 둥글게 */
+  --radius-sm:  8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
 
   /* Typography */
-  --font-base: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-base: 'Nunito', 'Noto Sans KR', -apple-system, sans-serif;
   --font-mono: 'D2Coding', 'Consolas', monospace;
   --text-xs: 11px;
   --text-sm: 13px;
   --text-md: 15px;
-  --text-lg: 18px;
-  --text-xl: 24px;
-  --text-2xl: 32px;
+  --text-lg: 17px;
+  --text-xl: 22px;
+  --text-2xl: 30px;
 
-  /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  /* Shadows — 부드러운 그림자 */
+  --shadow-sm: 0 2px 8px rgba(155, 127, 212, 0.10);
+  --shadow-md: 0 4px 16px rgba(155, 127, 212, 0.15);
+  --shadow-lg: 0 8px 32px rgba(155, 127, 212, 0.20);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -76,3 +85,9 @@ button {
 input, textarea {
   font-family: inherit;
 }
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-border-light); border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: var(--color-accent-light); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }

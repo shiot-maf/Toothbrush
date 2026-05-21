@@ -1,98 +1,85 @@
+import { useState, useRef, useEffect } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import useTimer from '../../hooks/useTimer';
-import { useEffect, useState } from 'react';
+import WritingEditor from '../editor/WritingEditor';
+import EditorStatusBar from '../editor/EditorStatusBar';
 import styles from './CenterPanel.module.css';
 
-export default function CenterPanel({ focusMode = false, onFocusModeToggle }) {
-  const level = useGameStore((s) => s.player.level);
-  const exp = useGameStore((s) => s.player.exp);
-  const energy = useGameStore((s) => s.player.energy);
-  const quests = useGameStore((s) => s.quests);
-  const { elapsed, running, start, pause } = useTimer();
+function formatTime(sec) {
+  const h = Math.floor(sec / 3600).toString().padStart(2, '0');
+  const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
+  const s = (sec % 60).toString().padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
 
-  const expNeeded = level * 1000;
-  const expPct = Math.min(100, Math.round((exp / expNeeded) * 100));
+export default function CenterPanel({ novelId, chapterId, onClose }) {
+  const novels = useGameStore((s) => s.novels);
+  const [wordCount, setWordCount] = useState(0);
+  const { elapsed, running, start, pause, reset } = useTimer();
+  const sessionIdRef = useRef(null);
 
-  function formatTime(sec) {
-    const h = Math.floor(sec / 3600).toString().padStart(2, '0');
-    const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
-    const s = (sec % 60).toString().padStart(2, '0');
-    return `${h}:${m}:${s}`;
+  const novel = novels.find((n) => n.id === novelId);
+  const chapter = novel?.chapters.find((c) => c.id === chapterId);
+
+  useEffect(() => {
+    if (chapterId) {
+      reset();
+      start();
+    }
+    return () => pause();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapterId]);
+
+  if (!chapterId || !chapter) {
+    return (
+      <section className={styles.panel}>
+        <div className={styles.emptyState}>
+          <div className={styles.emptyEmoji}>✍️</div>
+          <p className={styles.emptyTitle}>오늘도 이야기를 써볼까요?</p>
+          <p className={styles.emptySub}>
+            왼쪽 패널에서 챕터를 선택하면<br />
+            바로 여기서 집필할 수 있어요
+          </p>
+        </div>
+      </section>
+    );
   }
 
   return (
-    <section className={styles.panel}>
-      {/* Focus Mode Toggle */}
-      <div className={styles.focusRow}>
+    <section className={styles.panelActive}>
+      <div className={styles.editorHeader}>
+        <span className={styles.editorBreadcrumb}>
+          {novel.emoji} {novel.title}
+          <span className={styles.sep}> › </span>
+          {chapter.title}
+        </span>
+        <span className={styles.editorTimer}>{formatTime(elapsed)}</span>
+        <span id="save-status" className={styles.saveStatus} />
         <button
-          className={`${styles.focusBtn} ${focusMode ? styles.focusBtnActive : ''}`}
-          onClick={onFocusModeToggle}
-          title={focusMode ? '집중 모드 해제' : '집중 모드 켜기'}
+          className={styles.closeBtn}
+          onClick={() => { pause(); onClose(); }}
+          title="닫기"
         >
-          {focusMode ? '✖ 집중 해제' : '🎯 집중 모드'}
+          ✕
         </button>
       </div>
-
-      {/* Character */}
-      <div className={styles.characterArea}>
-        <div className={styles.characterWrap}>
-          <img
-            src={running ? '/assets/character_writing.svg' : '/assets/character_idle.svg'}
-            alt="캐릭터"
-            className={styles.character}
-            onError={(e) => { e.target.style.display = 'none'; }}
-          />
-          <div className={styles.characterFallback}>{running ? '✍️' : '💭'}</div>
-        </div>
-        {!running && <div className={styles.speechBubble}>...</div>}
+      <div className={styles.editorBody}>
+        <WritingEditor
+          key={chapterId}
+          novelId={novelId}
+          chapterId={chapterId}
+          initialContent={chapter.content || ''}
+          onWordCountChange={setWordCount}
+        />
       </div>
-
-      {/* Timer */}
-      <div className={styles.timerArea}>
-        <div className={styles.timer}>{formatTime(elapsed)}</div>
-        <button
-          className={`${styles.timerBtn} ${running ? styles.timerBtnActive : ''}`}
-          onClick={running ? pause : start}
-        >
-          {running ? '⏸ 일시정지' : '▶ 집필 시작'}
-        </button>
-      </div>
-
-      {/* EXP Bar */}
-      <div className={styles.expRow}>
-        <span className={styles.expLabel}>Lv.{level}</span>
-        <div className={styles.expBar}>
-          <div className={styles.expFill} style={{ width: `${expPct}%` }} />
-        </div>
-        <span className={styles.expLabel}>{exp} / {expNeeded}</span>
-      </div>
-
-      {/* Energy */}
-      <div className={styles.energyRow}>
-        <span>⚡ 에너지</span>
-        <div className={styles.energyBar}>
-          <div
-            className={styles.energyFill}
-            style={{
-              width: `${energy}%`,
-              background: energy > 50 ? 'var(--color-success)' : energy > 20 ? 'var(--color-warning)' : 'var(--color-danger)',
-            }}
-          />
-        </div>
-        <span>{energy}%</span>
-      </div>
-
-      {/* Quests */}
-      <div className={styles.questSection}>
-        <h3 className={styles.questTitle}>오늘의 퀘스트</h3>
-        {quests.filter((q) => !q.done || q.type === 'daily').slice(0, 4).map((q) => (
-          <div key={q.id} className={`${styles.quest} ${q.done ? styles.questDone : ''}`}>
-            <span className={styles.questCheck}>{q.done ? '✅' : '⬜'}</span>
-            <span className={styles.questName}>{q.title}</span>
-            <span className={styles.questProgress}>{Math.min(q.progress, q.target)}/{q.target}</span>
-          </div>
-        ))}
-      </div>
+      <EditorStatusBar
+        chapterId={chapterId}
+        wordCount={wordCount}
+        elapsed={elapsed}
+        running={running}
+        sessionIdRef={sessionIdRef}
+        initialWordCount={chapter.wordCount || 0}
+      />
     </section>
   );
 }

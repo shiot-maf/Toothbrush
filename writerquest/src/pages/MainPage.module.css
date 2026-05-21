@@ -7,14 +7,19 @@
 
 .layout {
   display: grid;
-  grid-template-columns: 260px 1fr 280px;
+  grid-template-columns: 240px 1fr 280px;
   gap: var(--space-md);
   padding: var(--space-md);
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
-/* Tablet: hide left panel into hamburger */
+.left, .center, .right {
+  min-height: 0;
+  height: 100%;
+}
+
 @media (max-width: 1023px) {
   .layout {
     grid-template-columns: 1fr 280px;
@@ -22,7 +27,6 @@
   .left { display: none; }
 }
 
-/* Mobile: single column + bottom tabs */
 @media (max-width: 767px) {
   .layout {
     grid-template-columns: 1fr;
@@ -30,13 +34,5 @@
     padding-bottom: 0;
   }
   .left, .center, .right { display: none; }
-  .left.tabVisible, .center.tabVisible, .right.tabVisible { display: block; }
-}
-
-.layoutFocus {
-  grid-template-columns: 1fr;
-}
-
-.panelHidden {
-  display: none !important;
+  .left.tabVisible, .center.tabVisible, .right.tabVisible { display: block; height: 100%; }
 }
