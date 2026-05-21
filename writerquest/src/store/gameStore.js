@@ -178,6 +178,26 @@ export const useGameStore = create(
         set((s) => ({ player: { ...s.player, exp: newExp } }));
         return { levelUp: false };
       },
+
+      // 집필 중 시간당 -10% 에너지 (60초마다 호출 → 1/6%)
+      drainEnergy: () => {
+        set((s) => ({
+          player: { ...s.player, energy: Math.max(0, s.player.energy - 1 / 6) },
+        }));
+      },
+
+      // 퀘스트 progress 갱신 + 달성 여부 확인
+      updateQuestProgress: (questId, progress) => {
+        set((s) => ({
+          quests: s.quests.map((q) => {
+            if (q.id !== questId || q.done) return q;
+            const done = progress >= q.target;
+            return { ...q, progress, done };
+          }),
+        }));
+        const quest = get().quests.find((q) => q.id === questId);
+        return quest?.done ?? false;
+      },
     }),
     {
       name: 'writerquest',

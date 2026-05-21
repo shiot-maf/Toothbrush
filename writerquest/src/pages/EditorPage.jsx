@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/gameStore';
 import WritingEditor from '../components/editor/WritingEditor';
@@ -8,6 +9,14 @@ export default function EditorPage() {
   const { chapterId } = useParams();
   const navigate = useNavigate();
   const novels = useGameStore((s) => s.novels);
+  const updateChapter = useGameStore((s) => s.updateChapterContent);
+  const startSession = useGameStore((s) => s.startSession);
+  const endSession = useGameStore((s) => s.endSession);
+
+  const [wordCount, setWordCount] = useState(0);
+  const contentRef = useRef('');
+  const sessionIdRef = useRef(null);
+  const initialWordCount = useRef(0);
 
   const { novel, chapter } = (() => {
     for (const n of novels) {
@@ -16,6 +25,32 @@ export default function EditorPage() {
     }
     return { novel: null, chapter: null };
   })();
+
+  useEffect(() => {
+    if (!chapter) return;
+
+    initialWordCount.current = chapter.content?.length || 0;
+    sessionIdRef.current = startSession(chapterId);
+
+    function handleBeforeUnload() {
+      updateChapter(novel.id, chapterId, contentRef.current);
+      if (sessionIdRef.current) {
+        const written = Math.max(0, contentRef.current.length - initialWordCount.current);
+        endSession(sessionIdRef.current, written);
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // 페이지 이탈(뒤로가기 등)에도 세션 종료
+      if (sessionIdRef.current) {
+        const written = Math.max(0, contentRef.current.length - initialWordCount.current);
+        endSession(sessionIdRef.current, written);
+        sessionIdRef.current = null;
+      }
+    };
+  }, [chapter?.id]);
 
   if (!chapter) {
     return (
@@ -36,9 +71,20 @@ export default function EditorPage() {
         <span className={styles.saveStatus} id="save-status">저장됨</span>
       </header>
 
-      <WritingEditor novelId={novel.id} chapterId={chapter.id} initialContent={chapter.content} />
+      <WritingEditor
+        novelId={novel.id}
+        chapterId={chapter.id}
+        initialContent={chapter.content}
+        onWordCountChange={setWordCount}
+        onContentChange={(text) => { contentRef.current = text; }}
+      />
 
-      <EditorStatusBar chapterId={chapter.id} />
+      <EditorStatusBar
+        chapterId={chapter.id}
+        wordCount={wordCount}
+        sessionIdRef={sessionIdRef}
+        initialWordCount={initialWordCount}
+      />
     </div>
   );
 }
