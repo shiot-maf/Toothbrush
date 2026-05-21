@@ -16,7 +16,7 @@ export default function WritingEditor({ novelId, chapterId, initialContent, onWo
     if (el) { el.textContent = '저장됨'; el.style.color = 'var(--color-success)'; }
   }, [novelId, chapterId, updateChapter]);
 
-  useAutoSave(content, save, 30_000);
+  useAutoSave(content, save, 2_000);
 
   function handleChange(e) {
     const text = e.target.value;

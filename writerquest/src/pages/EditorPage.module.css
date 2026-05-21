@@ -51,3 +51,27 @@
   gap: var(--space-md);
   color: var(--color-text-sub);
 }
+
+.headerFocus {
+  justify-content: flex-end;
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border-bottom-color: transparent;
+}
+
+.focusBtn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-sub);
+  transition: color var(--transition-fast);
+  line-height: 1;
+}
+
+.focusBtn:hover { color: var(--color-accent); }
+.focusBtnActive { color: var(--color-accent); }
+
+.statusHidden { display: none; }

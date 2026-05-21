@@ -100,3 +100,20 @@
 .questCheck { font-size: 14px; }
 .questName { flex: 1; }
 .questProgress { font-size: var(--text-xs); color: var(--color-text-sub); }
+
+.focusRow { width: 100%; display: flex; justify-content: flex-end; margin-bottom: calc(-1 * var(--space-sm)); }
+
+.focusBtn {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-sub);
+  font-size: var(--text-xs);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.focusBtn:hover, .focusBtnActive {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

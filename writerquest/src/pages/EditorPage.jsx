@@ -14,6 +14,7 @@ export default function EditorPage() {
   const endSession = useGameStore((s) => s.endSession);
 
   const [wordCount, setWordCount] = useState(0);
+  const [focusMode, setFocusMode] = useState(false);
   const contentRef = useRef('');
   const sessionIdRef = useRef(null);
   const initialWordCount = useRef(0);
@@ -25,6 +26,13 @@ export default function EditorPage() {
     }
     return { novel: null, chapter: null };
   })();
+
+  useEffect(() => {
+    if (!focusMode) return;
+    function onKey(e) { if (e.key === 'Escape') setFocusMode(false); }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [focusMode]);
 
   useEffect(() => {
     if (!chapter) return;
@@ -62,13 +70,24 @@ export default function EditorPage() {
   }
 
   return (
-    <div className={styles.root}>
-      <header className={styles.header}>
-        <button className={styles.back} onClick={() => navigate('/')}>← 뒤로</button>
-        <span className={styles.breadcrumb}>
-          {novel.emoji} {novel.title} &gt; {chapter.title}
-        </span>
+    <div className={`${styles.root} ${focusMode ? styles.rootFocus : ''}`}>
+      <header className={`${styles.header} ${focusMode ? styles.headerFocus : ''}`}>
+        {!focusMode && (
+          <button className={styles.back} onClick={() => navigate('/')}>← 뒤로</button>
+        )}
+        {!focusMode && (
+          <span className={styles.breadcrumb}>
+            {novel.emoji} {novel.title} &gt; {chapter.title}
+          </span>
+        )}
         <span className={styles.saveStatus} id="save-status">저장됨</span>
+        <button
+          className={`${styles.focusBtn} ${focusMode ? styles.focusBtnActive : ''}`}
+          onClick={() => setFocusMode((v) => !v)}
+          title={focusMode ? 'ESC 또는 클릭으로 집중 모드 해제' : '집중 모드 켜기'}
+        >
+          🎯
+        </button>
       </header>
 
       <WritingEditor
@@ -79,12 +98,14 @@ export default function EditorPage() {
         onContentChange={(text) => { contentRef.current = text; }}
       />
 
-      <EditorStatusBar
-        chapterId={chapter.id}
-        wordCount={wordCount}
-        sessionIdRef={sessionIdRef}
-        initialWordCount={initialWordCount}
-      />
+      <div className={focusMode ? styles.statusHidden : ''}>
+        <EditorStatusBar
+          chapterId={chapter.id}
+          wordCount={wordCount}
+          sessionIdRef={sessionIdRef}
+          initialWordCount={initialWordCount}
+        />
+      </div>
     </div>
   );
 }

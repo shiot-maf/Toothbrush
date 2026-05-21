@@ -49,6 +49,7 @@ export const useGameStore = create((set, get) => ({
   sessions: [],
   quests: DEFAULT_QUESTS,
   memos: [],
+  trash: [],
   comments: getMockComments(),
 
   // ── 인증 ──────────────────────────────────────────────────────────
@@ -62,6 +63,7 @@ export const useGameStore = create((set, get) => ({
           player: userData.player ?? DEFAULT_PLAYER,
           quests: userData.quests ?? DEFAULT_QUESTS,
           memos: userData.memos ?? [],
+          trash: userData.trash ?? [],
           novels,
           loading: false,
         });
@@ -79,13 +81,13 @@ export const useGameStore = create((set, get) => ({
   clearUser: () => set({
     uid: null, loading: false,
     player: { ...DEFAULT_PLAYER },
-    novels: [], sessions: [], quests: DEFAULT_QUESTS, memos: [],
+    novels: [], sessions: [], quests: DEFAULT_QUESTS, memos: [], trash: [],
   }),
 
   // ── 내부 헬퍼: meta 저장 예약 ─────────────────────────────────────
   _saveMeta: () => {
-    const { uid, player, quests, memos } = get();
-    scheduleSaveMeta(uid, { player, quests, memos });
+    const { uid, player, quests, memos, trash } = get();
+    scheduleSaveMeta(uid, { player, quests, memos, trash });
   },
 
   // ── 플레이어 ──────────────────────────────────────────────────────
@@ -102,7 +104,7 @@ export const useGameStore = create((set, get) => ({
       id: crypto.randomUUID(),
       title: novelTitle,
       emoji: '🌙',
-      chapters: [{ id: crypto.randomUUID(), title: '1화. 시작', content: '', wordCount: 0, completed: false }],
+      chapters: [{ id: crypto.randomUUID(), title: '1화. 시작', content: '', wordCount: 0, completed: false, status: 'draft', synopsis: '', wordGoal: 0, moodTags: [], pov: '' }],
       createdAt: new Date().toISOString(),
     };
     set((s) => ({
@@ -119,11 +121,54 @@ export const useGameStore = create((set, get) => ({
     const { uid } = get();
     const novel = {
       id: crypto.randomUUID(), title, emoji,
-      chapters: [{ id: crypto.randomUUID(), title: '1화. 시작', content: '', wordCount: 0, completed: false }],
+      chapters: [{ id: crypto.randomUUID(), title: '1화. 시작', content: '', wordCount: 0, completed: false, status: 'draft', synopsis: '', wordGoal: 0, moodTags: [], pov: '' }],
       createdAt: new Date().toISOString(),
     };
     set((s) => ({ novels: [...s.novels, novel] }));
     if (uid) await saveNovel(uid, novel);
+  },
+
+  addChapter: async (novelId, title) => {
+    const { uid } = get();
+    const novel = get().novels.find((n) => n.id === novelId);
+    if (!novel) return;
+    const idx = novel.chapters.length + 1;
+    const chapter = {
+      id: crypto.randomUUID(),
+      title: title || `${idx}화. 제목`,
+      content: '', wordCount: 0, completed: false,
+      status: 'draft', synopsis: '', wordGoal: 0, moodTags: [], pov: '',
+    };
+    set((s) => ({
+      novels: s.novels.map((n) =>
+        n.id !== novelId ? n : { ...n, chapters: [...n.chapters, chapter] }
+      ),
+    }));
+    if (uid) {
+      const updated = get().novels.find((n) => n.id === novelId);
+      if (updated) await saveNovel(uid, updated);
+    }
+  },
+
+  updateChapterMeta: async (novelId, chapterId, patch) => {
+    const { uid } = get();
+    set((s) => ({
+      novels: s.novels.map((n) =>
+        n.id !== novelId ? n : {
+          ...n,
+          chapters: n.chapters.map((c) => {
+            if (c.id !== chapterId) return c;
+            const updated = { ...c, ...patch };
+            if (patch.status !== undefined) updated.completed = patch.status === 'done';
+            return updated;
+          }),
+        }
+      ),
+    }));
+    if (uid) {
+      const novel = get().novels.find((n) => n.id === novelId);
+      if (novel) await saveNovel(uid, novel);
+    }
   },
 
   updateChapterContent: (novelId, chapterId, content) => {
@@ -196,6 +241,55 @@ export const useGameStore = create((set, get) => ({
     get()._saveMeta();
   },
 
+  // ── 휴지통 ────────────────────────────────────────────────────────
+
+  deleteChapter: async (novelId, chapterId) => {
+    const { uid } = get();
+    const novel = get().novels.find((n) => n.id === novelId);
+    const chapter = novel?.chapters.find((c) => c.id === chapterId);
+    if (!chapter) return;
+    const trashItem = {
+      id: crypto.randomUUID(),
+      novelId,
+      novelTitle: novel.title,
+      chapter,
+      deletedAt: new Date().toISOString(),
+    };
+    set((s) => ({
+      trash: [...s.trash, trashItem],
+      novels: s.novels.map((n) =>
+        n.id !== novelId ? n : { ...n, chapters: n.chapters.filter((c) => c.id !== chapterId) }
+      ),
+    }));
+    get()._saveMeta();
+    if (uid) {
+      const updated = get().novels.find((n) => n.id === novelId);
+      if (updated) await saveNovel(uid, updated);
+    }
+  },
+
+  restoreChapter: async (trashId) => {
+    const { uid } = get();
+    const item = get().trash.find((t) => t.id === trashId);
+    if (!item) return;
+    set((s) => ({
+      trash: s.trash.filter((t) => t.id !== trashId),
+      novels: s.novels.map((n) =>
+        n.id !== item.novelId ? n : { ...n, chapters: [...n.chapters, item.chapter] }
+      ),
+    }));
+    get()._saveMeta();
+    if (uid) {
+      const novel = get().novels.find((n) => n.id === item.novelId);
+      if (novel) await saveNovel(uid, novel);
+    }
+  },
+
+  emptyTrash: () => {
+    set({ trash: [] });
+    get()._saveMeta();
+  },
+
   // ── 에너지 ────────────────────────────────────────────────────────
 
   rest: () => {
@@ -217,6 +311,7 @@ export const useGameStore = create((set, get) => ({
   checkMidnightReset: () => {
     const { player } = get();
     const today = TODAY();
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     if (player.energyLastResetDate !== today) {
       set((s) => ({
         player: { ...s.player, energy: Math.min(100, s.player.energy + 50), energyLastResetDate: today },
@@ -226,6 +321,7 @@ export const useGameStore = create((set, get) => ({
             return { ...q, progress: 0, done: false, lastResetWeek: getMonday() };
           return q;
         }),
+        trash: s.trash.filter((t) => t.deletedAt > thirtyDaysAgo),
       }));
       get()._saveMeta();
     }

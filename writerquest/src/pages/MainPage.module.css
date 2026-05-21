@@ -32,3 +32,11 @@
   .left, .center, .right { display: none; }
   .left.tabVisible, .center.tabVisible, .right.tabVisible { display: block; }
 }
+
+.layoutFocus {
+  grid-template-columns: 1fr;
+}
+
+.panelHidden {
+  display: none !important;
+}

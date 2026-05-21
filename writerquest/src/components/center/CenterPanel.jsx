@@ -3,7 +3,7 @@ import useTimer from '../../hooks/useTimer';
 import { useEffect, useState } from 'react';
 import styles from './CenterPanel.module.css';
 
-export default function CenterPanel() {
+export default function CenterPanel({ focusMode = false, onFocusModeToggle }) {
   const player = useGameStore((s) => s.player);
   const quests = useGameStore((s) => s.quests);
   const { elapsed, running, start, pause } = useTimer();
@@ -20,6 +20,17 @@ export default function CenterPanel() {
 
   return (
     <section className={styles.panel}>
+      {/* Focus Mode Toggle */}
+      <div className={styles.focusRow}>
+        <button
+          className={`${styles.focusBtn} ${focusMode ? styles.focusBtnActive : ''}`}
+          onClick={onFocusModeToggle}
+          title={focusMode ? '집중 모드 해제' : '집중 모드 켜기'}
+        >
+          {focusMode ? '✖ 집중 해제' : '🎯 집중 모드'}
+        </button>
+      </div>
+
       {/* Character */}
       <div className={styles.characterArea}>
         <div className={styles.characterWrap}>

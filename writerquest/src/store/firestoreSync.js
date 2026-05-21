@@ -26,8 +26,8 @@ export async function loadUserData(uid) {
   return { userData, novels };
 }
 
-export async function saveUserMeta(uid, { player, quests, memos }) {
-  await setDoc(userRef(uid), { player, quests, memos }, { merge: true });
+export async function saveUserMeta(uid, { player, quests, memos, trash }) {
+  await setDoc(userRef(uid), { player, quests, memos, trash: trash ?? [] }, { merge: true });
 }
 
 export async function saveNovel(uid, novel) {
