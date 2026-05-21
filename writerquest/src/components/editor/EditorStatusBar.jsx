@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import useTimer from '../../hooks/useTimer';
 import styles from './EditorStatusBar.module.css';
 
 // 새벽 시간대 판별 (00:00~04:00)
@@ -9,8 +8,7 @@ function isDawn() {
   return h >= 0 && h < 4;
 }
 
-export default function EditorStatusBar({ chapterId, wordCount, sessionIdRef, initialWordCount }) {
-  const { elapsed, running, start, pause } = useTimer();
+export default function EditorStatusBar({ chapterId, wordCount, elapsed, running, sessionIdRef, initialWordCount }) {
   const energy = useGameStore((s) => s.player.energy);
   const energyLastRestAt = useGameStore((s) => s.player.energyLastRestAt);
   const rest = useGameStore((s) => s.rest);
@@ -25,17 +23,12 @@ export default function EditorStatusBar({ chapterId, wordCount, sessionIdRef, in
   const lastExpWordCount = useRef(wordCount);
   const dawnChecked = useRef(false);
 
-  // 에디터 진입 시 타이머 자동 시작
+  // 새벽 감성 퀘스트 감지 (진입 시각 기준)
   useEffect(() => {
-    start();
-
-    // 새벽 감성 퀘스트 감지 (진입 시각 기준)
     if (!dawnChecked.current && isDawn()) {
       dawnChecked.current = true;
       updateQuestProgress('daily_dawn', 1);
     }
-
-    return () => pause();
   }, []);
 
   // 60초마다 에너지 소모 (-1/6% ≈ 시간당 -10%)
@@ -80,13 +73,6 @@ export default function EditorStatusBar({ chapterId, wordCount, sessionIdRef, in
     return () => clearInterval(id);
   }, [energyLastRestAt]);
 
-  function formatTime(sec) {
-    const h = Math.floor(sec / 3600).toString().padStart(2, '0');
-    const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
-    const s = (sec % 60).toString().padStart(2, '0');
-    return `${h}:${m}:${s}`;
-  }
-
   const displayCount = excludeSpaces
     ? String(wordCount).replace(/\s/g, '').length  // 실제 content 없으므로 근사
     : wordCount;
@@ -105,8 +91,6 @@ export default function EditorStatusBar({ chapterId, wordCount, sessionIdRef, in
         ✍️ {wordCount.toLocaleString()}자
         <span className={styles.spaceMode}>{excludeSpaces ? '(공백제외)' : '(공백포함)'}</span>
       </button>
-      <span className={styles.divider} />
-      <span className={styles.item}>⏱️ {formatTime(elapsed)}</span>
       <span className={styles.divider} />
       <span
         className={styles.item}

@@ -36,6 +36,15 @@
   text-overflow: ellipsis;
 }
 
+.timer {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--color-accent);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
 .saveStatus {
   font-size: var(--text-xs);
   color: var(--color-success);

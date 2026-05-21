@@ -3,7 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/gameStore';
 import WritingEditor from '../components/editor/WritingEditor';
 import EditorStatusBar from '../components/editor/EditorStatusBar';
+import useTimer from '../hooks/useTimer';
 import styles from './EditorPage.module.css';
+
+function formatTime(sec) {
+  const h = Math.floor(sec / 3600).toString().padStart(2, '0');
+  const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
+  const s = (sec % 60).toString().padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
 
 export default function EditorPage() {
   const { chapterId } = useParams();
@@ -18,6 +26,7 @@ export default function EditorPage() {
   const contentRef = useRef('');
   const sessionIdRef = useRef(null);
   const initialWordCount = useRef(0);
+  const { elapsed, running, start, pause } = useTimer();
 
   const { novel, chapter } = (() => {
     for (const n of novels) {
@@ -39,6 +48,7 @@ export default function EditorPage() {
 
     initialWordCount.current = chapter.content?.length || 0;
     sessionIdRef.current = startSession(chapterId);
+    start();
 
     function handleBeforeUnload() {
       updateChapter(novel.id, chapterId, contentRef.current);
@@ -51,7 +61,7 @@ export default function EditorPage() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      // 페이지 이탈(뒤로가기 등)에도 세션 종료
+      pause();
       if (sessionIdRef.current) {
         const written = Math.max(0, contentRef.current.length - initialWordCount.current);
         endSession(sessionIdRef.current, written);
@@ -80,6 +90,7 @@ export default function EditorPage() {
             {novel.emoji} {novel.title} &gt; {chapter.title}
           </span>
         )}
+        <span className={styles.timer}>⏱️ {formatTime(elapsed)}</span>
         <span className={styles.saveStatus} id="save-status">저장됨</span>
         <button
           className={`${styles.focusBtn} ${focusMode ? styles.focusBtnActive : ''}`}
@@ -102,6 +113,8 @@ export default function EditorPage() {
         <EditorStatusBar
           chapterId={chapter.id}
           wordCount={wordCount}
+          elapsed={elapsed}
+          running={running}
           sessionIdRef={sessionIdRef}
           initialWordCount={initialWordCount}
         />
