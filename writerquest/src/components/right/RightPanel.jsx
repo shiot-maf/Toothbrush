@@ -1,4 +1,3 @@
-import { useGameStore } from '../../store/gameStore';
 import StatPanel from './StatPanel';
 import ReaderComments from './ReaderComments';
 import styles from './RightPanel.module.css';

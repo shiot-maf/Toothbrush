@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import styles from './CenterPanel.module.css';
 
 export default function CenterPanel({ focusMode = false, onFocusModeToggle }) {
-  const player = useGameStore((s) => s.player);
+  const level = useGameStore((s) => s.player.level);
+  const exp = useGameStore((s) => s.player.exp);
+  const energy = useGameStore((s) => s.player.energy);
   const quests = useGameStore((s) => s.quests);
   const { elapsed, running, start, pause } = useTimer();
 
-  const expNeeded = player.level * 1000;
-  const expPct = Math.min(100, Math.round((player.exp / expNeeded) * 100));
+  const expNeeded = level * 1000;
+  const expPct = Math.min(100, Math.round((exp / expNeeded) * 100));
 
   function formatTime(sec) {
     const h = Math.floor(sec / 3600).toString().padStart(2, '0');
@@ -58,11 +60,11 @@ export default function CenterPanel({ focusMode = false, onFocusModeToggle }) {
 
       {/* EXP Bar */}
       <div className={styles.expRow}>
-        <span className={styles.expLabel}>Lv.{player.level}</span>
+        <span className={styles.expLabel}>Lv.{level}</span>
         <div className={styles.expBar}>
           <div className={styles.expFill} style={{ width: `${expPct}%` }} />
         </div>
-        <span className={styles.expLabel}>{player.exp} / {expNeeded}</span>
+        <span className={styles.expLabel}>{exp} / {expNeeded}</span>
       </div>
 
       {/* Energy */}
@@ -72,12 +74,12 @@ export default function CenterPanel({ focusMode = false, onFocusModeToggle }) {
           <div
             className={styles.energyFill}
             style={{
-              width: `${player.energy}%`,
-              background: player.energy > 50 ? 'var(--color-success)' : player.energy > 20 ? 'var(--color-warning)' : 'var(--color-danger)',
+              width: `${energy}%`,
+              background: energy > 50 ? 'var(--color-success)' : energy > 20 ? 'var(--color-warning)' : 'var(--color-danger)',
             }}
           />
         </div>
-        <span>{player.energy}%</span>
+        <span>{energy}%</span>
       </div>
 
       {/* Quests */}

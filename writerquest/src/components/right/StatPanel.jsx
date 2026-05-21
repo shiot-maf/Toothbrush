@@ -12,8 +12,7 @@ const STAT_LABELS = {
 const STAT_MAX = 200;
 
 export default function StatPanel() {
-  const { player } = useGameStore((s) => ({ player: s.player }));
-  const { stats } = player;
+  const stats = useGameStore((s) => s.player.stats);
 
   return (
     <div className={styles.section}>
