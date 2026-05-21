@@ -9,7 +9,7 @@ import styles from './App.module.css';
 
 export default function App() {
   const { uid, loading } = useAuth();
-  const player = useGameStore((s) => s.player);
+  const onboarded = useGameStore((s) => s.player.onboarded);
 
   if (loading) {
     return (
@@ -22,7 +22,7 @@ export default function App() {
 
   if (!uid) return <LoginPage />;
 
-  if (!player.onboarded) {
+  if (!onboarded) {
     return (
       <BrowserRouter>
         <Routes>

@@ -11,7 +11,8 @@ function isDawn() {
 
 export default function EditorStatusBar({ chapterId, wordCount, sessionIdRef, initialWordCount }) {
   const { elapsed, running, start, pause } = useTimer();
-  const player = useGameStore((s) => s.player);
+  const energy = useGameStore((s) => s.player.energy);
+  const energyLastRestAt = useGameStore((s) => s.player.energyLastRestAt);
   const rest = useGameStore((s) => s.rest);
   const drainEnergy = useGameStore((s) => s.drainEnergy);
   const gainExp = useGameStore((s) => s.gainExp);
@@ -72,12 +73,12 @@ export default function EditorStatusBar({ chapterId, wordCount, sessionIdRef, in
   // 휴식 쿨다운 카운터
   useEffect(() => {
     const id = setInterval(() => {
-      const lastRest = player.energyLastRestAt ? new Date(player.energyLastRestAt).getTime() : 0;
+      const lastRest = energyLastRestAt ? new Date(energyLastRestAt).getTime() : 0;
       const remaining = Math.max(0, 30 * 60 - Math.floor((Date.now() - lastRest) / 1000));
       setRestCooldown(remaining);
     }, 1000);
     return () => clearInterval(id);
-  }, [player.energyLastRestAt]);
+  }, [energyLastRestAt]);
 
   function formatTime(sec) {
     const h = Math.floor(sec / 3600).toString().padStart(2, '0');
@@ -109,9 +110,9 @@ export default function EditorStatusBar({ chapterId, wordCount, sessionIdRef, in
       <span className={styles.divider} />
       <span
         className={styles.item}
-        style={{ color: player.energy <= 20 ? 'var(--color-danger)' : player.energy <= 50 ? 'var(--color-warning)' : 'inherit' }}
+        style={{ color: energy <= 20 ? 'var(--color-danger)' : energy <= 50 ? 'var(--color-warning)' : 'inherit' }}
       >
-        ⚡ {Math.floor(player.energy)}%
+        ⚡ {Math.floor(energy)}%
       </span>
       <button
         className={styles.restBtn}
