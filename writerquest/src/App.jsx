@@ -1,15 +1,26 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useAuth } from './hooks/useAuth';
 import { useGameStore } from './store/gameStore';
 import MainPage from './pages/MainPage';
 import EditorPage from './pages/EditorPage';
 import OnboardingPage from './pages/OnboardingPage';
+import LoginPage from './pages/LoginPage';
+import styles from './App.module.css';
 
 export default function App() {
+  const { uid, loading } = useAuth();
   const player = useGameStore((s) => s.player);
-  const checkMidnightReset = useGameStore((s) => s.checkMidnightReset);
 
-  useEffect(() => { checkMidnightReset(); }, []);
+  if (loading) {
+    return (
+      <div className={styles.splash}>
+        <span className={styles.splashIcon}>✍️</span>
+        <p className={styles.splashText}>불러오는 중…</p>
+      </div>
+    );
+  }
+
+  if (!uid) return <LoginPage />;
 
   if (!player.onboarded) {
     return (

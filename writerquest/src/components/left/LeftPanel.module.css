@@ -15,8 +15,10 @@
   align-items: center;
 }
 
-.nickname { font-weight: 700; font-size: var(--text-md); }
-.level { font-size: var(--text-xs); color: var(--color-accent); background: rgba(201,160,232,0.15); padding: 2px 8px; border-radius: 99px; }
+.nickname { font-weight: 700; font-size: var(--text-md); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.level { font-size: var(--text-xs); color: var(--color-accent); background: rgba(201,160,232,0.15); padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.logoutBtn { background: none; border: none; color: var(--color-text-sub); font-size: 14px; padding: 2px 4px; border-radius: var(--radius-sm); transition: color var(--transition-fast); }
+.logoutBtn:hover { color: var(--color-danger); }
 
 .streak {
   display: flex;

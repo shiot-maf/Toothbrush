@@ -1,0 +1,24 @@
+.splash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: var(--space-md);
+  background: var(--color-bg);
+}
+
+.splashIcon {
+  font-size: 48px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.splashText {
+  font-size: var(--text-sm);
+  color: var(--color-text-sub);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.95); }
+}
