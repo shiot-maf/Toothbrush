@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase';
 import styles from './LeftPanel.module.css';
 
 const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -196,7 +197,6 @@ export default function LeftPanel() {
   const addNovel = useGameStore((s) => s.addNovel);
   const trash = useGameStore((s) => s.trash);
   const navigate = useNavigate();
-  const { logout } = useAuth();
   const [showTrash, setShowTrash] = useState(false);
 
   const todayIdx = (new Date().getDay() + 6) % 7;
@@ -211,7 +211,7 @@ export default function LeftPanel() {
       <div className={styles.header}>
         <span className={styles.nickname}>{player.nickname} 작가</span>
         <span className={styles.level}>Lv.{player.level}</span>
-        <button className={styles.logoutBtn} onClick={logout} title="로그아웃">↩</button>
+        <button className={styles.logoutBtn} onClick={() => signOut(auth)} title="로그아웃">↩</button>
       </div>
 
       <div className={styles.streak}>
