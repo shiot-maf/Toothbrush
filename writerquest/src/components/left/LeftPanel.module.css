@@ -20,6 +20,9 @@
 
 .nickname { font-weight: 700; font-size: var(--text-md); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .level { font-size: var(--text-xs); color: var(--color-accent); background: rgba(201,160,232,0.15); padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.themeBtn { background: none; border: none; font-size: 15px; padding: 2px 4px; border-radius: var(--radius-sm); transition: transform var(--transition-fast); line-height: 1; }
+.themeBtn:hover { transform: scale(1.2); }
+
 .logoutBtn { background: none; border: none; color: var(--color-text-sub); font-size: 14px; padding: 2px 4px; border-radius: var(--radius-sm); transition: color var(--transition-fast); }
 .logoutBtn:hover { color: var(--color-danger); }
 

@@ -59,6 +59,34 @@
   --transition-base: 250ms ease;
 }
 
+[data-theme="dark"] {
+  /* ── 다크 팔레트 ── */
+  --color-bg:          #120e1c;
+  --color-surface:     #1c1530;
+  --color-panel:       #251c3a;
+  --color-panel-alt:   #2a1835;
+
+  --color-accent:      #c4a8f0;
+  --color-accent-light:#7a5fa8;
+  --color-accent-mint: #5baf9a;
+  --color-accent-peach:#d4886e;
+
+  --color-text:        #ede6ff;
+  --color-text-sub:    #9d88c4;
+  --color-text-light:  #5a4a78;
+
+  --color-border:      #3a2858;
+  --color-border-light:#2a1e46;
+
+  --color-success:     #4aad88;
+  --color-warning:     #d4922a;
+  --color-danger:      #d45272;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

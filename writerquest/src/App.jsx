@@ -7,6 +7,10 @@ import OnboardingPage from './pages/OnboardingPage';
 import LoginPage from './pages/LoginPage';
 import styles from './App.module.css';
 
+// 저장된 테마를 앱 로드 직후 즉시 적용 (깜빡임 방지)
+const savedTheme = localStorage.getItem('writerquest_theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
 export default function App() {
   const { uid, loading } = useAuth();
   const onboarded = useGameStore((s) => s.player.onboarded);

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
+import { useTheme } from '../../hooks/useTheme';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import styles from './LeftPanel.module.css';
@@ -204,6 +205,7 @@ export default function LeftPanel({ onSelectChapter, selectedChapterId }) {
   const addNovel = useGameStore((s) => s.addNovel);
   const trash = useGameStore((s) => s.trash);
   const [showTrash, setShowTrash] = useState(false);
+  const { dark, toggle: toggleTheme } = useTheme();
 
   const todayIdx = (new Date().getDay() + 6) % 7;
 
@@ -217,6 +219,13 @@ export default function LeftPanel({ onSelectChapter, selectedChapterId }) {
       <div className={styles.header}>
         <span className={styles.nickname}>{nickname} 작가</span>
         <span className={styles.level}>Lv.{level}</span>
+        <button
+          className={styles.themeBtn}
+          onClick={toggleTheme}
+          title={dark ? '라이트 모드로 전환' : '다크 모드로 전환'}
+        >
+          {dark ? '☀️' : '🌙'}
+        </button>
         <button className={styles.logoutBtn} onClick={() => signOut(auth)} title="로그아웃">↩</button>
       </div>
 
