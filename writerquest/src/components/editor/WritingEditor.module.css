@@ -1,0 +1,15 @@
+.textarea {
+  flex: 1;
+  width: 100%;
+  padding: var(--space-xl) clamp(var(--space-lg), 10vw, 120px);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  line-height: 1.9;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--font-base);
+}
+
+.textarea::placeholder { color: var(--color-text-sub); }
