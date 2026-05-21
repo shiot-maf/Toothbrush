@@ -191,9 +191,10 @@ function NovelItem({ novel, navigate }) {
 }
 
 export default function LeftPanel() {
-  const { player, novels, addNovel, trash } = useGameStore((s) => ({
-    player: s.player, novels: s.novels, addNovel: s.addNovel, trash: s.trash,
-  }));
+  const player = useGameStore((s) => s.player);
+  const novels = useGameStore((s) => s.novels);
+  const addNovel = useGameStore((s) => s.addNovel);
+  const trash = useGameStore((s) => s.trash);
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [showTrash, setShowTrash] = useState(false);
