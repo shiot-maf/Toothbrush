@@ -5,6 +5,7 @@ import MainPage from './pages/MainPage';
 import EditorPage from './pages/EditorPage';
 import OnboardingPage from './pages/OnboardingPage';
 import LoginPage from './pages/LoginPage';
+import ToastContainer from './components/common/Toast';
 import styles from './App.module.css';
 
 // 저장된 테마를 앱 로드 직후 즉시 적용 (깜빡임 방지)
@@ -37,12 +38,15 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/editor/:chapterId" element={<EditorPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/editor/:chapterId" element={<EditorPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+      <ToastContainer />
+    </>
   );
 }

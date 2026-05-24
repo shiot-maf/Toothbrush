@@ -1,0 +1,16 @@
+{
+  "name": "WriterQuest — 작가 여정",
+  "short_name": "WriterQuest",
+  "description": "글 쓰는 RPG — 집필하면 캐릭터가 성장합니다",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#9b7fd4",
+  "background_color": "#fbf7ff",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

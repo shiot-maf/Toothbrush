@@ -82,9 +82,25 @@ export default function OnboardingPage() {
           ))}
         </div>
 
-        <button className={styles.btn} onClick={next}>
+        <button
+          className={styles.btn}
+          onClick={next}
+          disabled={step === 0 && !nickname.trim()}
+        >
           {step === STEPS.length - 1 ? '시작하기 🚀' : '다음'}
         </button>
+        {step === 1 && (
+          <button
+            className={styles.skipBtn}
+            onClick={() => {
+              setNovelTitle('나의 첫 이야기');
+              setAnimating(true);
+              setTimeout(() => { setStep((s) => s + 1); setAnimating(false); }, 300);
+            }}
+          >
+            건너뛰기
+          </button>
+        )}
       </div>
     </div>
   );

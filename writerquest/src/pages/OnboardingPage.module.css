@@ -111,5 +111,18 @@
   transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
 
-.btn:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
+.btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(0); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.skipBtn {
+  display: block;
+  margin: var(--space-sm) auto 0;
+  background: none;
+  border: none;
+  color: var(--color-text-sub);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 8px;
+}

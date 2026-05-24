@@ -346,6 +346,7 @@ export const useGameStore = create((set, get) => ({
         },
       }));
       get()._saveMeta();
+      window.dispatchEvent(new CustomEvent('writerquest:levelup', { detail: { level: newLevel } }));
       return { levelUp: true, newLevel };
     }
     set((s) => ({ player: { ...s.player, exp: newExp } }));
@@ -356,6 +357,7 @@ export const useGameStore = create((set, get) => ({
   // ── 퀘스트 ────────────────────────────────────────────────────────
 
   updateQuestProgress: (questId, progress) => {
+    const before = get().quests.find((q) => q.id === questId);
     set((s) => ({
       quests: s.quests.map((q) => {
         if (q.id !== questId || q.done) return q;
@@ -365,6 +367,9 @@ export const useGameStore = create((set, get) => ({
     }));
     get()._saveMeta();
     const quest = get().quests.find((q) => q.id === questId);
+    if (quest?.done && !before?.done) {
+      window.dispatchEvent(new CustomEvent('writerquest:quest', { detail: { title: quest.title } }));
+    }
     return quest?.done ?? false;
   },
 }));
