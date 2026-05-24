@@ -6,7 +6,6 @@ const TODAY = () => new Date().toISOString().slice(0, 10);
 function getMonday() {
   const d = new Date();
   const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   return new Date(new Date().setDate(d.getDate() - day + (day === 0 ? -6 : 1))).toISOString().slice(0, 10);
 }
 
@@ -187,7 +186,7 @@ export const useGameStore = create((set, get) => ({
     // 소설은 변경 시 즉시 저장 (글 유실 방지)
     if (uid) {
       const novel = get().novels.find((n) => n.id === novelId);
-      if (novel) saveNovel(uid, novel);
+      if (novel) saveNovel(uid, novel).catch((e) => console.error('챕터 저장 실패', e));
     }
   },
 
@@ -334,24 +333,27 @@ export const useGameStore = create((set, get) => ({
     const { player } = get();
     const multiplier = player.energy === 0 ? 0.5 : 1;
     const gained = Math.floor(amount * multiplier);
-    const newExp = player.exp + gained;
-    const expNeeded = player.level * 1000;
-    if (newExp >= expNeeded) {
-      const newLevel = player.level + 1;
-      const milestone = getMilestoneTitle(newLevel);
-      set((s) => ({
-        player: {
-          ...s.player, exp: newExp - expNeeded, level: newLevel,
-          titles: milestone ? [...s.player.titles, milestone] : s.player.titles,
-        },
-      }));
-      get()._saveMeta();
-      window.dispatchEvent(new CustomEvent('writerquest:levelup', { detail: { level: newLevel } }));
-      return { levelUp: true, newLevel };
+    let exp = player.exp + gained;
+    let level = player.level;
+    const titles = [...player.titles];
+    let leveledUp = false;
+
+    // 다중 레벨업 지원
+    while (exp >= level * 1000) {
+      exp -= level * 1000;
+      level++;
+      const milestone = getMilestoneTitle(level);
+      if (milestone && !titles.includes(milestone)) titles.push(milestone);
+      leveledUp = true;
     }
-    set((s) => ({ player: { ...s.player, exp: newExp } }));
+
+    set((s) => ({ player: { ...s.player, exp, level, titles } }));
     get()._saveMeta();
-    return { levelUp: false };
+
+    if (leveledUp) {
+      window.dispatchEvent(new CustomEvent('writerquest:levelup', { detail: { level } }));
+    }
+    return { levelUp: leveledUp, newLevel: level };
   },
 
   // ── 퀘스트 ────────────────────────────────────────────────────────

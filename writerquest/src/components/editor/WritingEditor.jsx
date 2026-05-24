@@ -3,7 +3,7 @@ import { useGameStore } from '../../store/gameStore';
 import useAutoSave from '../../hooks/useAutoSave';
 import styles from './WritingEditor.module.css';
 
-export default function WritingEditor({ novelId, chapterId, initialContent, onWordCountChange, onContentChange }) {
+export default function WritingEditor({ novelId, chapterId, initialContent, onWordCountChange, onContentChange, onSaveStatusChange }) {
   const [content, setContent] = useState(initialContent || '');
   const updateChapter = useGameStore((s) => s.updateChapterContent);
   const textareaRef = useRef(null);
@@ -12,9 +12,8 @@ export default function WritingEditor({ novelId, chapterId, initialContent, onWo
 
   const save = useCallback((text) => {
     updateChapter(novelId, chapterId, text);
-    const el = document.getElementById('save-status');
-    if (el) { el.textContent = '저장됨'; el.style.color = 'var(--color-success)'; }
-  }, [novelId, chapterId, updateChapter]);
+    onSaveStatusChange?.({ text: '저장됨', ok: true });
+  }, [novelId, chapterId, updateChapter, onSaveStatusChange]);
 
   useAutoSave(content, save, 2_000);
 
@@ -23,8 +22,7 @@ export default function WritingEditor({ novelId, chapterId, initialContent, onWo
     setContent(text);
     onContentChange?.(text);
 
-    const el = document.getElementById('save-status');
-    if (el) { el.textContent = '저장 중…'; el.style.color = 'var(--color-text-sub)'; }
+    onSaveStatusChange?.({ text: '저장 중…', ok: false });
 
     // 한국어 IME 조합 중에는 카운트/EXP 갱신 보류
     if (!isComposing.current) {

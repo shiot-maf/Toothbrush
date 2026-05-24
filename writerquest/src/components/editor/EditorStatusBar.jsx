@@ -8,7 +8,7 @@ function isDawn() {
   return h >= 0 && h < 4;
 }
 
-export default function EditorStatusBar({ chapterId, wordCount, elapsed, running, sessionIdRef, initialWordCount }) {
+export default function EditorStatusBar({ chapterId, wordCount, content, elapsed, running, sessionIdRef, initialWordCount }) {
   const energy = useGameStore((s) => s.player.energy);
   const energyLastRestAt = useGameStore((s) => s.player.energyLastRestAt);
   const rest = useGameStore((s) => s.rest);
@@ -16,12 +16,22 @@ export default function EditorStatusBar({ chapterId, wordCount, elapsed, running
   const gainExp = useGameStore((s) => s.gainExp);
   const updateQuestProgress = useGameStore((s) => s.updateQuestProgress);
   const quests = useGameStore((s) => s.quests);
-  const novels = useGameStore((s) => s.novels);
 
   const [excludeSpaces, setExcludeSpaces] = useState(false);
   const [restCooldown, setRestCooldown] = useState(0);
   const lastExpWordCount = useRef(wordCount);
   const dawnChecked = useRef(false);
+
+  // refs — interval 클로저가 최신 값을 읽되 deps로 등록하지 않기 위함
+  const wordCountRef = useRef(wordCount);
+  useEffect(() => { wordCountRef.current = wordCount; }, [wordCount]);
+
+  // 세션 중 누적 글자수 추적 (daily_words 퀘스트용)
+  const sessionWordsRef = useRef(0);
+  // 오늘 이미 저장된 daily_words 진행도 (세션 시작 시점 기준)
+  const dailyWordsBaseRef = useRef(
+    quests.find((q) => q.id === 'daily_words')?.progress ?? 0
+  );
 
   // 새벽 감성 퀘스트 감지 (진입 시각 기준)
   useEffect(() => {
@@ -47,21 +57,20 @@ export default function EditorStatusBar({ chapterId, wordCount, elapsed, running
   }, [elapsed]);
 
   // 30초마다 EXP 획득 + 오늘 글자수 퀘스트 갱신
+  // deps 없음 — wordCountRef로 최신 값 읽어 interval 재시작 방지
   useEffect(() => {
     const id = setInterval(() => {
-      const written = wordCount - lastExpWordCount.current;
+      const written = wordCountRef.current - lastExpWordCount.current;
       if (written > 0) {
         gainExp(written * 0.1);
-        lastExpWordCount.current = wordCount;
+        sessionWordsRef.current += written;
+        lastExpWordCount.current = wordCountRef.current;
+        // 오늘 글자수 = 이전 세션까지 저장된 진행도 + 이번 세션 추가분
+        updateQuestProgress('daily_words', dailyWordsBaseRef.current + sessionWordsRef.current);
       }
-
-      // 오늘 총 글자수 합산 → 1,000자 퀘스트
-      const todayTotal = novels.reduce((sum, n) =>
-        sum + n.chapters.reduce((s2, c) => s2 + (c.wordCount || 0), 0), 0);
-      updateQuestProgress('daily_words', todayTotal);
     }, 30_000);
     return () => clearInterval(id);
-  }, [wordCount, novels]);
+  }, []);
 
   // 휴식 쿨다운 카운터
   useEffect(() => {
@@ -73,13 +82,10 @@ export default function EditorStatusBar({ chapterId, wordCount, elapsed, running
     return () => clearInterval(id);
   }, [energyLastRestAt]);
 
-  const displayCount = excludeSpaces
-    ? String(wordCount).replace(/\s/g, '').length  // 실제 content 없으므로 근사
+  // 공백 포함/제외 글자수 — content prop이 있을 때 정확하게 계산
+  const displayCount = excludeSpaces && content
+    ? content.replace(/\s/g, '').length
     : wordCount;
-
-  // excludeSpaces 모드에서는 EditorPage에서 content를 받아야 정확하나,
-  // wordCount는 이미 전체 length이므로 공백 제외는 EditorPage에서 content를 prop으로 내려줘야 정확.
-  // 현재는 wordCount를 그대로 표시하고 토글 텍스트만 변경.
 
   return (
     <footer className={styles.bar}>
@@ -88,7 +94,7 @@ export default function EditorStatusBar({ chapterId, wordCount, elapsed, running
         onClick={() => setExcludeSpaces((v) => !v)}
         title="클릭하여 공백 포함/제외 전환"
       >
-        ✍️ {wordCount.toLocaleString()}자
+        ✍️ {displayCount.toLocaleString()}자
         <span className={styles.spaceMode}>{excludeSpaces ? '(공백제외)' : '(공백포함)'}</span>
       </button>
       <span className={styles.divider} />

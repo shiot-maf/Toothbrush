@@ -14,7 +14,10 @@ function formatTime(sec) {
 
 export default function CenterPanel({ novelId, chapterId, onClose }) {
   const novels = useGameStore((s) => s.novels);
+  const updateChapter = useGameStore((s) => s.updateChapterContent);
   const [wordCount, setWordCount] = useState(0);
+  const [content, setContent] = useState('');
+  const [saveStatus, setSaveStatus] = useState({ text: '', ok: true });
   const { elapsed, running, start, pause, reset } = useTimer();
   const sessionIdRef = useRef(null);
 
@@ -25,10 +28,21 @@ export default function CenterPanel({ novelId, chapterId, onClose }) {
     if (chapterId) {
       reset();
       start();
+      setContent(chapter?.content || '');
     }
     return () => pause();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chapterId]);
+
+  // 탭 닫기 직전 즉시 저장
+  useEffect(() => {
+    if (!chapterId) return;
+    function handleUnload() {
+      updateChapter(novelId, chapterId, content);
+    }
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [chapterId, content, novelId, updateChapter]);
 
   if (!chapterId || !chapter) {
     return (
@@ -54,7 +68,12 @@ export default function CenterPanel({ novelId, chapterId, onClose }) {
           {chapter.title}
         </span>
         <span className={styles.editorTimer}>{formatTime(elapsed)}</span>
-        <span id="save-status" className={styles.saveStatus} />
+        <span
+          className={styles.saveStatus}
+          style={{ color: saveStatus.ok ? 'var(--color-success)' : 'var(--color-text-sub)' }}
+        >
+          {saveStatus.text}
+        </span>
         <button
           className={styles.closeBtn}
           onClick={() => { pause(); onClose(); }}
@@ -70,11 +89,14 @@ export default function CenterPanel({ novelId, chapterId, onClose }) {
           chapterId={chapterId}
           initialContent={chapter.content || ''}
           onWordCountChange={setWordCount}
+          onContentChange={setContent}
+          onSaveStatusChange={setSaveStatus}
         />
       </div>
       <EditorStatusBar
         chapterId={chapterId}
         wordCount={wordCount}
+        content={content}
         elapsed={elapsed}
         running={running}
         sessionIdRef={sessionIdRef}

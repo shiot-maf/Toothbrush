@@ -201,6 +201,8 @@ function NovelItem({ novel, onSelectChapter, selectedChapterId }) {
 export default function LeftPanel({ onSelectChapter, selectedChapterId }) {
   const nickname = useGameStore((s) => s.player.nickname);
   const level = useGameStore((s) => s.player.level);
+  const streakDays = useGameStore((s) => s.player.streakDays);
+  const lastWrittenDate = useGameStore((s) => s.player.lastWrittenDate);
   const novels = useGameStore((s) => s.novels);
   const addNovel = useGameStore((s) => s.addNovel);
   const trash = useGameStore((s) => s.trash);
@@ -208,6 +210,9 @@ export default function LeftPanel({ onSelectChapter, selectedChapterId }) {
   const { dark, toggle: toggleTheme } = useTheme();
 
   const todayIdx = (new Date().getDay() + 6) % 7;
+  const today = new Date().toISOString().slice(0, 10);
+  // 오늘 집필했을 때만 streak 표시, 아니면 0
+  const activeStreak = lastWrittenDate === today ? streakDays : 0;
 
   function handleAddNovel() {
     const title = prompt('새 소설 제목을 입력하세요:');
@@ -230,11 +235,16 @@ export default function LeftPanel({ onSelectChapter, selectedChapterId }) {
       </div>
 
       <div className={styles.streak}>
-        {DAYS.map((d, i) => (
-          <div key={d} className={`${styles.dot} ${i <= todayIdx ? styles.dotDone : ''}`}>
-            {d}
-          </div>
-        ))}
+        {DAYS.map((d, i) => {
+          // todayIdx 기준으로 몇 일 전인지 계산 (0=오늘, 1=어제, …)
+          const daysAgo = (todayIdx - i + 7) % 7;
+          const filled = daysAgo < activeStreak;
+          return (
+            <div key={d} className={`${styles.dot} ${filled ? styles.dotDone : ''}`}>
+              {d}
+            </div>
+          );
+        })}
       </div>
 
       <div className={styles.section}>
