@@ -54,10 +54,13 @@ export const useGameStore = create((set, get) => ({
   // ── 인증 ──────────────────────────────────────────────────────────
 
   initUser: async (uid) => {
-    if (get().uid === uid) return; // Strict Mode 이중 호출 방지
+    if (get().uid === uid) return; // 이중 호출 방지
     set({ uid, loading: true });
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('TIMEOUT')), 10_000)
+    );
     try {
-      const { userData, novels } = await loadUserData(uid);
+      const { userData, novels } = await Promise.race([loadUserData(uid), timeout]);
       if (userData) {
         set({
           player: userData.player ?? DEFAULT_PLAYER,
@@ -73,7 +76,7 @@ export const useGameStore = create((set, get) => ({
         set({ loading: false });
       }
     } catch (e) {
-      console.error('Firestore 로딩 실패', e);
+      console.error('Firestore 로딩 실패 — Firestore 데이터베이스가 생성됐는지, 보안 규칙이 올바른지 확인하세요.', e.message ?? e);
       set({ loading: false });
     }
   },
