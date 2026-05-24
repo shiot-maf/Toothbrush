@@ -13,7 +13,15 @@ export default function LoginPage() {
     try {
       await login();
     } catch (e) {
-      setError('로그인에 실패했습니다. 다시 시도해 주세요.');
+      const msgs = {
+        'auth/popup-closed-by-user': '로그인 창이 닫혔습니다. 다시 시도해 주세요.',
+        'auth/popup-blocked': '팝업이 차단됐습니다. 브라우저 설정에서 팝업을 허용해 주세요.',
+        'auth/unauthorized-domain': '이 도메인은 Firebase 인증이 허용되지 않습니다. 콘솔에서 도메인을 추가해 주세요.',
+        'auth/network-request-failed': '네트워크 오류입니다. 인터넷 연결을 확인해 주세요.',
+        'auth/cancelled-popup-request': null, // 사용자가 취소한 것 — 에러 표시 안 함
+      };
+      const msg = msgs[e.code];
+      if (msg !== null) setError(msg ?? `로그인 실패 (${e.code})`);
     } finally {
       setLoading(false);
     }
