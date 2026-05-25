@@ -2,18 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import styles from './EditorStatusBar.module.css';
 
-// 새벽 시간대 판별 (00:00~04:00)
 function isDawn() {
   const h = new Date().getHours();
   return h >= 0 && h < 4;
 }
 
-export default function EditorStatusBar({ chapterId, wordCount, content, elapsed, running, sessionIdRef, initialWordCount }) {
+// P3-4: sessionIdRef, initialWordCount props 제거 (사용하지 않음)
+export default function EditorStatusBar({ chapterId, wordCount, content, elapsed, running }) {
   const energy = useGameStore((s) => s.player.energy);
   const energyLastRestAt = useGameStore((s) => s.player.energyLastRestAt);
   const rest = useGameStore((s) => s.rest);
   const drainEnergy = useGameStore((s) => s.drainEnergy);
   const gainExp = useGameStore((s) => s.gainExp);
+  const gainStats = useGameStore((s) => s.gainStats);
   const updateQuestProgress = useGameStore((s) => s.updateQuestProgress);
   const quests = useGameStore((s) => s.quests);
 
@@ -22,18 +23,24 @@ export default function EditorStatusBar({ chapterId, wordCount, content, elapsed
   const lastExpWordCount = useRef(wordCount);
   const dawnChecked = useRef(false);
 
-  // refs — interval 클로저가 최신 값을 읽되 deps로 등록하지 않기 위함
   const wordCountRef = useRef(wordCount);
   useEffect(() => { wordCountRef.current = wordCount; }, [wordCount]);
 
-  // 세션 중 누적 글자수 추적 (daily_words 퀘스트용)
+  // P3-7: 마지막 타이핑 시각 추적 — wordCount 변화 = 타이핑
+  const lastTypedAt = useRef(0);
+  const prevWordCount = useRef(wordCount);
+  useEffect(() => {
+    if (wordCount !== prevWordCount.current) {
+      lastTypedAt.current = Date.now();
+      prevWordCount.current = wordCount;
+    }
+  });
+
   const sessionWordsRef = useRef(0);
-  // 오늘 이미 저장된 daily_words 진행도 (세션 시작 시점 기준)
   const dailyWordsBaseRef = useRef(
     quests.find((q) => q.id === 'daily_words')?.progress ?? 0
   );
 
-  // 새벽 감성 퀘스트 감지 (진입 시각 기준)
   useEffect(() => {
     if (!dawnChecked.current && isDawn()) {
       dawnChecked.current = true;
@@ -41,14 +48,16 @@ export default function EditorStatusBar({ chapterId, wordCount, content, elapsed
     }
   }, []);
 
-  // 60초마다 에너지 소모 (-1/6% ≈ 시간당 -10%)
+  // P3-7: 에너지 소모 — 최근 5분 내 타이핑 없으면 소모 안 함
   useEffect(() => {
     if (!running) return;
-    const id = setInterval(() => drainEnergy(), 60_000);
+    const id = setInterval(() => {
+      const idleSec = (Date.now() - lastTypedAt.current) / 1000;
+      if (idleSec < 300) drainEnergy();
+    }, 60_000);
     return () => clearInterval(id);
   }, [running]);
 
-  // 집중 모드 2시간 퀘스트 감지
   useEffect(() => {
     const focus2h = quests.find((q) => q.id === 'focus_2h');
     if (!focus2h?.done && elapsed >= 7200) {
@@ -56,23 +65,32 @@ export default function EditorStatusBar({ chapterId, wordCount, content, elapsed
     }
   }, [elapsed]);
 
-  // 30초마다 EXP 획득 + 오늘 글자수 퀘스트 갱신
-  // deps 없음 — wordCountRef로 최신 값 읽어 interval 재시작 방지
+  // 30초마다 EXP + 스탯 획득 + 오늘 글자수 퀘스트 갱신
   useEffect(() => {
     const id = setInterval(() => {
       const written = wordCountRef.current - lastExpWordCount.current;
       if (written > 0) {
         gainExp(written * 0.1);
+        // P0-2: 집필 글자수에 따라 문체력/대화술/묘사력 증가
+        gainStats({ style: written * 0.01, dialogue: written * 0.01, description: written * 0.01 });
         sessionWordsRef.current += written;
         lastExpWordCount.current = wordCountRef.current;
-        // 오늘 글자수 = 이전 세션까지 저장된 진행도 + 이번 세션 추가분
         updateQuestProgress('daily_words', dailyWordsBaseRef.current + sessionWordsRef.current);
       }
     }, 30_000);
     return () => clearInterval(id);
   }, []);
 
-  // 휴식 쿨다운 카운터
+  // 60초마다 집중력 스탯 증가 (타이핑 여부 무관)
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => {
+      // P0-2: 집필 시간에 따라 집중력 증가
+      gainStats({ focus: 0.1 });
+    }, 60_000);
+    return () => clearInterval(id);
+  }, [running]);
+
   useEffect(() => {
     const id = setInterval(() => {
       const lastRest = energyLastRestAt ? new Date(energyLastRestAt).getTime() : 0;
@@ -82,7 +100,6 @@ export default function EditorStatusBar({ chapterId, wordCount, content, elapsed
     return () => clearInterval(id);
   }, [energyLastRestAt]);
 
-  // 공백 포함/제외 글자수 — content prop이 있을 때 정확하게 계산
   const displayCount = excludeSpaces && content
     ? content.replace(/\s/g, '').length
     : wordCount;
@@ -109,6 +126,7 @@ export default function EditorStatusBar({ chapterId, wordCount, content, elapsed
         onClick={() => rest()}
         disabled={restCooldown > 0}
         title={restCooldown > 0 ? `${Math.ceil(restCooldown / 60)}분 후 휴식 가능` : '휴식 (+30% 에너지)'}
+        aria-label={restCooldown > 0 ? `${Math.ceil(restCooldown / 60)}분 후 휴식 가능` : '휴식'}
       >
         {restCooldown > 0 ? `휴식 (${Math.ceil(restCooldown / 60)}분)` : '휴식'}
       </button>

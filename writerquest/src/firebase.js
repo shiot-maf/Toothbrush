@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 
 // Firebase Hosting 도메인에서 접속 시 해당 도메인을 authDomain으로 사용
 // → cross-origin 쿠키 차단 문제 방지 (web.app vs firebaseapp.com)
@@ -19,6 +19,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = initializeFirestore(app, { localCache: persistentLocalCache() });
 export const googleProvider = new GoogleAuthProvider();
 

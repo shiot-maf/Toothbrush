@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useTheme } from '../../hooks/useTheme';
 import { signOut } from 'firebase/auth';
@@ -8,7 +8,9 @@ import styles from './LeftPanel.module.css';
 const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
 const STATUS_ORDER = ['idea', 'draft', 'revising', 'done'];
 const STATUS_ICONS = { idea: '🔵', draft: '✏️', revising: '🔄', done: '✅' };
+const NOVEL_EMOJIS = ['🌙', '📖', '🌸', '⭐', '🔥', '💎', '🌊', '🌿', '🌹', '🎭', '🗡️', '🏰', '🌌', '🦋', '🌺'];
 
+// P2-7: Escape 시 초안을 버리지 않고 저장
 function SynopsisField({ value, onChange }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value || '');
@@ -26,7 +28,8 @@ function SynopsisField({ value, onChange }) {
             onChange(draft);
             setEditing(false);
           }
-          if (e.key === 'Escape') setEditing(false);
+          // P2-7: Escape → 저장 후 닫기 (소실 방지)
+          if (e.key === 'Escape') { onChange(draft); setEditing(false); }
         }}
         autoFocus
         rows={2}
@@ -49,6 +52,11 @@ function ChapterItem({ novel, chapter, onSelectChapter, selectedChapterId }) {
   const updateChapterMeta = useGameStore((s) => s.updateChapterMeta);
   const deleteChapter = useGameStore((s) => s.deleteChapter);
   const isSelected = chapter.id === selectedChapterId;
+  // P1-5: 챕터 제목 인라인 편집
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState(chapter.title);
+  // P1-4: window.confirm 대체 — 인라인 확인
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   function cycleStatus(e) {
     e.stopPropagation();
@@ -61,11 +69,10 @@ function ChapterItem({ novel, chapter, onSelectChapter, selectedChapterId }) {
     ? Math.min(1, (chapter.wordCount || 0) / chapter.wordGoal)
     : null;
 
-  function handleDelete(e) {
-    e.stopPropagation();
-    if (window.confirm(`"${chapter.title}"을 삭제하시겠습니까?\n(30일 후 자동 삭제됩니다)`)) {
-      deleteChapter(novel.id, chapter.id);
-    }
+  function submitTitle() {
+    const t = titleDraft.trim();
+    if (t) updateChapterMeta(novel.id, chapter.id, { title: t });
+    setEditingTitle(false);
   }
 
   return (
@@ -75,10 +82,34 @@ function ChapterItem({ novel, chapter, onSelectChapter, selectedChapterId }) {
           className={styles.statusIcon}
           onClick={cycleStatus}
           title="클릭하여 상태 변경"
+          aria-label={`상태: ${STATUS_ICONS[chapter.status || 'draft']} — 클릭하여 변경`}
         >
           {STATUS_ICONS[chapter.status || 'draft']}
         </button>
-        <span className={styles.chapterTitle}>{chapter.title}</span>
+
+        {/* P1-5: 더블클릭하여 제목 편집 */}
+        {editingTitle ? (
+          <input
+            className={styles.titleInput}
+            value={titleDraft}
+            onChange={(e) => setTitleDraft(e.target.value)}
+            onBlur={submitTitle}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') submitTitle();
+              if (e.key === 'Escape') setEditingTitle(false);
+            }}
+            autoFocus
+          />
+        ) : (
+          <span
+            className={styles.chapterTitle}
+            onDoubleClick={() => { setTitleDraft(chapter.title); setEditingTitle(true); }}
+            title="더블클릭하여 제목 편집"
+          >
+            {chapter.title}
+          </span>
+        )}
+
         {progress !== null && (
           <div className={styles.progressWrap} title={`${chapter.wordCount || 0}/${chapter.wordGoal}자`}>
             <div className={styles.progressBar}>
@@ -92,13 +123,34 @@ function ChapterItem({ novel, chapter, onSelectChapter, selectedChapterId }) {
         >
           {isSelected ? '집필 중' : '집필'}
         </button>
-        <button
-          className={styles.deleteBtn}
-          onClick={handleDelete}
-          title="챕터 삭제 (휴지통으로 이동)"
-        >
-          🗑
-        </button>
+
+        {/* P1-4: window.confirm 대체 */}
+        {confirmDelete ? (
+          <div className={styles.deleteConfirm}>
+            <span>삭제?</span>
+            <button
+              className={styles.deleteConfirmYes}
+              onClick={() => { deleteChapter(novel.id, chapter.id); setConfirmDelete(false); }}
+            >
+              예
+            </button>
+            <button
+              className={styles.deleteConfirmNo}
+              onClick={() => setConfirmDelete(false)}
+            >
+              취소
+            </button>
+          </div>
+        ) : (
+          <button
+            className={styles.deleteBtn}
+            onClick={(e) => { e.stopPropagation(); setConfirmDelete(true); }}
+            title="챕터 삭제 (휴지통으로 이동)"
+            aria-label="챕터 삭제"
+          >
+            🗑
+          </button>
+        )}
       </div>
       <SynopsisField
         value={chapter.synopsis}
@@ -112,6 +164,7 @@ function TrashDrawer({ onClose }) {
   const trash = useGameStore((s) => s.trash);
   const restoreChapter = useGameStore((s) => s.restoreChapter);
   const emptyTrash = useGameStore((s) => s.emptyTrash);
+  const [confirmEmpty, setConfirmEmpty] = useState(false);
 
   function formatDate(iso) {
     return new Date(iso).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
@@ -122,15 +175,24 @@ function TrashDrawer({ onClose }) {
       <div className={styles.trashHeader}>
         <span>🗑️ 휴지통</span>
         <div className={styles.trashActions}>
+          {/* P1-4: window.confirm 대체 */}
           {trash.length > 0 && (
-            <button
-              className={styles.emptyBtn}
-              onClick={() => { if (window.confirm('휴지통을 비우시겠습니까?')) emptyTrash(); }}
-            >
-              전체 삭제
-            </button>
+            confirmEmpty ? (
+              <div className={styles.confirmBtns}>
+                <span>전체 삭제?</span>
+                <button className={styles.confirmYes} onClick={() => { emptyTrash(); setConfirmEmpty(false); }}>예</button>
+                <button className={styles.confirmNo} onClick={() => setConfirmEmpty(false)}>취소</button>
+              </div>
+            ) : (
+              <button
+                className={styles.emptyBtn}
+                onClick={() => setConfirmEmpty(true)}
+              >
+                전체 삭제
+              </button>
+            )
           )}
-          <button className={styles.trashCloseBtn} onClick={onClose}>✕</button>
+          <button className={styles.trashCloseBtn} onClick={onClose} aria-label="휴지통 닫기">✕</button>
         </div>
       </div>
       {trash.length === 0
@@ -157,30 +219,112 @@ function TrashDrawer({ onClose }) {
 function NovelItem({ novel, onSelectChapter, selectedChapterId }) {
   const [expanded, setExpanded] = useState(true);
   const addChapter = useGameStore((s) => s.addChapter);
+  const removeNovel = useGameStore((s) => s.removeNovel);
+  const updateNovel = useGameStore((s) => s.updateNovel);
+  // P1-4: 챕터 추가 인라인 폼
+  const [showChapterForm, setShowChapterForm] = useState(false);
+  const [chapterFormTitle, setChapterFormTitle] = useState('');
+  // P1-6: 소설 삭제 확인
+  const [confirmDeleteNovel, setConfirmDeleteNovel] = useState(false);
+  // P2-4: 이모지 피커
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const inputRef = useRef(null);
 
   function handleAddChapter(e) {
     e.stopPropagation();
-    const idx = novel.chapters.length + 1;
-    const title = prompt(`새 챕터 제목을 입력하세요 (기본: "${idx}화. 제목"):`);
-    if (title === null) return;
-    addChapter(novel.id, title.trim() || `${idx}화. 제목`);
+    setShowChapterForm(true);
+    setChapterFormTitle('');
     setExpanded(true);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
+  function submitChapterForm() {
+    const idx = novel.chapters.length + 1;
+    addChapter(novel.id, chapterFormTitle.trim() || `${idx}화. 제목`);
+    setShowChapterForm(false);
+    setChapterFormTitle('');
   }
 
   return (
     <div className={styles.novel}>
       <div className={styles.novelHeader} onClick={() => setExpanded((v) => !v)}>
-        <span className={styles.novelEmoji}>{novel.emoji}</span>
+        {/* P2-4: 이모지 클릭 시 피커 표시 */}
+        <div className={styles.emojiPickerWrap} onClick={(e) => e.stopPropagation()}>
+          <button
+            className={styles.novelEmojiBtn}
+            onClick={() => setShowEmojiPicker((v) => !v)}
+            title="이모지 변경"
+            aria-label="소설 이모지 변경"
+          >
+            {novel.emoji}
+          </button>
+          {showEmojiPicker && (
+            <div className={styles.emojiPicker}>
+              {NOVEL_EMOJIS.map((em) => (
+                <button
+                  key={em}
+                  className={styles.emojiOption}
+                  onClick={() => { updateNovel(novel.id, { emoji: em }); setShowEmojiPicker(false); }}
+                  aria-label={em}
+                >
+                  {em}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className={styles.novelInfo}>
           <span className={styles.novelTitle}>{novel.title}</span>
           <span className={styles.novelMeta}>{novel.chapters.length}화</span>
         </div>
-        <button className={styles.addChapterBtn} onClick={handleAddChapter} title="챕터 추가">+</button>
+        <button className={styles.addChapterBtn} onClick={handleAddChapter} title="챕터 추가" aria-label="챕터 추가">+</button>
+        {/* P1-6: 소설 삭제 버튼 */}
+        <button
+          className={styles.novelDeleteBtn}
+          onClick={(e) => { e.stopPropagation(); setConfirmDeleteNovel(true); }}
+          title="소설 삭제"
+          aria-label="소설 삭제"
+        >
+          🗑
+        </button>
         <span className={styles.expandIcon}>{expanded ? '▲' : '▼'}</span>
       </div>
+
+      {/* P1-6: 소설 삭제 확인 */}
+      {confirmDeleteNovel && (
+        <div className={styles.novelDeleteConfirm}>
+          <span>"{novel.title}" 소설을 삭제하시겠습니까?</span>
+          <div className={styles.novelDeleteConfirmBtns}>
+            <button onClick={() => { removeNovel(novel.id); setConfirmDeleteNovel(false); }}>삭제</button>
+            <button onClick={() => setConfirmDeleteNovel(false)}>취소</button>
+          </div>
+        </div>
+      )}
+
       {expanded && (
         <div className={styles.chapterList}>
-          {novel.chapters.length === 0
+          {/* P1-4: 챕터 추가 인라인 폼 */}
+          {showChapterForm && (
+            <div className={styles.inlineForm} style={{ margin: '4px' }}>
+              <input
+                ref={inputRef}
+                className={styles.inlineInput}
+                value={chapterFormTitle}
+                onChange={(e) => setChapterFormTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') submitChapterForm();
+                  if (e.key === 'Escape') setShowChapterForm(false);
+                }}
+                placeholder={`${novel.chapters.length + 1}화. 제목`}
+              />
+              <div className={styles.inlineFormBtns}>
+                <button className={styles.inlineSubmit} onClick={submitChapterForm}>추가</button>
+                <button className={styles.inlineCancel} onClick={() => setShowChapterForm(false)}>취소</button>
+              </div>
+            </div>
+          )}
+          {novel.chapters.length === 0 && !showChapterForm
             ? <p className={styles.chapterEmpty}>챕터가 없습니다</p>
             : novel.chapters.map((ch) => (
               <ChapterItem
@@ -208,15 +352,24 @@ export default function LeftPanel({ onSelectChapter, selectedChapterId }) {
   const trash = useGameStore((s) => s.trash);
   const [showTrash, setShowTrash] = useState(false);
   const { dark, toggle: toggleTheme } = useTheme();
+  // P1-4: 소설 추가 인라인 폼
+  const [showNovelForm, setShowNovelForm] = useState(false);
+  const [novelFormTitle, setNovelFormTitle] = useState('');
 
   const todayIdx = (new Date().getDay() + 6) % 7;
-  const today = new Date().toISOString().slice(0, 10);
-  // 오늘 집필했을 때만 streak 표시, 아니면 0
+  // P1-3: 타임존 버그 수정 — 로컬 날짜 사용
+  const today = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
   const activeStreak = lastWrittenDate === today ? streakDays : 0;
 
-  function handleAddNovel() {
-    const title = prompt('새 소설 제목을 입력하세요:');
-    if (title?.trim()) addNovel(title.trim());
+  function submitNovelForm() {
+    if (novelFormTitle.trim()) {
+      addNovel(novelFormTitle.trim());
+      setShowNovelForm(false);
+      setNovelFormTitle('');
+    }
   }
 
   return (
@@ -228,15 +381,23 @@ export default function LeftPanel({ onSelectChapter, selectedChapterId }) {
           className={styles.themeBtn}
           onClick={toggleTheme}
           title={dark ? '라이트 모드로 전환' : '다크 모드로 전환'}
+          aria-label={dark ? '라이트 모드로 전환' : '다크 모드로 전환'}
         >
           {dark ? '☀️' : '🌙'}
         </button>
-        <button className={styles.logoutBtn} onClick={() => signOut(auth)} title="로그아웃">↩</button>
+        {/* P4-3: aria-label 추가 */}
+        <button
+          className={styles.logoutBtn}
+          onClick={() => signOut(auth)}
+          title="로그아웃"
+          aria-label="로그아웃"
+        >
+          ↩
+        </button>
       </div>
 
       <div className={styles.streak}>
         {DAYS.map((d, i) => {
-          // todayIdx 기준으로 몇 일 전인지 계산 (0=오늘, 1=어제, …)
           const daysAgo = (todayIdx - i + 7) % 7;
           const filled = daysAgo < activeStreak;
           return (
@@ -250,8 +411,32 @@ export default function LeftPanel({ onSelectChapter, selectedChapterId }) {
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
           <span>내 작품</span>
-          <button className={styles.addBtn} onClick={handleAddNovel}>+ 작품</button>
+          {/* P1-4: window.prompt 대체 — 인라인 폼 토글 */}
+          <button className={styles.addBtn} onClick={() => { setShowNovelForm((v) => !v); setNovelFormTitle(''); }}>
+            + 작품
+          </button>
         </div>
+
+        {showNovelForm && (
+          <div className={styles.inlineForm}>
+            <input
+              className={styles.inlineInput}
+              value={novelFormTitle}
+              onChange={(e) => setNovelFormTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitNovelForm();
+                if (e.key === 'Escape') setShowNovelForm(false);
+              }}
+              placeholder="소설 제목을 입력하세요"
+              autoFocus
+            />
+            <div className={styles.inlineFormBtns}>
+              <button className={styles.inlineSubmit} onClick={submitNovelForm}>추가</button>
+              <button className={styles.inlineCancel} onClick={() => setShowNovelForm(false)}>취소</button>
+            </div>
+          </div>
+        )}
+
         {novels.length === 0 && <p className={styles.empty}>작품이 없습니다</p>}
         {novels.map((novel) => (
           <NovelItem
@@ -266,6 +451,7 @@ export default function LeftPanel({ onSelectChapter, selectedChapterId }) {
       <button
         className={styles.trashBtn}
         onClick={() => setShowTrash((v) => !v)}
+        aria-label={`휴지통 ${trash.length > 0 ? `(${trash.length}개)` : ''}`}
       >
         🗑️ 휴지통 {trash.length > 0 && `(${trash.length})`}
       </button>

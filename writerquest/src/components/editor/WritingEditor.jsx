@@ -49,6 +49,7 @@ export default function WritingEditor({ novelId, chapterId, initialContent, onWo
       const newValue = value.slice(0, selectionStart) + indent + value.slice(selectionEnd);
       setContent(newValue);
       onContentChange?.(newValue);
+      onWordCountChange?.(newValue.length);
       cursorAfterTab.current = selectionStart + indent.length;
     }
   }

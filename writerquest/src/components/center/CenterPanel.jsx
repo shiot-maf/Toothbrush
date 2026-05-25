@@ -3,46 +3,59 @@ import { useGameStore } from '../../store/gameStore';
 import useTimer from '../../hooks/useTimer';
 import WritingEditor from '../editor/WritingEditor';
 import EditorStatusBar from '../editor/EditorStatusBar';
+import { formatTime } from '../../utils/formatTime';
 import styles from './CenterPanel.module.css';
-
-function formatTime(sec) {
-  const h = Math.floor(sec / 3600).toString().padStart(2, '0');
-  const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
-  const s = (sec % 60).toString().padStart(2, '0');
-  return `${h}:${m}:${s}`;
-}
 
 export default function CenterPanel({ novelId, chapterId, onClose }) {
   const novels = useGameStore((s) => s.novels);
   const updateChapter = useGameStore((s) => s.updateChapterContent);
+  const startSession = useGameStore((s) => s.startSession);
+  const endSession = useGameStore((s) => s.endSession);
   const [wordCount, setWordCount] = useState(0);
   const [content, setContent] = useState('');
   const [saveStatus, setSaveStatus] = useState({ text: '', ok: true });
   const { elapsed, running, start, pause, reset } = useTimer();
   const sessionIdRef = useRef(null);
+  // P2-3: contentRef로 beforeunload 핸들러가 content state에 의존하지 않도록 함
+  const contentRef = useRef('');
+  // P1-1: 세션 시작 시 초기 글자수 기록 (streak 계산용)
+  const initialWordCountRef = useRef(0);
 
   const novel = novels.find((n) => n.id === novelId);
   const chapter = novel?.chapters.find((c) => c.id === chapterId);
 
   useEffect(() => {
-    if (chapterId) {
+    if (chapterId && chapter) {
       reset();
       start();
-      setContent(chapter?.content || '');
+      const initialContent = chapter.content || '';
+      contentRef.current = initialContent;
+      setContent(initialContent);
+      initialWordCountRef.current = initialContent.length;
+      // P1-1: 챕터 진입 시 세션 시작 → streak 업데이트를 위해 endSession 필수
+      sessionIdRef.current = startSession(chapterId);
     }
-    return () => pause();
+    return () => {
+      pause();
+      // P1-1: 챕터 이탈 시 세션 종료
+      if (sessionIdRef.current) {
+        const written = Math.max(0, contentRef.current.length - initialWordCountRef.current);
+        endSession(sessionIdRef.current, written);
+        sessionIdRef.current = null;
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chapterId]);
 
-  // 탭 닫기 직전 즉시 저장
+  // P2-3: contentRef 패턴 — content 변경마다 리스너 재등록하지 않음
   useEffect(() => {
     if (!chapterId) return;
     function handleUnload() {
-      updateChapter(novelId, chapterId, content);
+      updateChapter(novelId, chapterId, contentRef.current);
     }
     window.addEventListener('beforeunload', handleUnload);
     return () => window.removeEventListener('beforeunload', handleUnload);
-  }, [chapterId, content, novelId, updateChapter]);
+  }, [chapterId, novelId, updateChapter]);
 
   if (!chapterId || !chapter) {
     return (
@@ -78,6 +91,7 @@ export default function CenterPanel({ novelId, chapterId, onClose }) {
           className={styles.closeBtn}
           onClick={() => { pause(); onClose(); }}
           title="닫기"
+          aria-label="에디터 닫기"
         >
           ✕
         </button>
@@ -89,7 +103,7 @@ export default function CenterPanel({ novelId, chapterId, onClose }) {
           chapterId={chapterId}
           initialContent={chapter.content || ''}
           onWordCountChange={setWordCount}
-          onContentChange={setContent}
+          onContentChange={(text) => { contentRef.current = text; setContent(text); }}
           onSaveStatusChange={setSaveStatus}
         />
       </div>
@@ -99,8 +113,6 @@ export default function CenterPanel({ novelId, chapterId, onClose }) {
         content={content}
         elapsed={elapsed}
         running={running}
-        sessionIdRef={sessionIdRef}
-        initialWordCount={chapter.wordCount || 0}
       />
     </section>
   );

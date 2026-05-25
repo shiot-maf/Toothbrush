@@ -1,6 +1,6 @@
 import {
   doc, getDoc, setDoc, collection,
-  getDocs, addDoc, updateDoc, deleteDoc, writeBatch,
+  getDocs, deleteDoc, writeBatch,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -40,4 +40,11 @@ export async function deleteNovel(uid, novelId) {
 
 export async function saveSession(uid, session) {
   await setDoc(doc(sessionsRef(uid), session.id), session);
+}
+
+export async function saveOnboardingData(uid, { player, quests, memos, trash }, novel) {
+  const batch = writeBatch(db);
+  batch.set(userRef(uid), { player, quests, memos, trash: trash ?? [] }, { merge: true });
+  batch.set(novelRef(uid, novel.id), novel);
+  await batch.commit();
 }

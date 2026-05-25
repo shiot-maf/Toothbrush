@@ -11,11 +11,17 @@ export default function ToastContainer() {
     function onQuest(e) {
       add({ type: 'quest', msg: `✅ ${e.detail.title} 완료!` });
     }
+    // P0-4: Firestore 저장 실패 경고
+    function onError(e) {
+      add({ type: 'error', msg: `⚠️ ${e.detail.message}` });
+    }
     window.addEventListener('writerquest:levelup', onLevelUp);
     window.addEventListener('writerquest:quest', onQuest);
+    window.addEventListener('writerquest:error', onError);
     return () => {
       window.removeEventListener('writerquest:levelup', onLevelUp);
       window.removeEventListener('writerquest:quest', onQuest);
+      window.removeEventListener('writerquest:error', onError);
     };
   }, []);
 

@@ -51,7 +51,8 @@ export default function RightPanel() {
       {/* Quests */}
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>오늘의 퀘스트</h3>
-        {quests.filter((q) => !q.done || q.type === 'daily').slice(0, 4).map((q) => (
+        {/* P2-5: 일관된 필터 — 모든 퀘스트 표시 (미완료 먼저, 완료 뒤) */}
+        {[...quests.filter((q) => !q.done), ...quests.filter((q) => q.done)].map((q) => (
           <div key={q.id} className={`${styles.quest} ${q.done ? styles.questDone : ''}`}>
             <span className={styles.questCheck}>{q.done ? '✅' : '⬜'}</span>
             <span className={styles.questName}>{q.title}</span>

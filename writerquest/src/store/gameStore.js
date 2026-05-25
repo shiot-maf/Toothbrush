@@ -1,12 +1,21 @@
 import { create } from 'zustand';
-import { saveUserMeta, saveNovel, deleteNovel, saveSession, loadUserData } from './firestoreSync';
+import { saveUserMeta, saveNovel, deleteNovel as firestoreDeleteNovel, saveSession, loadUserData, saveOnboardingData } from './firestoreSync';
 
-const TODAY = () => new Date().toISOString().slice(0, 10);
+function localDateStr(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+const TODAY = () => localDateStr();
 
 function getMonday() {
   const d = new Date();
   const day = d.getDay();
-  return new Date(new Date().setDate(d.getDate() - day + (day === 0 ? -6 : 1))).toISOString().slice(0, 10);
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return localDateStr(monday);
 }
 
 const DEFAULT_PLAYER = {
@@ -40,9 +49,13 @@ function scheduleSaveMeta(uid, data) {
   metaSaveTimer = setTimeout(() => saveUserMeta(uid, data), 2000);
 }
 
+// P3-1: initUser 중복 호출 방지 (getRedirectResult + onAuthStateChanged 레이스)
+let initializingUid = null;
+
 export const useGameStore = create((set, get) => ({
   uid: null,
   loading: true,
+  loadError: false,
   player: { ...DEFAULT_PLAYER },
   novels: [],
   sessions: [],
@@ -54,8 +67,11 @@ export const useGameStore = create((set, get) => ({
   // ── 인증 ──────────────────────────────────────────────────────────
 
   initUser: async (uid) => {
-    if (get().uid === uid) return; // 이중 호출 방지
-    set({ uid, loading: true });
+    // P4-1 + P3-1: 이미 로드 완료된 동일 uid 또는 현재 초기화 중인 uid 중복 호출 방지
+    if (get().uid === uid && !get().loading) return;
+    if (initializingUid === uid) return;
+    initializingUid = uid;
+    set({ uid, loading: true, loadError: false });
     const timeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('TIMEOUT')), 10_000)
     );
@@ -69,20 +85,22 @@ export const useGameStore = create((set, get) => ({
           trash: userData.trash ?? [],
           novels,
           loading: false,
+          loadError: false,
         });
         get().checkMidnightReset();
       } else {
-        // 신규 사용자 — 빈 상태로 시작
-        set({ loading: false });
+        set({ loading: false, loadError: false });
       }
     } catch (e) {
       console.error('Firestore 로딩 실패 — Firestore 데이터베이스가 생성됐는지, 보안 규칙이 올바른지 확인하세요.', e.message ?? e);
-      set({ loading: false });
+      set({ loading: false, loadError: true });
+    } finally {
+      initializingUid = null;
     }
   },
 
   clearUser: () => set({
-    uid: null, loading: false,
+    uid: null, loading: false, loadError: false,
     player: { ...DEFAULT_PLAYER },
     novels: [], sessions: [], quests: DEFAULT_QUESTS, memos: [], trash: [],
   }),
@@ -101,7 +119,7 @@ export const useGameStore = create((set, get) => ({
   },
 
   completeOnboarding: async (nickname, firstNovelTitle) => {
-    const { uid } = get();
+    const { uid, player, quests, memos, trash } = get();
     const novelTitle = firstNovelTitle.trim() || '나의 첫 이야기';
     const novel = {
       id: crypto.randomUUID(),
@@ -110,12 +128,12 @@ export const useGameStore = create((set, get) => ({
       chapters: [{ id: crypto.randomUUID(), title: '1화. 시작', content: '', wordCount: 0, completed: false, status: 'draft', synopsis: '', wordGoal: 0, moodTags: [], pov: '' }],
       createdAt: new Date().toISOString(),
     };
-    set((s) => ({
-      player: { ...s.player, nickname, onboarded: true },
-      novels: [novel],
-    }));
-    get()._saveMeta();
-    if (uid) await saveNovel(uid, novel);
+    const updatedPlayer = { ...player, nickname, onboarded: true };
+    set({ player: updatedPlayer, novels: [novel] });
+    // P0-3: writeBatch로 원자적 저장 (player + novel 동시 성공/실패)
+    if (uid) {
+      await saveOnboardingData(uid, { player: updatedPlayer, quests, memos, trash }, novel);
+    }
   },
 
   // ── 소설 ──────────────────────────────────────────────────────────
@@ -129,6 +147,23 @@ export const useGameStore = create((set, get) => ({
     };
     set((s) => ({ novels: [...s.novels, novel] }));
     if (uid) await saveNovel(uid, novel);
+  },
+
+  // P1-6: 소설 삭제
+  removeNovel: async (novelId) => {
+    const { uid } = get();
+    set((s) => ({ novels: s.novels.filter((n) => n.id !== novelId) }));
+    if (uid) await firestoreDeleteNovel(uid, novelId);
+  },
+
+  // P2-4: 소설 속성(이모지/제목) 업데이트
+  updateNovel: async (novelId, patch) => {
+    const { uid } = get();
+    set((s) => ({ novels: s.novels.map((n) => n.id !== novelId ? n : { ...n, ...patch }) }));
+    if (uid) {
+      const novel = get().novels.find((n) => n.id === novelId);
+      if (novel) await saveNovel(uid, novel);
+    }
   },
 
   addChapter: async (novelId, title) => {
@@ -186,10 +221,13 @@ export const useGameStore = create((set, get) => ({
         }
       ),
     }));
-    // 소설은 변경 시 즉시 저장 (글 유실 방지)
+    // P0-4: 저장 실패 시 Toast 경고
     if (uid) {
       const novel = get().novels.find((n) => n.id === novelId);
-      if (novel) saveNovel(uid, novel).catch((e) => console.error('챕터 저장 실패', e));
+      if (novel) saveNovel(uid, novel).catch((e) => {
+        console.error('챕터 저장 실패', e);
+        window.dispatchEvent(new CustomEvent('writerquest:error', { detail: { message: '저장에 실패했습니다. 네트워크를 확인해 주세요.' } }));
+      });
     }
   },
 
@@ -207,11 +245,12 @@ export const useGameStore = create((set, get) => ({
 
   endSession: (sessionId, wordsWritten) => {
     const { uid } = get();
+    const endAt = new Date().toISOString();
     set((s) => ({
       sessions: s.sessions.map((sess) =>
         sess.id !== sessionId ? sess : {
           ...sess,
-          endAt: new Date().toISOString(),
+          endAt,
           durationSec: Math.round((Date.now() - new Date(sess.startAt).getTime()) / 1000),
           wordsWritten,
         }
@@ -219,7 +258,11 @@ export const useGameStore = create((set, get) => ({
     }));
     if (uid) {
       const sess = get().sessions.find((s) => s.id === sessionId);
-      if (sess) saveSession(uid, sess);
+      if (sess) {
+        saveSession(uid, sess);
+        // P3-5: Firestore 저장 후 메모리에서 세션 제거
+        set((s) => ({ sessions: s.sessions.filter((ss) => ss.id !== sessionId) }));
+      }
     }
     // 오늘 집필 날짜 갱신 → 스트릭 계산
     const today = TODAY();
@@ -236,6 +279,8 @@ export const useGameStore = create((set, get) => ({
   addMemo: (text, novelId = null) => {
     const memo = { id: crypto.randomUUID(), text, novelId, createdAt: new Date().toISOString() };
     set((s) => ({ memos: [...s.memos, memo] }));
+    // P0-2: 메모 추가 시 상상력 스탯 증가
+    get().gainStats({ imagination: 0.5 });
     get()._saveMeta();
   },
 
@@ -341,7 +386,6 @@ export const useGameStore = create((set, get) => ({
     const titles = [...player.titles];
     let leveledUp = false;
 
-    // 다중 레벨업 지원
     while (exp >= level * 1000) {
       exp -= level * 1000;
       level++;
@@ -359,6 +403,19 @@ export const useGameStore = create((set, get) => ({
     return { levelUp: leveledUp, newLevel: level };
   },
 
+  // P0-2: 스탯 증가 (집필 글자수/시간에 따라)
+  gainStats: (patch) => {
+    set((s) => ({
+      player: {
+        ...s.player,
+        stats: Object.fromEntries(
+          Object.entries(s.player.stats).map(([k, v]) => [k, Math.min(200, v + (patch[k] || 0))])
+        ),
+      },
+    }));
+    get()._saveMeta();
+  },
+
   // ── 퀘스트 ────────────────────────────────────────────────────────
 
   updateQuestProgress: (questId, progress) => {
@@ -374,6 +431,8 @@ export const useGameStore = create((set, get) => ({
     const quest = get().quests.find((q) => q.id === questId);
     if (quest?.done && !before?.done) {
       window.dispatchEvent(new CustomEvent('writerquest:quest', { detail: { title: quest.title } }));
+      // P0-2: 퀘스트 완료 시 상상력 스탯 증가
+      get().gainStats({ imagination: 1 });
     }
     return quest?.done ?? false;
   },
@@ -385,7 +444,7 @@ function isYesterday(dateStr) {
   if (!dateStr) return false;
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  return dateStr === yesterday.toISOString().slice(0, 10);
+  return dateStr === localDateStr(yesterday);
 }
 
 function getMilestoneTitle(level) {
