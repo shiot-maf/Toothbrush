@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 전역 로딩 스피너 -->
+<div id="global-spinner">
+  <div class="spinner-ring"></div>
+</div>
+
+<!-- ── 화면 1: 로그인 ─────────────────────────────────────── -->
+<div id="screen-login" class="screen">
+  <div class="login-card">
+    <div class="login-logo">💬</div>
+    <h1 class="login-title">English Practice</h1>
+    <p class="login-sub">AI 캐릭터와 영어로 대화하며<br>문법 교정을 받아보세요</p>
+    <button id="google-login-btn" class="btn-google">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+        <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      Google로 시작하기
+    </button>
+  </div>
+</div>
+
+<!-- ── 화면 2: 캐릭터 설정 ────────────────────────────────── -->
+<div id="screen-character" class="screen">
+  <div class="char-setup-container">
+    <div class="char-setup-header">
+      <h2>캐릭터 설정</h2>
+      <p>대화할 AI 캐릭터를 만들어보세요</p>
+    </div>
+    <form id="character-form" class="char-form">
+      <div class="field-group">
+        <label for="char-name">캐릭터 이름 <span class="required">*</span></label>
+        <input type="text" id="char-name" placeholder="예: Alex" maxlength="50" autocomplete="off">
+      </div>
+      <div class="field-group">
+        <label for="char-personality">성격</label>
+        <input type="text" id="char-personality" placeholder="예: 활발하고 친근한" maxlength="500" autocomplete="off">
+      </div>
+      <div class="field-group">
+        <label for="char-speech">말투</label>
+        <input type="text" id="char-speech" placeholder="예: casual American English, 슬랭 자주 사용" maxlength="500" autocomplete="off">
+      </div>
+      <div class="field-group">
+        <label for="char-situation">대화 상황</label>
+        <input type="text" id="char-situation" placeholder="예: 카페에서 일하는 바리스타" maxlength="500" autocomplete="off">
+      </div>
+      <button type="submit" class="btn-primary btn-full">대화 시작하기</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── 화면 3: 메인 ────────────────────────────────────────── -->
+<div id="screen-main" class="screen">
+
+  <!-- 헤더 -->
+  <header class="main-header">
+    <div class="header-left">
+      <div class="char-dot"></div>
+      <span id="header-char-name" class="header-char-name">캐릭터</span>
+      <span id="header-char-desc" class="header-char-desc"></span>
+    </div>
+    <div class="header-right">
+      <div class="api-key-wrap">
+        <button id="api-key-btn" class="btn-icon" title="API 키 설정">🔑 API 키</button>
+        <div id="api-key-dropdown" class="api-key-dropdown">
+          <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off">
+          <button id="api-key-save" class="btn-small">저장</button>
+        </div>
+      </div>
+      <button id="theme-btn" class="btn-icon">☀️</button>
+      <button id="edit-character-btn" class="btn-secondary btn-sm">캐릭터 수정</button>
+      <button id="new-chat-btn" class="btn-secondary btn-sm">새 대화</button>
+      <button id="logout-btn" class="btn-ghost btn-sm">로그아웃</button>
+    </div>
+  </header>
+
+  <!-- 본문 -->
+  <div class="main-layout">
+
+    <!-- 대화창 -->
+    <section class="chat-panel">
+      <div id="chat-messages" class="chat-messages"></div>
+      <div id="typing-indicator" class="typing-indicator" style="display:none">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="chat-input-area">
+        <textarea
+          id="chat-input"
+          placeholder="메시지를 입력하세요... (Enter 전송 / Shift+Enter 줄바꿈)"
+          rows="1"
+        ></textarea>
+        <button id="send-btn" class="send-btn">전송</button>
+      </div>
+    </section>
+
+    <!-- 피드백 패널 -->
+    <aside class="feedback-panel">
+
+      <!-- 메모 핀 영역 -->
+      <div class="memo-section">
+        <div class="memo-header">메모 핀</div>
+        <div id="memo-list" class="memo-list"></div>
+        <div class="memo-input-wrap">
+          <input type="text" id="memo-input" placeholder="짧은 메모 추가 (최대 5개)" maxlength="200">
+          <button id="memo-add-btn" class="btn-small">+</button>
+        </div>
+      </div>
+
+      <!-- 탭 -->
+      <div class="panel-tabs">
+        <button id="tab-corrections" class="tab-btn active">교정 기록</button>
+        <button id="tab-pins" class="tab-btn">핀</button>
+      </div>
+
+      <!-- 교정 기록 패널 -->
+      <div id="corrections-panel" class="panel-content">
+        <div id="corrections-list" class="corrections-list"></div>
+      </div>
+
+      <!-- 핀 패널 -->
+      <div id="pins-panel" class="panel-content" style="display:none">
+        <div id="pins-list" class="corrections-list"></div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
