@@ -1,14 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"
 
-// TODO: Firebase Console에서 새 프로젝트 생성 후 아래 값을 교체하세요.
-// Console → 프로젝트 설정 → 내 앱 → 웹 앱 추가 → firebaseConfig 복사
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBw5a7fA5mP5SvYVxbzUFS7qyU03z7sXSY",
+  authDomain: "price-talk-3920f.firebaseapp.com",
+  projectId: "price-talk-3920f",
+  storageBucket: "price-talk-3920f.firebasestorage.app",
+  messagingSenderId: "19898547701",
+  appId: "1:19898547701:web:d19241dd0365d6fed734bc"
 }
 
 export const app = initializeApp(firebaseConfig)
