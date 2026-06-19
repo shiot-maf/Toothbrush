@@ -308,7 +308,7 @@ textarea { resize: none; line-height: 1.6; overflow: hidden; }
   line-height: 1.55; letter-spacing: -.3px;
   color: #231642; position: relative;
 }
-[data-theme="dark"] .hero-quote { color: var(--text); }
+[data-theme="dark"] .hero-quote { color: #EAE4F8; }
 
 /* ── 주간 스트릭 바 ─────────────────────────────────────────────────────── */
 .streak-week {
