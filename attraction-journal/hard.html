@@ -15,38 +15,40 @@
 <body>
   <div class="phone-frame">
     <div class="header">
-      <button class="header-back" onclick="history.back()">‹</button>
-      <span class="header-title" style="color:var(--c28);">HARD 노트</span>
-      <div class="header-actions">
-        <button class="icon-btn" id="themeBtn">🌙</button>
-      </div>
+      <button class="header-back" onclick="history.back()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <span class="header-title">HARD 노트</span>
+      <div class="header-dot" style="background:var(--c28);"></div>
     </div>
 
     <div class="page-content">
-      <!-- 힌트 -->
-      <div class="hint-box" style="border-color:var(--c28);">
-        풍요와 방향을 한 페이지에. 주 1회, 일요일 아침 15분.
-      </div>
 
-      <!-- DATE + 키워드 -->
-      <div style="display:flex;gap:10px;margin-bottom:20px;">
-        <div style="flex:1;">
-          <div class="field-label">DATE</div>
-          <input type="date" id="dateInput">
+      <!-- 날짜 + 키워드 -->
+      <div style="display:flex;gap:12px;margin-bottom:20px;">
+        <div class="card" style="flex:1;padding:12px 14px;">
+          <div class="section-label" style="margin-bottom:6px;">DATE</div>
+          <input type="date" id="dateInput" style="border:none;background:transparent;font-family:inherit;font-size:14px;font-weight:700;color:var(--text);width:100%;outline:none;">
         </div>
-        <div style="flex:1;">
-          <div class="field-label">이번 주 키워드</div>
-          <input type="text" id="keyword" placeholder="한 단어" maxlength="20">
+        <div class="card" style="flex:1;padding:12px 14px;background:var(--c28bg);">
+          <div class="section-label" style="margin-bottom:6px;color:var(--c28);">이번 주 키워드</div>
+          <input type="text" id="keyword" placeholder="확신" maxlength="20"
+            style="border:none;background:transparent;font-family:inherit;font-size:14px;font-weight:700;color:var(--c28);width:100%;outline:none;">
         </div>
       </div>
 
       <!-- 2×2 그리드 -->
       <div class="hard-grid">
 
-        <!-- H: HAVE -->
+        <!-- H: Have -->
         <div class="hard-q hard-q-H">
-          <div class="hard-q-title">H — HAVE</div>
-          <div class="hard-q-desc">지금 가진 것<br>너무 당연해서 잊고 사는 것들</div>
+          <div class="hard-q-header">
+            <div class="hard-q-letter" style="color:var(--c17);">H</div>
+            <div>
+              <div class="hard-q-name" style="color:var(--c17);">Have</div>
+              <div class="hard-q-tag">지금 가진 것</div>
+            </div>
+          </div>
           <input class="hard-line-input" type="text" maxlength="100" id="h0" placeholder="건강한 몸">
           <input class="hard-line-input" type="text" maxlength="100" id="h1" placeholder="안전한 거처">
           <input class="hard-line-input" type="text" maxlength="100" id="h2" placeholder="곁의 사람">
@@ -54,10 +56,15 @@
           <input class="hard-line-input" type="text" maxlength="100" id="h4" placeholder="">
         </div>
 
-        <!-- A: ACHIEVED -->
+        <!-- A: Act -->
         <div class="hard-q hard-q-A">
-          <div class="hard-q-title">A — ACHIEVED</div>
-          <div class="hard-q-desc">이미 이룬 것<br>5년 전의 내가 간절했던 지금</div>
+          <div class="hard-q-header">
+            <div class="hard-q-letter" style="color:var(--c21);">A</div>
+            <div>
+              <div class="hard-q-name" style="color:var(--c21);">Act</div>
+              <div class="hard-q-tag">이번 주 실천</div>
+            </div>
+          </div>
           <input class="hard-line-input" type="text" maxlength="100" id="a0" placeholder="">
           <input class="hard-line-input" type="text" maxlength="100" id="a1" placeholder="">
           <input class="hard-line-input" type="text" maxlength="100" id="a2" placeholder="">
@@ -65,10 +72,15 @@
           <input class="hard-line-input" type="text" maxlength="100" id="a4" placeholder="">
         </div>
 
-        <!-- R: RECEIVE -->
+        <!-- R: Realized -->
         <div class="hard-q hard-q-R">
-          <div class="hard-q-title">R — RECEIVE</div>
-          <div class="hard-q-desc">받게 되는 것<br>"받는다", "들어온다" — 현재형</div>
+          <div class="hard-q-header">
+            <div class="hard-q-letter" style="color:var(--c28);">R</div>
+            <div>
+              <div class="hard-q-name" style="color:var(--c28);">Realized</div>
+              <div class="hard-q-tag">이미 이루어진 것</div>
+            </div>
+          </div>
           <input class="hard-line-input" type="text" maxlength="100" id="r0" placeholder="">
           <input class="hard-line-input" type="text" maxlength="100" id="r1" placeholder="">
           <input class="hard-line-input" type="text" maxlength="100" id="r2" placeholder="">
@@ -76,10 +88,15 @@
           <input class="hard-line-input" type="text" maxlength="100" id="r4" placeholder="">
         </div>
 
-        <!-- D: DO -->
+        <!-- D: Dream -->
         <div class="hard-q hard-q-D">
-          <div class="hard-q-title">D — DO</div>
-          <div class="hard-q-desc">이번 주 할 것<br>R로 가는 가장 작은 한 걸음</div>
+          <div class="hard-q-header">
+            <div class="hard-q-letter" style="color:var(--cd);">D</div>
+            <div>
+              <div class="hard-q-name" style="color:var(--cd);">Dream</div>
+              <div class="hard-q-tag">꿈꾸는 것</div>
+            </div>
+          </div>
           <input class="hard-line-input" type="text" maxlength="100" id="d0" placeholder="">
           <input class="hard-line-input" type="text" maxlength="100" id="d1" placeholder="">
           <input class="hard-line-input" type="text" maxlength="100" id="d2" placeholder="">
@@ -89,7 +106,7 @@
 
       </div>
 
-      <button class="btn btn-28" id="saveBtn">저장하기</button>
+      <button class="btn btn-28" id="saveBtn">HARD 노트 저장</button>
     </div>
   </div>
 
@@ -101,45 +118,22 @@
       saveHardNote, getHardNote,
       formatDate, getWeekKey,
     } from './firebase.js';
+    import { initTheme, showToast } from './utils.js';
 
-    // ── 테마 ──────────────────────────────────────────────────────────────
-    const root = document.documentElement;
-    const themeBtn = document.getElementById('themeBtn');
-    function applyTheme(t) {
-      root.setAttribute('data-theme', t);
-      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
-    }
-    applyTheme(localStorage.getItem('theme') || 'light');
-    themeBtn.addEventListener('click', () => {
-      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', next);
-      applyTheme(next);
-    });
+    initTheme();
 
-    // ── 날짜 / 주 키 ─────────────────────────────────────────────────────
     const dateInput = document.getElementById('dateInput');
     dateInput.value = formatDate(new Date());
 
-    // ── 특수문자 필터링 ───────────────────────────────────────────────────
     document.querySelectorAll('input[type="text"], textarea').forEach(el => {
-      el.addEventListener('input', () => {
-        el.value = el.value.replace(/[<>&]/g, '');
-      });
+      el.addEventListener('input', () => { el.value = el.value.replace(/[<>&]/g, ''); });
     });
-
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2200);
-    }
 
     function getInputs(prefix) {
       return Array.from({ length: 5 }, (_, i) =>
         (document.getElementById(`${prefix}${i}`)?.value || '').trim()
       );
     }
-
     function fillInputs(prefix, arr) {
       (arr || []).forEach((v, i) => {
         const el = document.getElementById(`${prefix}${i}`);
@@ -147,7 +141,6 @@
       });
     }
 
-    // ── 기존 데이터 로드 ──────────────────────────────────────────────────
     let currentUid = null;
 
     async function loadData(uid, date) {
@@ -165,7 +158,6 @@
       if (currentUid) loadData(currentUid, dateInput.value);
     });
 
-    // ── 인증 ──────────────────────────────────────────────────────────────
     const user = await waitForAuth();
     if (!user) { window.location.replace('index.html'); }
     else {
@@ -174,15 +166,12 @@
       await loadData(user.uid, dateInput.value);
     }
 
-    // ── 저장 ──────────────────────────────────────────────────────────────
     document.getElementById('saveBtn').addEventListener('click', async () => {
       if (!currentUid) return;
-
       const weekKey = getWeekKey(new Date(dateInput.value));
       const saveBtn = document.getElementById('saveBtn');
       saveBtn.disabled = true;
       saveBtn.textContent = '저장 중…';
-
       try {
         await saveHardNote(currentUid, weekKey, {
           keyword:  document.getElementById('keyword').value.trim(),
@@ -196,7 +185,7 @@
       } catch (e) {
         showToast('저장에 실패했습니다. 다시 시도해주세요.');
         saveBtn.disabled = false;
-        saveBtn.textContent = '저장하기';
+        saveBtn.textContent = 'HARD 노트 저장';
       }
     });
   </script>

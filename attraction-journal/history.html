@@ -14,28 +14,41 @@
 </head>
 <body>
   <div class="phone-frame">
-    <div class="header">
-      <button class="header-back" onclick="history.back()">‹</button>
-      <span class="header-title">기록 열람</span>
-      <div class="header-actions">
-        <button class="icon-btn" id="themeBtn">🌙</button>
-      </div>
+    <!-- 헤더 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;">
+      <div style="font-size:17px;font-weight:800;">기록 열람</div>
+      <button class="theme-btn" id="themeBtn" aria-label="테마 전환">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5z"/></svg>
+      </button>
     </div>
 
-    <!-- 탭 -->
-    <div class="tabs" style="margin:0;padding:0 20px;">
-      <button class="tab active" id="tabCal" onclick="switchTab('cal')">달력</button>
-      <button class="tab" id="tabList" onclick="switchTab('list')">목록</button>
+    <!-- 탭 (pill style) -->
+    <div style="padding:0 20px;">
+      <div class="hist-tabs">
+        <button class="hist-tab active" id="tabCal" onclick="switchTab('cal')">달력</button>
+        <button class="hist-tab" id="tabList" onclick="switchTab('list')">목록</button>
+      </div>
     </div>
 
     <!-- 달력 탭 -->
     <div class="page-content" id="panelCal">
-      <div class="cal-nav">
-        <button class="cal-nav-btn" id="prevMonthBtn">‹</button>
-        <span class="cal-month" id="calMonthLabel"></span>
-        <button class="cal-nav-btn" id="nextMonthBtn">›</button>
+      <div class="cal-wrap">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" id="prevMonthBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <span class="cal-month" id="calMonthLabel"></span>
+          <button class="cal-nav-btn" id="nextMonthBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
       </div>
-      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--c17);"></div>자기증명</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--c21);"></div>감사</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--c28);"></div>HARD</div>
+      </div>
     </div>
 
     <!-- 목록 탭 -->
@@ -48,6 +61,25 @@
       </div>
       <div id="listContent"></div>
     </div>
+
+    <nav class="bottom-nav">
+      <a class="bottom-nav-item" href="home.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/></svg>
+        <span class="bottom-nav-label">홈</span>
+      </a>
+      <a class="bottom-nav-item active" href="history.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="rgba(106,62,192,.14)" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 9.5h16M9 3.5v3M15 3.5v3"/></svg>
+        <span class="bottom-nav-label">기록</span>
+      </a>
+      <a class="bottom-nav-item" href="report.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V4M5 19h15"/><path d="M9 16v-4M13 16V8M17 16v-6"/></svg>
+        <span class="bottom-nav-label">리포트</span>
+      </a>
+      <a class="bottom-nav-item" href="vision.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="2.6"/></svg>
+        <span class="bottom-nav-label">비전</span>
+      </a>
+    </nav>
   </div>
 
   <!-- 모달 -->
@@ -61,39 +93,24 @@
   <script type="module">
     import {
       waitForAuth, onAuthChange, getAllEntries,
-      getIdentityDiary, getGratitudeAdvance, getHardNote,
       formatDate, getWeekKey, getISOMonday,
       NOTE_TYPES, WEEKDAYS,
     } from './firebase.js';
+    import { initTheme } from './utils.js';
 
-    // 노트 타입별 헬퍼 (한 곳에서 관리)
     const N = NOTE_TYPES;
-    function noteLabel(type)  { return N[type]?.label      || type; }
-    function noteBadge(type)  { return N[type]?.badgeClass || '';   }
-    function noteDot(type)    { return N[type]?.dotClass   || '';   }
+    function noteLabel(type) { return N[type]?.label      || type; }
+    function noteBadge(type) { return N[type]?.badgeClass || '';   }
+    function noteDot(type)   { return N[type]?.dotClass   || '';   }
 
-    // ── 테마 ──────────────────────────────────────────────────────────────
-    const root = document.documentElement;
-    const themeBtn = document.getElementById('themeBtn');
-    function applyTheme(t) {
-      root.setAttribute('data-theme', t);
-      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
-    }
-    applyTheme(localStorage.getItem('theme') || 'light');
-    themeBtn.addEventListener('click', () => {
-      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', next);
-      applyTheme(next);
-    });
+    initTheme();
 
-    // ── 전역 상태 ─────────────────────────────────────────────────────────
-    let allData   = { diary: {}, gratitude: {}, hard: {} };
+    let allData    = { diary: {}, gratitude: {}, hard: {} };
     let currentUid = null;
-    let calYear   = new Date().getFullYear();
-    let calMonth  = new Date().getMonth(); // 0-based
+    let calYear    = new Date().getFullYear();
+    let calMonth   = new Date().getMonth();
     let activeFilter = 'all';
 
-    // ── 탭 전환 ───────────────────────────────────────────────────────────
     window.switchTab = function(tab) {
       document.getElementById('tabCal').classList.toggle('active', tab === 'cal');
       document.getElementById('tabList').classList.toggle('active', tab === 'list');
@@ -101,18 +118,14 @@
       document.getElementById('panelList').classList.toggle('hidden', tab !== 'list');
     };
 
-    // ── 달력 렌더 ─────────────────────────────────────────────────────────
     function renderCalendar() {
       const todayStr = formatDate(new Date());
-      const label = `${calYear}년 ${calMonth + 1}월`;
-      document.getElementById('calMonthLabel').textContent = label;
+      document.getElementById('calMonthLabel').textContent = `${calYear}년 ${calMonth + 1}월`;
 
       const firstDay = new Date(calYear, calMonth, 1);
       const lastDay  = new Date(calYear, calMonth + 1, 0);
-      // 월요일 시작: 0=월 … 6=일
       const startOffset = (firstDay.getDay() + 6) % 7;
 
-      // HARD 주 키 → 일요일 날짜 매핑
       const hardSundays = new Set();
       Object.keys(allData.hard).forEach(wk => {
         const monday = getISOMonday(wk);
@@ -122,11 +135,7 @@
       });
 
       let html = WEEKDAYS.map(d => `<div class="cal-hdr">${d}</div>`).join('');
-
-      // 빈 칸
-      for (let i = 0; i < startOffset; i++) {
-        html += '<div class="cal-cell empty"></div>';
-      }
+      for (let i = 0; i < startOffset; i++) html += '<div class="cal-cell empty"></div>';
 
       for (let d = 1; d <= lastDay.getDate(); d++) {
         const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -139,155 +148,117 @@
         const dots = Object.entries(hasMap)
           .map(([type, has]) => has ? `<span class="cal-dot ${noteDot(type)}"></span>` : '')
           .join('');
-
         html += `
-          <div class="cal-cell${isToday ? ' today' : ''}"
-               onclick="openDateModal('${dateStr}')">
+          <div class="cal-cell${isToday ? ' today' : ''}" onclick="openDateModal('${dateStr}')">
             <span class="cal-num">${d}</span>
             <div class="cal-dots">${dots}</div>
           </div>`;
       }
-
       document.getElementById('calGrid').innerHTML = html;
     }
 
     document.getElementById('prevMonthBtn').addEventListener('click', () => {
-      calMonth--;
-      if (calMonth < 0) { calMonth = 11; calYear--; }
-      renderCalendar();
+      calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar();
     });
     document.getElementById('nextMonthBtn').addEventListener('click', () => {
-      calMonth++;
-      if (calMonth > 11) { calMonth = 0; calYear++; }
-      renderCalendar();
+      calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar();
     });
 
-    // ── 날짜 모달 ─────────────────────────────────────────────────────────
     window.openDateModal = async function(dateStr) {
       const wk = getWeekKey(new Date(dateStr));
-      const [d17, d21, d28] = await Promise.all([
-        allData.diary[dateStr]     || null,
-        allData.gratitude[dateStr] || null,
-        allData.hard[wk]           || null,
-      ]);
-
+      const d17 = allData.diary[dateStr]     || null;
+      const d21 = allData.gratitude[dateStr] || null;
+      const d28 = allData.hard[wk]           || null;
       if (!d17 && !d21 && !d28) return;
 
-      let body = `<div style="font-size:13px;color:var(--text-hint);margin-bottom:16px;">${dateStr}</div>`;
+      let body = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div style="font-size:18px;font-weight:800;">${dateStr.replace(/-/g,' ').replace(/(\d{4}) (\d{2}) (\d{2})/,'$2월 $3일')}</div>
+        <button onclick="document.getElementById('modalOverlay').classList.add('hidden')" style="width:32px;height:32px;border-radius:50%;border:none;background:var(--card);color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;">`;
 
       if (d17) {
-        body += `
-          <span class="badge ${noteBadge('diary')}" style="margin-bottom:12px;">${noteLabel('diary')}</span>
-          <div class="modal-label mt-8">오늘의 나</div>
-          <div class="modal-value">나는 ${d17.declaration} 한 사람이다.</div>
-          <div class="modal-label">오늘의 증거</div>
-          <div class="modal-value">
-            ${(d17.evidence || []).filter(Boolean).map((e, i) =>
-              `<div>${String(i+1).padStart(2,'0')} ${e}</div>`).join('')}
+        body += `<div>
+          <div class="history-tag" style="background:var(--c17bg);color:var(--c17);display:inline-block;margin-bottom:10px;">자기증명</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:14px;line-height:1.5;color:var(--text);padding-left:14px;border-left:2px solid var(--c17);">나는 ${d17.declaration} 한 사람이다.</div>
+            ${(d17.evidence || []).filter(Boolean).map(e =>
+              `<div style="font-size:14px;line-height:1.5;color:var(--text2);padding-left:14px;border-left:2px solid var(--c17);">· ${e}</div>`
+            ).join('')}
+            ${d17.conclusion ? `<div style="font-size:14px;line-height:1.5;color:var(--text);padding-left:14px;border-left:2px solid var(--c17);">오늘의 나는 분명히 ${d17.conclusion} 한 사람이었다.</div>` : ''}
           </div>
-          ${d17.conclusion
-            ? `<div class="modal-label">한 줄 결론</div>
-               <div class="modal-value">오늘의 나는 분명히 ${d17.conclusion} 한 사람이었다.</div>`
-            : ''}
-          <div class="separator"></div>`;
+        </div>`;
       }
-
       if (d21) {
-        body += `
-          <span class="badge ${noteBadge('gratitude')}" style="margin-bottom:12px;">${noteLabel('gratitude')}</span>
-          <div class="modal-label mt-8">미리 감사합니다</div>
-          <div class="modal-value">
-            ${(d21.gratitudes || []).filter(Boolean).map((g, i) =>
-              `<div>${String(i+1).padStart(2,'0')} ${g} 감사합니다.</div>`).join('')}
+        body += `<div>
+          <div class="history-tag" style="background:var(--c21bg);color:var(--c21);display:inline-block;margin-bottom:10px;">감사선행</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            ${(d21.gratitudes || []).filter(Boolean).map(g =>
+              `<div style="font-size:14px;line-height:1.5;color:var(--text);padding-left:14px;border-left:2px solid var(--c21);">${g} 감사합니다.</div>`
+            ).join('')}
+            ${d21.feeling ? `<div style="font-size:14px;line-height:1.5;color:var(--text2);padding-left:14px;border-left:2px solid var(--c21);">${d21.feeling}</div>` : ''}
           </div>
-          ${d21.feeling
-            ? `<div class="modal-label">지금 이 순간의 감정</div>
-               <div class="modal-value">${d21.feeling}</div>`
-            : ''}
-          <div class="separator"></div>`;
+        </div>`;
       }
-
       if (d28) {
-        const wkLabel = wk;
-        body += `
-          <span class="badge ${noteBadge('hard')}" style="margin-bottom:12px;">${noteLabel('hard')}</span>
-          <div class="modal-label mt-8">주차 / 키워드</div>
-          <div class="modal-value">${wkLabel} · ${d28.keyword || '–'}</div>
-          ${['have','achieved','receive','do'].map((k, idx) => {
-            const titles = ['H — HAVE', 'A — ACHIEVED', 'R — RECEIVE', 'D — DO'];
-            const items = (d28[k] || []).filter(Boolean);
-            return items.length
-              ? `<div class="modal-label">${titles[idx]}</div>
-                 <div class="modal-value">${items.map(v => `<div>· ${v}</div>`).join('')}</div>`
-              : '';
-          }).join('')}`;
+        body += `<div>
+          <div class="history-tag" style="background:var(--c28bg);color:var(--c28);display:inline-block;margin-bottom:10px;">HARD · ${d28.keyword || ''}</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            ${['have','achieved','receive','do'].map((k, idx) => {
+              const titles = ['H — Have', 'A — Act', 'R — Realized', 'D — Dream'];
+              const items = (d28[k] || []).filter(Boolean);
+              return items.length ? `<div style="font-size:14px;line-height:1.5;color:var(--text2);padding-left:14px;border-left:2px solid var(--c28);"><strong style="color:var(--c28)">${titles[idx]}</strong><br>${items.map(v => `· ${v}`).join('<br>')}</div>` : '';
+            }).join('')}
+          </div>
+        </div>`;
       }
 
+      body += '</div>';
       document.getElementById('modalBody').innerHTML = body;
       document.getElementById('modalOverlay').classList.remove('hidden');
     };
 
     window.closeModal = function(e) {
-      if (e.target === document.getElementById('modalOverlay')) {
+      if (e.target === document.getElementById('modalOverlay'))
         document.getElementById('modalOverlay').classList.add('hidden');
-      }
     };
 
-    // ── 목록 렌더 ─────────────────────────────────────────────────────────
     function renderList() {
       const todayStr = formatDate(new Date());
       const thisWeekStart = (() => {
-        const d = new Date();
-        const dow = (d.getDay() + 6) % 7;
-        d.setDate(d.getDate() - dow);
-        return formatDate(d);
+        const d = new Date(); const dow = (d.getDay() + 6) % 7; d.setDate(d.getDate() - dow); return formatDate(d);
       })();
       const lastWeekStart = (() => {
-        const d = new Date(thisWeekStart);
-        d.setDate(d.getDate() - 7);
-        return formatDate(d);
+        const d = new Date(thisWeekStart); d.setDate(d.getDate() - 7); return formatDate(d);
       })();
 
-      // 모든 항목 수집
       const items = [];
-
-      if (activeFilter === 'all' || activeFilter === '17') {
-        Object.entries(allData.diary).forEach(([date, data]) => {
-          items.push({ date, type: 'diary', data });
-        });
-      }
-      if (activeFilter === 'all' || activeFilter === 'gratitude') {
-        Object.entries(allData.gratitude).forEach(([date, data]) => {
-          items.push({ date, type: 'gratitude', data });
-        });
-      }
-      if (activeFilter === 'all' || activeFilter === 'hard') {
+      if (activeFilter === 'all' || activeFilter === 'diary')
+        Object.entries(allData.diary).forEach(([date, data]) => items.push({ date, type: 'diary', data }));
+      if (activeFilter === 'all' || activeFilter === 'gratitude')
+        Object.entries(allData.gratitude).forEach(([date, data]) => items.push({ date, type: 'gratitude', data }));
+      if (activeFilter === 'all' || activeFilter === 'hard')
         Object.entries(allData.hard).forEach(([wk, data]) => {
           const monday = getISOMonday(wk);
           items.push({ date: formatDate(monday), weekKey: wk, type: 'hard', data });
         });
-      }
 
-      // 최신순 정렬
       items.sort((a, b) => b.date.localeCompare(a.date));
 
-      // 그룹화
       function getGroup(date) {
         if (date >= thisWeekStart) return '이번 주';
         if (date >= lastWeekStart) return '지난 주';
-        return date.slice(0, 7); // YYYY-MM
+        return date.slice(0, 7);
       }
 
       let html = '';
       let lastGroup = null;
-
       items.forEach(item => {
         const group = getGroup(item.date);
         if (group !== lastGroup) {
           html += `<div class="group-label">${group}</div>`;
           lastGroup = group;
         }
-
         let preview = '';
         let clickArg = '';
         if (item.type === 'diary') {
@@ -298,27 +269,26 @@
           clickArg = `'${item.date}'`;
         } else {
           preview = `키워드: ${item.data.keyword || '–'}`;
-          clickArg = `'${item.date}'`; // 일요일 기준 모달
+          clickArg = `'${item.date}'`;
         }
+
+        const tagColors = { diary: 'background:var(--c17bg);color:var(--c17)', gratitude: 'background:var(--c21bg);color:var(--c21)', hard: 'background:var(--c28bg);color:var(--c28)' };
+        const tagLabels = { diary: '자기증명', gratitude: '감사선행', hard: 'HARD' };
 
         html += `
           <div class="history-item" onclick="openDateModal(${clickArg})">
-            <div class="history-item-top">
-              <span class="badge ${noteBadge(item.type)}">${noteLabel(item.type)}</span>
-              <span class="history-item-date">${item.weekKey || item.date}</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div class="history-tag" style="${tagColors[item.type]}">${tagLabels[item.type]}</div>
+              <span style="font-size:12px;color:var(--hint);">${item.weekKey || item.date}</span>
             </div>
-            <div class="history-preview">${preview}</div>
+            <div style="font-size:14px;color:var(--text2);line-height:1.45;">${preview}</div>
           </div>`;
       });
 
-      if (!items.length) {
-        html = '<div style="text-align:center;padding:40px 0;color:var(--text-hint);">기록이 없습니다.</div>';
-      }
-
+      if (!items.length) html = '<div style="text-align:center;padding:40px 0;color:var(--hint);">기록이 없어요</div>';
       document.getElementById('listContent').innerHTML = html;
     }
 
-    // ── 필터 버튼 ─────────────────────────────────────────────────────────
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -328,7 +298,6 @@
       });
     });
 
-    // ── 인증 + 데이터 로드 ────────────────────────────────────────────────
     const user = await waitForAuth();
     if (!user) { window.location.replace('index.html'); }
     else {
@@ -340,7 +309,7 @@
         renderList();
       } catch (e) {
         document.getElementById('calGrid').innerHTML =
-          '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-hint);">불러오기 실패</div>';
+          '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--hint);">불러오기 실패</div>';
       }
     }
   </script>

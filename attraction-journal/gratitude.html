@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>미리 감사 — 끌어당김의 기록</title>
+  <title>감사 선행기법 — 끌어당김의 기록</title>
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.svg">
@@ -15,53 +15,31 @@
 <body>
   <div class="phone-frame">
     <div class="header">
-      <button class="header-back" onclick="history.back()">‹</button>
-      <span class="header-title" style="color:var(--c21);">미리 감사</span>
-      <div class="header-actions">
-        <button class="icon-btn" id="themeBtn">🌙</button>
-      </div>
+      <button class="header-back" onclick="history.back()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <span class="header-title">감사 선행기법</span>
+      <div class="header-dot" style="background:var(--c21);"></div>
     </div>
 
     <div class="page-content">
-      <!-- 힌트 -->
-      <div class="hint-box" style="border-color:var(--c21);">
-        <strong>미래의 감정을 현재로.</strong> 아직 일어나지 않았지만 이미 일어난 것처럼, 무조건 현재형·완료형으로 적으세요.
+      <div class="hint-box hint-21">
+        이미 받은 것처럼 감사하세요. 감사는 더 많은 풍요를 끌어당기는 가장 강력한 주파수입니다.
       </div>
 
-      <!-- DATE -->
-      <div class="section">
-        <div class="field-label">DATE</div>
-        <input type="date" id="dateInput">
+      <input type="date" id="dateInput" style="display:none;">
+
+      <div class="section-label">다섯 가지 감사</div>
+      <div id="gratitudeFields" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;"></div>
+
+      <div class="section-label">지금 이 순간의 감정</div>
+      <div class="card" style="margin-bottom:28px;">
+        <textarea id="feeling" rows="3" maxlength="300"
+          placeholder="감사로 가득 찬 지금의 느낌을 적어보세요"
+          style="width:100%;border:none;background:transparent;resize:none;font-family:inherit;font-size:14.5px;color:var(--text);line-height:1.6;min-height:66px;outline:none;"></textarea>
       </div>
 
-      <!-- 미리 감사합니다 -->
-      <div class="section">
-        <div class="field-label">미리 감사합니다</div>
-        <p style="font-size:12px;color:var(--text-hint);margin-bottom:10px;">
-          디테일이 살아 있을수록 강해요. "돈이 들어와서"보다 "OO월 OO일에 OOO만 원이 통장에 들어와서".
-        </p>
-
-        <div id="gratitudeFields">
-          <!-- 01~05 동적 생성 -->
-        </div>
-      </div>
-
-      <!-- 지금 이 순간의 감정 -->
-      <div class="section">
-        <div class="field-label">지금 이 순간의 감정</div>
-        <p style="font-size:12px;color:var(--text-hint);margin-bottom:8px;">
-          이 감사들을 적고 나니 가슴에 남는 느낌. 감정이 안 올라오면 항목을 바꾸세요.
-        </p>
-        <textarea id="feeling" rows="3" maxlength="300" placeholder="지금 이 순간 느껴지는 감정을 적어주세요…"></textarea>
-      </div>
-
-      <!-- 주의사항 -->
-      <div class="hint-box" style="border-color:var(--c21);margin-bottom:20px;">
-        ⚠️ <strong>"받을 거예요" 금지</strong>, "받았습니다"만. 감정을 미래가 아닌 지금으로 끌어옵니다.<br>
-        마지막 감정 한 줄이 핵심입니다.
-      </div>
-
-      <button class="btn btn-21" id="saveBtn">저장하기</button>
+      <button class="btn btn-21" id="saveBtn">감사 기록 저장</button>
     </div>
   </div>
 
@@ -73,75 +51,38 @@
       saveGratitudeAdvance, getGratitudeAdvance,
       formatDate,
     } from './firebase.js';
+    import { initTheme, showToast } from './utils.js';
 
-    // ── 테마 ──────────────────────────────────────────────────────────────
-    const root = document.documentElement;
-    const themeBtn = document.getElementById('themeBtn');
-    function applyTheme(t) {
-      root.setAttribute('data-theme', t);
-      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
-    }
-    applyTheme(localStorage.getItem('theme') || 'light');
-    themeBtn.addEventListener('click', () => {
-      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', next);
-      applyTheme(next);
-    });
+    initTheme();
 
-    // ── 텍스트박스 auto-resize ────────────────────────────────────────────
     function autoResize(el) {
       el.style.height = 'auto';
       el.style.height = el.scrollHeight + 'px';
     }
 
-    // ── 감사 입력 필드 5개 생성 ──────────────────────────────────────────
+    // 감사 항목 5개 생성
     const container = document.getElementById('gratitudeFields');
     for (let i = 0; i < 5; i++) {
       const row = document.createElement('div');
-      row.className = 'num-field';
-      row.style.alignItems = 'flex-start';
+      row.className = 'ev-row card';
       row.innerHTML = `
-        <span class="num-label" style="padding-top:12px;">${String(i + 1).padStart(2, '0')}</span>
-        <div style="flex:1;background:var(--card-bg);border:0.5px solid var(--border);
-          border-radius:var(--r);padding:11px 14px;">
-          <textarea id="g${i}" rows="1"
-            placeholder="감사한 일을 적어주세요" maxlength="100"
-            style="width:100%;border:none;border-radius:0;padding:0;background:transparent;
-              resize:none;overflow:hidden;font-family:inherit;font-size:15px;
-              color:var(--text);line-height:1.6;display:block;"></textarea>
-          <div style="font-size:13px;color:var(--c21);font-weight:600;
-            margin-top:6px;text-align:right;">감사합니다.</div>
-        </div>`;
+        <span class="ev-num ev-21">${String(i + 1).padStart(2, '0')}</span>
+        <input type="text" id="g${i}" placeholder="감사한 것" maxlength="100"
+          style="flex:1;border:none;background:transparent;font-family:inherit;font-size:14.5px;color:var(--text);outline:none;min-width:0;">
+        <span style="font-size:12.5px;color:var(--hint);flex:none;font-weight:500;white-space:nowrap;">감사합니다</span>`;
       container.appendChild(row);
-      const ta = row.querySelector('textarea');
-      ta.addEventListener('input', () => autoResize(ta));
     }
 
-    // ── 특수문자 필터링 ───────────────────────────────────────────────────
     document.querySelectorAll('input[type="text"], textarea').forEach(el => {
-      el.addEventListener('input', () => {
-        el.value = el.value.replace(/[<>&]/g, '');
-      });
+      el.addEventListener('input', () => { el.value = el.value.replace(/[<>&]/g, ''); });
     });
 
-    // feeling textarea auto-resize
-    document.getElementById('feeling').addEventListener('input', function() {
-      autoResize(this);
-    });
+    const feeling = document.getElementById('feeling');
+    feeling.addEventListener('input', () => autoResize(feeling));
 
-    // ── 날짜 ─────────────────────────────────────────────────────────────
     const dateInput = document.getElementById('dateInput');
     dateInput.value = formatDate(new Date());
 
-    // ── 토스트 ────────────────────────────────────────────────────────────
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2200);
-    }
-
-    // ── 기존 데이터 로드 ──────────────────────────────────────────────────
     let currentUid = null;
 
     async function loadData(uid, date) {
@@ -149,9 +90,8 @@
       if (!data) return;
       (data.gratitudes || []).forEach((v, i) => {
         const el = document.getElementById(`g${i}`);
-        if (el) { el.value = v || ''; autoResize(el); }
+        if (el) el.value = v || '';
       });
-      const feeling = document.getElementById('feeling');
       feeling.value = data.feeling || '';
       autoResize(feeling);
     }
@@ -160,7 +100,6 @@
       if (currentUid) loadData(currentUid, dateInput.value);
     });
 
-    // ── 인증 ──────────────────────────────────────────────────────────────
     const user = await waitForAuth();
     if (!user) { window.location.replace('index.html'); }
     else {
@@ -169,34 +108,26 @@
       await loadData(user.uid, dateInput.value);
     }
 
-    // ── 저장 ──────────────────────────────────────────────────────────────
     document.getElementById('saveBtn').addEventListener('click', async () => {
       if (!currentUid) return;
-
       const gratitudes = Array.from({ length: 5 }, (_, i) =>
         (document.getElementById(`g${i}`)?.value || '').trim()
       );
-
-      if (gratitudes.every(g => !g)) {
-        showToast('감사한 일을 하나 이상 입력해주세요.');
-        return;
-      }
-
+      if (gratitudes.every(g => !g)) { showToast('감사한 일을 하나 이상 입력해주세요.'); return; }
       const saveBtn = document.getElementById('saveBtn');
       saveBtn.disabled = true;
       saveBtn.textContent = '저장 중…';
-
       try {
         await saveGratitudeAdvance(currentUid, dateInput.value, {
           gratitudes,
-          feeling: document.getElementById('feeling').value.trim(),
+          feeling: feeling.value.trim(),
         });
         showToast('✓ 저장되었습니다');
         setTimeout(() => window.location.href = 'home.html', 1200);
       } catch (e) {
         showToast('저장에 실패했습니다. 다시 시도해주세요.');
         saveBtn.disabled = false;
-        saveBtn.textContent = '저장하기';
+        saveBtn.textContent = '감사 기록 저장';
       }
     });
   </script>

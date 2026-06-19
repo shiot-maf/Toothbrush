@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5년 계획 — 끌어당김의 기록</title>
+  <title>5년 비전 — 끌어당김의 기록</title>
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.svg">
@@ -14,42 +14,55 @@
 </head>
 <body>
   <div class="phone-frame">
-    <div class="header">
-      <button class="header-back" onclick="history.back()">‹</button>
-      <span class="header-title">5 YEAR VISION</span>
-      <div class="header-actions">
-        <button class="icon-btn" id="themeBtn">🌙</button>
-      </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;">
+      <div style="font-size:17px;font-weight:800;">5년 비전</div>
+      <button class="theme-btn" id="themeBtn" aria-label="테마 전환">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5z"/></svg>
+      </button>
     </div>
 
     <div class="page-content">
-      <div class="hint-box" style="margin-bottom:20px;">
-        5년 후의 나를 현재형으로 상상해요. "나는 ___이다"처럼 이미 이루어진 것처럼 적으세요.
+      <div class="hint-box hint-17" style="margin-bottom:20px;">
+        미래의 모습을 현재형으로 적어보세요. 선명할수록 강하게 끌어당겨집니다.
       </div>
 
-      <div id="categoriesWrap">
-        <!-- JS로 렌더링 -->
-      </div>
+      <div id="categoriesWrap" style="display:flex;flex-direction:column;gap:14px;"></div>
 
-      <button class="btn btn-17" id="saveBtn">저장하기</button>
+      <button class="btn btn-17" id="saveBtn" style="margin-top:18px;">비전 저장</button>
     </div>
+
+    <nav class="bottom-nav">
+      <a class="bottom-nav-item" href="home.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/></svg>
+        <span class="bottom-nav-label">홈</span>
+      </a>
+      <a class="bottom-nav-item" href="history.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 9.5h16M9 3.5v3M15 3.5v3"/></svg>
+        <span class="bottom-nav-label">기록</span>
+      </a>
+      <a class="bottom-nav-item" href="report.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V4M5 19h15"/><path d="M9 16v-4M13 16V8M17 16v-6"/></svg>
+        <span class="bottom-nav-label">리포트</span>
+      </a>
+      <a class="bottom-nav-item active" href="vision.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="rgba(106,62,192,.14)" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="2.6"/></svg>
+        <span class="bottom-nav-label">비전</span>
+      </a>
+    </nav>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script type="module">
-    import {
-      waitForAuth, onAuthChange,
-      saveVisionPlan, getVisionPlan,
-    } from './firebase.js';
+    import { waitForAuth, onAuthChange, saveVisionPlan, getVisionPlan } from './firebase.js';
+    import { initTheme, showToast } from './utils.js';
 
-    // ── 카테고리 정의 (한 곳에서 관리) ───────────────────────────────────
     const CATEGORIES = [
-      { key: 'career',   icon: '💼', name: '커리어 · 일',    hint: '어떤 일을 하고 있을까' },
-      { key: 'finance',  icon: '💰', name: '재정 · 풍요',    hint: '어떤 경제적 상태일까' },
-      { key: 'relation', icon: '❤️', name: '관계 · 사랑',    hint: '어떤 사람들과 함께일까' },
-      { key: 'health',   icon: '🌿', name: '건강 · 에너지',  hint: '몸과 마음은 어떤 상태일까' },
-      { key: 'growth',   icon: '🌱', name: '자기계발 · 성장', hint: '어떤 사람이 되어 있을까' },
+      { key: 'career',   dot: 'var(--c17)', name: '커리어 · 일' },
+      { key: 'finance',  dot: 'var(--cd)',  name: '재정 · 풍요' },
+      { key: 'relation', dot: 'var(--c21)', name: '관계 · 사랑' },
+      { key: 'health',   dot: '#3BAB6F',   name: '건강 · 에너지' },
+      { key: 'growth',   dot: 'var(--c28)', name: '자기계발 · 성장' },
     ];
     const YEARS = [
       { key: 'y1', label: '1년' },
@@ -57,52 +70,34 @@
       { key: 'y5', label: '5년' },
     ];
 
-    // ── 테마 ──────────────────────────────────────────────────────────────
-    const root = document.documentElement;
-    const themeBtn = document.getElementById('themeBtn');
-    function applyTheme(t) {
-      root.setAttribute('data-theme', t);
-      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
-    }
-    applyTheme(localStorage.getItem('theme') || 'light');
-    themeBtn.addEventListener('click', () => {
-      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', next);
-      applyTheme(next);
-    });
+    initTheme();
 
-    // ── 토스트 ────────────────────────────────────────────────────────────
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2200);
-    }
-
-    // ── UI 렌더 ───────────────────────────────────────────────────────────
     function renderCategories(data) {
       const wrap = document.getElementById('categoriesWrap');
       wrap.innerHTML = CATEGORIES.map(cat => `
-        <div class="vision-category card-shadow">
+        <div class="card vision-cat">
           <div class="vision-cat-header">
-            <div class="vision-cat-icon">${cat.icon}</div>
-            <div>
-              <div class="vision-cat-name">${cat.name}</div>
-              <div class="vision-cat-hint">${cat.hint}</div>
-            </div>
+            <div class="vision-cat-dot" style="background:${cat.dot};"></div>
+            <div style="font-size:15px;font-weight:800;">${cat.name}</div>
           </div>
-          ${YEARS.map(yr => `
-            <div class="vision-year-row">
-              <span class="vision-year-lbl">${yr.label}</span>
-              <input type="text"
-                id="${cat.key}_${yr.key}"
-                maxlength="100"
-                value="${(data?.[cat.key]?.[yr.key] || '').replace(/"/g, '&quot;')}"
-                placeholder="나는…">
-            </div>
-          `).join('')}
-        </div>
-      `).join('');
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            ${YEARS.map(yr => `
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div class="vision-year-label" style="color:${cat.dot};">${yr.label}</div>
+                <textarea id="${cat.key}_${yr.key}" rows="1"
+                  placeholder="현재형으로 적어보세요"
+                  style="flex:1;font-size:14px;line-height:1.5;resize:none;min-height:38px;background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:9px 12px;font-family:inherit;color:var(--text);outline:none;"
+                >${(data?.[cat.key]?.[yr.key] || '').replace(/</g,'&lt;')}</textarea>
+              </div>`).join('')}
+          </div>
+        </div>`).join('');
+
+      // auto-resize
+      wrap.querySelectorAll('textarea').forEach(el => {
+        function resize() { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+        resize();
+        el.addEventListener('input', () => { el.value = el.value.replace(/[<>&]/g, ''); resize(); });
+      });
     }
 
     function collectData() {
@@ -110,16 +105,13 @@
       CATEGORIES.forEach(cat => {
         result[cat.key] = {};
         YEARS.forEach(yr => {
-          result[cat.key][yr.key] =
-            (document.getElementById(`${cat.key}_${yr.key}`)?.value || '').trim();
+          result[cat.key][yr.key] = (document.getElementById(`${cat.key}_${yr.key}`)?.value || '').trim();
         });
       });
       return result;
     }
 
-    // ── 인증 + 데이터 로드 ────────────────────────────────────────────────
     let currentUid = null;
-
     const user = await waitForAuth();
     if (!user) { window.location.replace('index.html'); }
     else {
@@ -129,15 +121,6 @@
       renderCategories(data);
     }
 
-    // ── 특수문자 필터링 ───────────────────────────────────────────────────
-    // renderCategories() 이후 동적 생성된 input에도 적용하기 위해 이벤트 위임 사용
-    document.getElementById('categoriesWrap').addEventListener('input', e => {
-      if (e.target.tagName === 'INPUT') {
-        e.target.value = e.target.value.replace(/[<>&]/g, '');
-      }
-    });
-
-    // ── 저장 ──────────────────────────────────────────────────────────────
     document.getElementById('saveBtn').addEventListener('click', async () => {
       if (!currentUid) return;
       const saveBtn = document.getElementById('saveBtn');
@@ -150,7 +133,7 @@
       } catch (e) {
         showToast('저장에 실패했습니다.');
         saveBtn.disabled = false;
-        saveBtn.textContent = '저장하기';
+        saveBtn.textContent = '비전 저장';
       }
     });
   </script>

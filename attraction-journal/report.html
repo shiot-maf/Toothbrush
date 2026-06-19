@@ -14,72 +14,54 @@
 </head>
 <body>
   <div class="phone-frame">
-    <div class="header">
-      <button class="header-back" onclick="history.back()">‹</button>
-      <span class="header-title">이번 주 리포트</span>
-      <div class="header-actions">
-        <button class="icon-btn" id="themeBtn">🌙</button>
-      </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;">
+      <div style="font-size:17px;font-weight:800;">주간 리포트</div>
+      <button class="theme-btn" id="themeBtn" aria-label="테마 전환">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5z"/></svg>
+      </button>
     </div>
 
     <div class="page-content" id="reportContent">
-      <div style="text-align:center;padding:40px 0;color:var(--text-hint);">불러오는 중…</div>
+      <div style="text-align:center;padding:40px 0;color:var(--hint);">불러오는 중…</div>
     </div>
+
+    <nav class="bottom-nav">
+      <a class="bottom-nav-item" href="home.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/></svg>
+        <span class="bottom-nav-label">홈</span>
+      </a>
+      <a class="bottom-nav-item" href="history.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 9.5h16M9 3.5v3M15 3.5v3"/></svg>
+        <span class="bottom-nav-label">기록</span>
+      </a>
+      <a class="bottom-nav-item active" href="report.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V4M5 19h15"/><path d="M9 16v-4M13 16V8M17 16v-6"/></svg>
+        <span class="bottom-nav-label">리포트</span>
+      </a>
+      <a class="bottom-nav-item" href="vision.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="2.6"/></svg>
+        <span class="bottom-nav-label">비전</span>
+      </a>
+    </nav>
   </div>
 
   <script type="module">
-    import { waitForAuth, onAuthChange, getThisWeekEntries, getWeekKey, formatDate, NOTE_TYPES, WEEKDAYS } from './firebase.js';
+    import { waitForAuth, onAuthChange, getThisWeekEntries, getWeekKey, formatDate, WEEKDAYS } from './firebase.js';
+    import { initTheme } from './utils.js';
 
-    // ── 테마 ──────────────────────────────────────────────────────────────
-    const root = document.documentElement;
-    const themeBtn = document.getElementById('themeBtn');
-    function applyTheme(t) {
-      root.setAttribute('data-theme', t);
-      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
-    }
-    applyTheme(localStorage.getItem('theme') || 'light');
-    themeBtn.addEventListener('click', () => {
-      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', next);
-      applyTheme(next);
-    });
+    initTheme();
 
-    // ── 유틸 ──────────────────────────────────────────────────────────────
-    const DAYS = WEEKDAYS; // firebase.js에서 가져온 공통 상수
-
-    // ── 불용어 목록 ───────────────────────────────────────────────────────
     const STOPWORDS = new Set([
-      // 대명사
-      '나는','나의','내가','나를','나에게','나도','나만','나로','나한테',
-      '우리','우리가','우리의','우리를',
-      '이것','그것','저것','이게','그게','저게',
-      '여기','거기','저기','이곳','그곳',
-      // 시간
-      '오늘','어제','내일','오전','오후','저녁','아침','점심','밤','낮','새벽',
-      '이번','지난','다음','매일','항상','언제나','지금','아직','이미','요즘',
-      '오래','최근','평소','언제','하루','매주','주간',
-      // 접속사·부사
-      '그리고','하지만','그래서','그런데','또한','또','더','더욱','게다가',
-      '때문','때문에','해서','하여','하여서','위해','위하여',
-      '정말','너무','매우','아주','조금','많이','모두','모든','전부',
-      '역시','특히','바로','이제','그냥','그렇게','이렇게','저렇게',
-      '사실','진짜','되게','꽤나','거의','약간','너무나',
-      // 동사·형용사 단편
-      '있다','없다','이다','됐다','됩니다','합니다','했다','했어','했고',
-      '좋다','좋은','좋고','같은','같이','처럼','만큼','보다',
-      '한다','하는','하고','하면','하여','하게','하기','해도','해서',
-      '된다','되는','되어','되고','되면','것이','것을','것은','것도','것들',
-      // 조사류 (단독으로 토큰이 되는 경우)
-      '에서','에게','부터','까지','으로','라도','이나','이고','이며',
-      '그냥','그게','이게','어떤','어느','어디','무엇','왜','어떻게',
-      // 숫자·단위 단독
-      '하나','둘','셋','넷','번째','가지',
+      '나는','나의','내가','나를','나에게','나도','나만','나로','우리','이것','그것','저것',
+      '여기','거기','저기','오늘','어제','내일','이번','지난','다음','매일','항상','지금',
+      '아직','이미','그리고','하지만','그래서','그런데','또한','또','더','정말','너무','매우',
+      '아주','모두','모든','사실','진짜','있다','없다','이다','됐다','합니다','했다','좋다',
+      '좋은','같은','같이','처럼','한다','하는','하고','하면','것이','것을','것은','것도',
     ]);
 
     function extractKeywords(text) {
       if (!text) return [];
-      return text
-        .split(/[\s,·]+/)
+      return text.split(/[\s,·]+/)
         .map(w => w.replace(/[^가-힣a-zA-Z0-9]/g, '').trim())
         .filter(w => w.length >= 2 && !STOPWORDS.has(w));
     }
@@ -87,15 +69,12 @@
     function topKeywords(list, limit = 10) {
       const freq = {};
       list.forEach(w => { freq[w] = (freq[w] || 0) + 1; });
-      return Object.entries(freq)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, limit)
-        .map(([w]) => w);
+      return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, limit).map(([w]) => w);
     }
 
     function encouragement(diaryCount, gratCount, hardDone) {
       const lines = [
-        `이번 주 ${diaryCount}번의 자기증명 일기와 ${gratCount}번의 감사를 기록했어요. 꾸준히 쌓이는 당신이 멋집니다.`,
+        `이번 주 ${diaryCount}번의 자기증명과 ${gratCount}번의 감사를 기록했어요. 꾸준히 쌓이는 당신이 멋집니다.`,
         `기록은 거짓말을 하지 않습니다. 이번 주 당신은 분명히 움직였어요.`,
         `작은 글자 하나하나가 현실을 끌어당기고 있어요. 계속 써주세요.`,
         `이번 주도 자신에게 집중한 시간이 있었습니다. 그게 전부예요.`,
@@ -105,148 +84,93 @@
       return lines[diaryCount % lines.length] + extra;
     }
 
-    // ── 주간 날짜 목록 생성 (월~일) ─────────────────────────────────────
     function weekDates(startDate) {
       const dates = [];
       const start = new Date(startDate);
       for (let i = 0; i < 7; i++) {
-        const d = new Date(start);
-        d.setDate(start.getDate() + i);
-        dates.push(formatDate(d));
+        const d = new Date(start); d.setDate(start.getDate() + i); dates.push(formatDate(d));
       }
       return dates;
     }
 
-    // ── 리포트 렌더 ───────────────────────────────────────────────────────
     function render({ diary, gratitude, hard, startDate, endDate }) {
-      const dates     = weekDates(startDate);
+      const dates    = weekDates(startDate);
       const diaryDays = dates.filter(d => diary[d]);
       const gratDays  = dates.filter(d => gratitude[d]);
       const hardDone  = !!hard;
 
-      // 감사 항목 전체 수집
       const allGratTexts = [];
-      gratDays.forEach(d => {
-        (gratitude[d].gratitudes || []).forEach(g => { if (g) allGratTexts.push(g); });
-      });
+      gratDays.forEach(d => (gratitude[d].gratitudes || []).forEach(g => { if (g) allGratTexts.push(g); }));
 
-      // 자기증명 선언 키워드
       const declWords = [];
-      diaryDays.forEach(d => {
-        if (diary[d].declaration) declWords.push(...extractKeywords(diary[d].declaration));
-      });
+      diaryDays.forEach(d => { if (diary[d].declaration) declWords.push(...extractKeywords(diary[d].declaration)); });
 
-      // 감사 키워드
       const gratWords = [];
       allGratTexts.forEach(t => gratWords.push(...extractKeywords(t)));
 
-      // ── 요일별 점 그리드 ────────────────────────────────────────────────
-      const weekGridHTML = dates.map((date, i) => {
+      // 바 차트: 각 요일별 기록 여부 → 높이
+      const barChartHTML = dates.map((date, i) => {
         const has17 = !!diary[date];
         const has21 = !!gratitude[date];
-        // HARD는 주 단위 — 해당 주에 작성됐으면 일요일(i=6)에 표시
         const has28 = hardDone && i === 6;
+        const count = [has17, has21, has28].filter(Boolean).length;
+        const pct   = count === 0 ? '0%' : count === 1 ? '33%' : count === 2 ? '66%' : '100%';
+        const color = has17 ? 'var(--c17)' : has21 ? 'var(--c21)' : has28 ? 'var(--c28)' : 'transparent';
+        const isToday = date === formatDate(new Date());
         return `
-          <div class="week-col">
-            <div class="week-col-label">${DAYS[i]}</div>
-            <div class="week-dots">
-              <div class="dot ${has17 ? 'on-17' : ''}"></div>
-              <div class="dot ${has21 ? 'on-21' : ''}"></div>
-              <div class="dot ${has28 ? 'on-28' : ''}"></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:9px;flex:1;">
+            <div style="width:14px;height:54px;border-radius:8px;background:var(--c17bg);position:relative;overflow:hidden;display:flex;align-items:flex-end;">
+              <div style="width:100%;height:${pct};background:${color};border-radius:8px;transition:height .4s;"></div>
             </div>
+            <div style="font-size:11px;font-weight:700;color:${isToday ? 'var(--c17)' : 'var(--hint)'};">${WEEKDAYS[i]}</div>
           </div>`;
       }).join('');
 
-      // ── 정체성 키워드 ───────────────────────────────────────────────────
       const identKeywords = topKeywords(declWords, 8);
       const identHTML = identKeywords.length
-        ? identKeywords.map(k => `<span class="chip chip-17">${k}</span>`).join('')
-        : '<span style="color:var(--text-hint);font-size:13px;">이번 주 기록이 없어요</span>';
+        ? identKeywords.map(k => `<div class="chip chip-17">${k}</div>`).join('')
+        : '<span style="color:var(--hint);font-size:13px;">이번 주 기록이 없어요</span>';
 
-      // 전체 선언문 목록
-      const declListHTML = diaryDays.length
-        ? diaryDays.map(d =>
-            `<div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;">
-               <span style="color:var(--text-hint);margin-right:6px;">${d.slice(5)}</span>
-               나는 ${diary[d].declaration} 한 사람이다.
-             </div>`
-          ).join('')
-        : '';
-
-      // ── 감사 키워드 ─────────────────────────────────────────────────────
       const gratKeywords = topKeywords(gratWords, 10);
       const gratHTML = gratKeywords.length
-        ? gratKeywords.map(k => `<span class="chip chip-21">${k}</span>`).join('')
-        : '<span style="color:var(--text-hint);font-size:13px;">이번 주 감사 기록이 없어요</span>';
+        ? gratKeywords.map(k => `<div class="chip chip-21">${k}</div>`).join('')
+        : '<span style="color:var(--hint);font-size:13px;">이번 주 감사 기록이 없어요</span>';
 
       const weekKey = getWeekKey(new Date(startDate));
 
       document.getElementById('reportContent').innerHTML = `
-        <!-- 기간 표시 -->
-        <div style="font-size:12px;color:var(--text-hint);margin-bottom:20px;">
-          ${startDate} ~ ${endDate} &nbsp;·&nbsp; ${weekKey}주차
-        </div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:18px;">${startDate} ~ ${endDate} · ${weekKey}주차</div>
 
-        <!-- 1. 기록 현황 -->
-        <div class="section">
-          <div class="section-title">이번 주 기록 현황</div>
-          <div class="stat-row">
-            <div class="stat-box">
-              <div class="stat-value" style="color:var(--c17);">${diaryDays.length}</div>
-              <div class="stat-label">자기증명 일기</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-value" style="color:var(--c21);">${gratDays.length}</div>
-              <div class="stat-label">감사 기록</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-value" style="color:var(--c21);">${allGratTexts.filter(Boolean).length}</div>
-              <div class="stat-label">감사 항목 수</div>
-            </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px;">
+          <div style="background:var(--c17bg);border:1px solid var(--border);border-radius:16px;padding:16px 12px;text-align:center;">
+            <div style="font-size:30px;font-weight:800;color:var(--c17);line-height:1;letter-spacing:-1px;">${diaryDays.length}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:7px;font-weight:600;">자기증명</div>
           </div>
-          <div class="card" style="padding:14px 16px;">
-            <div class="field-label" style="margin-bottom:10px;">요일별 작성 현황</div>
-            <div style="display:flex;gap:6px;font-size:10px;color:var(--text-hint);margin-bottom:6px;">
-              <span style="display:inline-flex;align-items:center;gap:3px;"><span class="dot on-17" style="width:7px;height:7px;"></span>자기증명</span>
-              <span style="display:inline-flex;align-items:center;gap:3px;"><span class="dot on-21" style="width:7px;height:7px;"></span>감사선행</span>
-              <span style="display:inline-flex;align-items:center;gap:3px;"><span class="dot on-28" style="width:7px;height:7px;"></span>HARD</span>
-            </div>
-            <div class="week-grid">${weekGridHTML}</div>
+          <div style="background:var(--c21bg);border:1px solid var(--border);border-radius:16px;padding:16px 12px;text-align:center;">
+            <div style="font-size:30px;font-weight:800;color:var(--c21);line-height:1;letter-spacing:-1px;">${gratDays.length}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:7px;font-weight:600;">감사 기록</div>
+          </div>
+          <div style="background:var(--c21bg);border:1px solid var(--border);border-radius:16px;padding:16px 12px;text-align:center;">
+            <div style="font-size:30px;font-weight:800;color:var(--c21);line-height:1;letter-spacing:-1px;">${allGratTexts.filter(Boolean).length}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:7px;font-weight:600;">감사 항목</div>
           </div>
         </div>
 
-        <div class="separator"></div>
-
-        <!-- 2. 이번 주 나의 정체성 -->
-        <div class="section">
-          <div class="section-title">이번 주 나의 정체성</div>
-          <div class="chips">${identHTML}</div>
-          ${declListHTML
-            ? `<div style="margin-top:12px;">${declListHTML}</div>`
-            : ''}
+        <div class="section-label">요일별 작성 현황</div>
+        <div class="card" style="display:flex;justify-content:space-between;padding:18px 14px;margin-bottom:24px;">
+          ${barChartHTML}
         </div>
 
-        <div class="separator"></div>
+        <div class="section-label">이번 주 정체성 키워드</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;">${identHTML}</div>
 
-        <!-- 3. 감사 키워드 -->
-        <div class="section">
-          <div class="section-title">이번 주 주요 감사 키워드</div>
-          <div class="chips">${gratHTML}</div>
-        </div>
+        <div class="section-label">감사 키워드</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;">${gratHTML}</div>
 
-        <div class="separator"></div>
-
-        <!-- 4. 격려 메시지 -->
-        <div class="section">
-          <div class="section-title">이번 주를 돌아보며</div>
-          <div class="encouragement">
-            ${encouragement(diaryDays.length, gratDays.length, hardDone)}
-          </div>
-        </div>
+        <div class="encouragement">${encouragement(diaryDays.length, gratDays.length, hardDone)}</div>
       `;
     }
 
-    // ── 인증 + 데이터 로드 ────────────────────────────────────────────────
     const user = await waitForAuth();
     if (!user) { window.location.replace('index.html'); }
     else {
@@ -256,7 +180,7 @@
         render(data);
       } catch (e) {
         document.getElementById('reportContent').innerHTML =
-          '<div style="text-align:center;padding:40px 0;color:var(--text-hint);">데이터를 불러오지 못했습니다.</div>';
+          '<div style="text-align:center;padding:40px 0;color:var(--hint);">데이터를 불러오지 못했습니다.</div>';
       }
     }
   </script>

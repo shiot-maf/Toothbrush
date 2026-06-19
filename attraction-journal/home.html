@@ -14,111 +14,158 @@
 </head>
 <body>
   <div class="phone-frame">
-    <div class="header">
-      <span class="header-title">끌어당김의 기록</span>
-      <div class="header-actions">
-        <button class="icon-btn" id="themeBtn" aria-label="테마 전환">🌙</button>
-        <button class="icon-btn" id="logoutBtn" title="로그아웃">↩</button>
+    <!-- 홈 헤더 (고정, 스크롤 밖) -->
+    <div class="home-header">
+      <div>
+        <div class="home-greeting" id="homeGreeting">안녕하세요</div>
+        <div class="home-date" id="homeDate"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="theme-btn" id="themeBtn" aria-label="테마 전환">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5z"/></svg>
+        </button>
+        <button class="theme-btn" id="logoutBtn" title="로그아웃" aria-label="로그아웃">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        </button>
       </div>
     </div>
 
     <div class="page-content">
 
-      <!-- ① 히어로 카드 -->
-      <div class="hero-card card-shadow-lg">
-        <div style="font-size:11px;font-weight:700;color:var(--text-hint);letter-spacing:1px;margin-bottom:10px;">
-          TODAY'S QUOTE
+      <!-- 히어로 카드 -->
+      <div class="hero-card">
+        <div class="hero-deco-circle"></div>
+        <div class="hero-deco-ring"></div>
+        <div class="streak-pill" id="streakBadge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c21)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.9 2.7-1.6 3.8-1.6 6.4a2.8 2.8 0 0 0 5.6.2c0-1-.4-1.8-.9-2.4 1.7 1 3 2.9 3 5.3a5.1 5.1 0 0 1-10.2 0C7.9 8.5 10.6 6.4 12 3z"/></svg>
+          <span id="streakText">0일 연속 기록</span>
         </div>
-        <div class="hero-quote serif" id="heroQuote">불러오는 중…</div>
-        <div class="streak-badge" id="streakBadge">🔥 0일 연속</div>
+        <div class="hero-quote" id="heroQuote">불러오는 중…</div>
       </div>
 
-      <!-- ② 이번 주 스트릭 바 -->
-      <div class="streak-week" id="streakWeek">
-        <!-- JS 렌더 -->
-      </div>
+      <!-- 이번 주 스트릭 -->
+      <div class="streak-week" id="streakWeek"></div>
 
-      <!-- ③ 오늘의 실천 -->
+      <!-- 오늘의 실천 -->
       <div class="section-label">TODAY'S PRACTICE</div>
-      <div class="card card-shadow" id="practiceCard" style="border-color:var(--c28);">
+      <div class="card practice-card" id="practiceCard">
         <div class="practice-header">
-          <span class="practice-label">오늘의 실천</span>
-          <button class="icon-btn" id="addPracticeBtn" style="font-size:13px;color:var(--c28);" title="직접 입력">＋</button>
+          <span class="practice-title">오늘의 실천</span>
+          <span class="practice-count" id="practiceCount">0/3</span>
         </div>
-        <div id="practiceList">
-          <div style="color:var(--text-hint);font-size:13px;text-align:center;padding:8px 0;">불러오는 중…</div>
-        </div>
+        <div id="practiceList"></div>
+        <button class="practice-add-btn" id="addPracticeBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>
+          실천 추가
+        </button>
       </div>
 
-      <!-- ④ TODAY'S NOTES -->
+      <!-- 오늘의 노트 -->
       <div class="section-label">TODAY'S NOTES</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
 
-      <a class="note-card card-shadow" href="today.html">
-        <div class="note-icon note-icon-17" style="font-size:17px;">✦</div>
-        <div class="note-card-body">
-          <div class="note-card-name">자기증명 일기</div>
-          <div class="note-card-sub">매일 저녁 · 5분</div>
-          <div class="note-card-preview" id="preview17">불러오는 중…</div>
-        </div>
-        <div class="note-status" id="status17">…</div>
-      </a>
+        <a class="note-card" href="today.html">
+          <div class="note-icon-sq note-icon-sq-17">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3l1.9 5.4L19 10l-5.1 1.6L12 17l-1.9-5.4L5 10l5.1-1.6z" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="note-card-body">
+            <div class="note-card-name">자기증명 일기</div>
+            <div class="note-card-preview" id="preview17">아직 작성하지 않았어요</div>
+          </div>
+          <div>
+            <div class="note-status-badge" id="status17-badge" style="background:var(--c28bg);color:var(--c28);">작성하기</div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--hint)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin-top:6px;margin-left:auto;"><path d="M9 6l6 6-6 6"/></svg>
+          </div>
+        </a>
 
-      <a class="note-card card-shadow" href="gratitude.html">
-        <div class="note-icon note-icon-21" style="font-size:17px;">◎</div>
-        <div class="note-card-body">
-          <div class="note-card-name">감사 선행기법</div>
-          <div class="note-card-sub">매일 잠들기 전 · 3분</div>
-          <div class="note-card-preview" id="preview21">불러오는 중…</div>
-        </div>
-        <div class="note-status" id="status21">…</div>
-      </a>
+        <a class="note-card" href="gratitude.html">
+          <div class="note-icon-sq note-icon-sq-21">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </div>
+          <div class="note-card-body">
+            <div class="note-card-name">감사 선행기법</div>
+            <div class="note-card-preview" id="preview21">아직 작성하지 않았어요</div>
+          </div>
+          <div>
+            <div class="note-status-badge" id="status21-badge" style="background:var(--c28bg);color:var(--c28);">작성하기</div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--hint)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin-top:6px;margin-left:auto;"><path d="M9 6l6 6-6 6"/></svg>
+          </div>
+        </a>
 
-      <a class="note-card card-shadow" href="hard.html">
-        <div class="note-icon note-icon-28" style="font-size:17px;">▦</div>
-        <div class="note-card-body">
-          <div class="note-card-name">HARD 노트</div>
-          <div class="note-card-sub">주 1회 일요일 · 15분</div>
-          <div class="note-card-preview" id="preview28">불러오는 중…</div>
-        </div>
-        <div class="note-status" id="status28">…</div>
-      </a>
+        <a class="note-card" href="hard.html">
+          <div class="note-icon-sq note-icon-sq-28">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+          </div>
+          <div class="note-card-body">
+            <div class="note-card-name">HARD 노트</div>
+            <div class="note-card-preview" id="preview28">아직 작성하지 않았어요</div>
+          </div>
+          <div>
+            <div class="note-status-badge" id="status28-badge" style="background:var(--c28bg);color:var(--c28);">작성하기</div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--hint)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin-top:6px;margin-left:auto;"><path d="M9 6l6 6-6 6"/></svg>
+          </div>
+        </a>
 
-      <!-- ⑤ MANIFESTATION -->
+      </div>
+
+      <!-- MANIFESTATION -->
       <div class="section-label">MANIFESTATION</div>
-      <div class="card card-shadow" id="manifestCard">
-        <div class="field-label" style="margin-bottom:10px;">이미 이룬 것</div>
-        <div id="achievedList">
-          <div style="color:var(--text-hint);font-size:13px;">불러오는 중…</div>
+      <div class="card manif-card" style="margin-bottom:24px;" id="manifestCard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--c17)" stroke-width="1.5" style="margin-bottom:8px;"><path d="M12 3l1.9 5.4L19 10l-5.1 1.6L12 17l-1.9-5.4L5 10l5.1-1.6z" stroke-linejoin="round"/></svg>
+        <div id="achievedList" style="font-size:15px;font-weight:600;line-height:1.55;color:var(--c17);">
+          <div style="color:var(--hint);font-size:13px;font-weight:400;">HARD 노트를 작성하면 자동으로 표시돼요.</div>
         </div>
+        <div style="font-size:11.5px;color:var(--text2);margin-top:8px;">이미 이루어진 일처럼 느껴보세요</div>
       </div>
 
-      <!-- ⑥ 5 YEAR VISION -->
+      <!-- 5 YEAR VISION -->
       <div class="section-label">5 YEAR VISION</div>
-      <a class="card card-shadow" href="vision.html" style="display:block;text-decoration:none;color:inherit;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div class="field-label">1년 후 나는</div>
-          <span style="font-size:12px;color:var(--text-hint);">전체 보기 →</span>
+      <a class="note-card" href="vision.html" style="margin-bottom:8px;">
+        <div class="note-icon-sq note-icon-sq-17">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="2.8"/></svg>
         </div>
-        <div id="visionPreview">
-          <div style="color:var(--text-hint);font-size:13px;">아직 작성하지 않았어요 → 탭해서 시작하기</div>
+        <div class="note-card-body">
+          <div class="note-card-name">1년 후의 나</div>
+          <div class="note-card-preview" id="visionPreview">아직 작성하지 않았어요</div>
         </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--hint)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
       </a>
-
-      <!-- ⑦ 하단 버튼 -->
-      <div class="separator"></div>
-      <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:8px;">
-        <a class="btn btn-outline" href="report.html">📊 이번 주 리포트 보기</a>
-        <a class="btn btn-outline" href="history.html">📅 기록 열람</a>
-      </div>
 
     </div>
+
+    <!-- 하단 탭바 -->
+    <nav class="bottom-nav">
+      <a class="bottom-nav-item active" href="home.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="rgba(106,62,192,.14)" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/></svg>
+        <span class="bottom-nav-label">홈</span>
+      </a>
+      <a class="bottom-nav-item" href="history.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 9.5h16M9 3.5v3M15 3.5v3"/></svg>
+        <span class="bottom-nav-label">기록</span>
+      </a>
+      <a class="bottom-nav-item" href="report.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V4M5 19h15"/><path d="M9 16v-4M13 16V8M17 16v-6"/></svg>
+        <span class="bottom-nav-label">리포트</span>
+      </a>
+      <a class="bottom-nav-item" href="vision.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="2.6"/></svg>
+        <span class="bottom-nav-label">비전</span>
+      </a>
+    </nav>
   </div>
 
-  <!-- 실천 직접 입력 모달 -->
+  <!-- 실천 모달 -->
   <div class="modal-overlay hidden" id="practiceModal">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
-      <div class="field-label" style="margin-bottom:8px;">오늘의 실천 입력</div>
+      <div class="field-label" style="margin-bottom:12px;">실천 항목 추가</div>
       <input type="text" id="practiceInput" placeholder="오늘 실천할 한 가지…" style="margin-bottom:16px;">
       <button class="btn btn-28" id="savePracticeBtn">저장하기</button>
     </div>
@@ -136,52 +183,25 @@
       formatDate, getWeekKey, getThisWeekRange,
       WEEKDAYS,
     } from './firebase.js';
+    import { initTheme, showToast } from './utils.js';
 
-    // ── 오늘의 명언 40선 ──────────────────────────────────────────────────
     const QUOTES = [
-      // 끌어당김 테마 (14)
-      "당신이 집중하는 것이 당신의 현실이 된다.",
-      "원하는 것을 이미 가진 것처럼 느껴라.",
-      "생각은 씨앗이다. 심은 대로 거둔다.",
-      "에너지는 집중하는 곳으로 흐른다.",
-      "당신의 감정이 당신의 나침반이다.",
-      "믿음은 보이지 않는 것을 보이게 만드는 힘이다.",
-      "우주는 당신의 가장 깊은 의도에 응답한다.",
-      "원하는 것에 저항하지 말고, 허용하라.",
-      "지금 이 순간의 감정이 내일의 현실을 만든다.",
-      "두려움에 집중하면 두려운 것을 끌어오고, 사랑에 집중하면 사랑을 끌어온다.",
-      "당신이 상상할 수 있다면, 이룰 수 있다.",
-      "풍요는 마음의 상태다.",
-      "바라는 것을 구하라. 그리고 이미 받은 것처럼 감사하라.",
-      "현실은 내 생각의 거울이다.",
-      // 시크릿 테마 (13)
-      "구하라, 믿어라, 받아라.",
-      "당신의 인생은 당신의 생각이 만들어낸 걸작이다.",
+      "당신이 집중하는 것이 당신의 현실이 된다.", "원하는 것을 이미 가진 것처럼 느껴라.",
+      "생각은 씨앗이다. 심은 대로 거둔다.", "에너지는 집중하는 곳으로 흐른다.",
+      "당신의 감정이 당신의 나침반이다.", "믿음은 보이지 않는 것을 보이게 만드는 힘이다.",
+      "우주는 당신의 가장 깊은 의도에 응답한다.", "원하는 것에 저항하지 말고, 허용하라.",
+      "지금 이 순간의 감정이 내일의 현실을 만든다.", "당신이 상상할 수 있다면, 이룰 수 있다.",
+      "풍요는 마음의 상태다.", "바라는 것을 구하라. 그리고 이미 받은 것처럼 감사하라.",
+      "현실은 내 생각의 거울이다.", "구하라, 믿어라, 받아라.",
       "감사는 끌어당김의 법칙을 활성화하는 가장 강력한 도구다.",
-      "당신 안에 있는 힘은 당신이 직면한 어떤 도전보다 크다.",
       "기분이 좋아지는 것이 곧 원하는 것을 끌어당기는 것이다.",
-      "행복은 원인이지, 결과가 아니다.",
-      "당신이 원하는 것을 원하는 이유는, 그것이 이미 당신 것이기 때문이다.",
-      "부정적인 생각 하나를 긍정적인 생각 열 개로 지워라.",
-      "당신이 원하는 것을 느낄 때, 그것은 이미 오고 있다.",
-      "마음이 가는 곳에 에너지가 따른다.",
-      "매일 아침 눈을 뜰 때, 오늘 하루에 감사하라.",
-      "당신은 당신이 생각하는 것보다 훨씬 강하다.",
-      "원하는 것을 이미 이룬 사람처럼 행동하라.",
-      // 자기증명/성장 테마 (13)
-      "나는 매일 모든 면에서 점점 더 나아지고 있다.",
-      "당신이 되고 싶은 사람이 되는 것은 매일의 선택이 만든다.",
-      "자신을 믿는 것이 변화의 첫 번째 단계다.",
-      "당신의 정체성이 당신의 운명을 결정한다.",
-      "작은 행동이 쌓여 큰 변화가 된다.",
-      "오늘 한 걸음이 내일의 도약이 된다.",
-      "변화는 결심의 순간이 아닌, 매일의 실천에서 온다.",
-      "나는 내가 믿는 것이 된다.",
-      "두려움은 성장의 신호다.",
-      "완벽함이 아닌 일관성이 결과를 만든다.",
-      "오늘의 나는 어제보다 낫다. 내일의 나는 오늘보다 나을 것이다.",
-      "작은 증거들이 쌓여 큰 확신이 된다.",
-      "나는 내 이야기의 작가다.",
+      "행복은 원인이지, 결과가 아니다.", "나는 매일 모든 면에서 점점 더 나아지고 있다.",
+      "당신의 정체성이 당신의 운명을 결정한다.", "작은 행동이 쌓여 큰 변화가 된다.",
+      "오늘 한 걸음이 내일의 도약이 된다.", "나는 내가 믿는 것이 된다.",
+      "완벽함이 아닌 일관성이 결과를 만든다.", "오늘의 나는 어제보다 낫다.",
+      "작은 증거들이 쌓여 큰 확신이 된다.", "나는 내 이야기의 작가다.",
+      "내가 선언하는 순간, 우주는 응답한다.", "나는 충분하며, 이미 가득 차 있다.",
+      "원하는 미래는 지금 이 순간 시작된다.", "오늘의 나는 어제보다 분명히 가까워졌다.",
     ];
 
     function getTodayQuote() {
@@ -191,44 +211,40 @@
       return QUOTES[dayOfYear % QUOTES.length];
     }
 
-    // ── 테마 ──────────────────────────────────────────────────────────────
-    const root = document.documentElement;
-    const themeBtn = document.getElementById('themeBtn');
-    function applyTheme(t) {
-      root.setAttribute('data-theme', t);
-      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
-    }
-    applyTheme(localStorage.getItem('theme') || 'light');
-    themeBtn.addEventListener('click', () => {
-      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', next);
-      applyTheme(next);
-    });
+    const KO_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
+    const KO_GREET = () => {
+      const h = new Date().getHours();
+      if (h < 6)  return '새벽을 열고 있군요 ✨';
+      if (h < 11) return '좋은 아침이에요 🌅';
+      if (h < 14) return '활기찬 오전이에요 ☀️';
+      if (h < 18) return '오후도 잘 보내고 있나요?';
+      if (h < 22) return '오늘 하루 어떠셨나요? 🌙';
+      return '오늘도 수고하셨어요 ⭐';
+    };
 
-    // ── 명언 즉시 표시 (Firestore 기다리지 않고) ──────────────────────────
+    initTheme();
     document.getElementById('heroQuote').textContent = getTodayQuote();
 
-    // ── 유틸 ──────────────────────────────────────────────────────────────
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2200);
-    }
+    // 날짜/인사
+    const now = new Date();
+    document.getElementById('homeGreeting').textContent = KO_GREET();
+    document.getElementById('homeDate').textContent =
+      `${now.getMonth()+1}월 ${now.getDate()}일 ${KO_DAYS[now.getDay()]}요일`;
 
-    function setCard(statusId, previewId, done, previewText) {
-      const s = document.getElementById(statusId);
+    // 노트 카드 상태 업데이트
+    function setNoteCard(previewId, badgeId, done, previewText) {
       const p = document.getElementById(previewId);
+      const b = document.getElementById(badgeId);
       if (done) {
-        s.textContent = '✓'; s.className = 'note-status status-done';
-        p.textContent = previewText || '';
+        if (p) p.textContent = previewText || '';
+        if (b) { b.textContent = '완료'; b.style.background = 'var(--c17bg)'; b.style.color = 'var(--c17)'; }
       } else {
-        s.textContent = '미작성'; s.className = 'note-status status-todo';
-        p.textContent = '아직 작성하지 않았어요';
+        if (p) p.textContent = '아직 작성하지 않았어요';
+        if (b) { b.textContent = '작성하기'; b.style.background = 'var(--c28bg)'; b.style.color = 'var(--c28)'; }
       }
     }
 
-    // ── 주간 스트릭 바 렌더 ───────────────────────────────────────────────
+    // 스트릭 바 렌더
     function renderStreakWeek(diaryRange, gratRange) {
       const { startDate } = getThisWeekRange();
       const todayStr = formatDate(new Date());
@@ -239,54 +255,45 @@
         const dateStr = formatDate(d);
         const done = !!(diaryRange[dateStr] || gratRange[dateStr]);
         const isToday = dateStr === todayStr;
-        const isFuture = dateStr > todayStr;
-        let dotClass = '';
-        if (done && isToday) dotClass = 'today-done';
-        else if (done)       dotClass = 'done';
-        else if (isToday)    dotClass = 'today-ring';
-        return `
-          <div class="streak-day">
-            <span class="streak-day-lbl">${label}</span>
-            <div class="streak-dot ${dotClass}" title="${dateStr}">
-              ${done ? '✓' : ''}
-            </div>
-          </div>`;
+        let cls = 'streak-dot';
+        if (done && isToday) cls += ' today-done';
+        else if (done)       cls += ' done';
+        else if (isToday)    cls += ' today-ring';
+        const mark = done
+          ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg>`
+          : '';
+        return `<div class="streak-day"><span class="streak-day-lbl" style="color:${isToday?'var(--c17)':'var(--hint)'}">${label}</span><div class="${cls}">${mark}</div></div>`;
       }).join('');
     }
 
-    // ── 실천 카드 렌더 ────────────────────────────────────────────────────
-    let practiceItems = [];     // { text, completed, source }
-    let practiceData  = null;   // Firestore daily_action doc
+    // 실천 카드
+    let practiceItems = [];
+    let practiceData  = null;
     let currentUid    = null;
     let todayStr      = '';
 
     async function savePracticeState() {
       if (!currentUid || !todayStr) return;
       await saveDailyAction(currentUid, todayStr, {
-        items: practiceItems,
-        source: practiceData?.source || 'hard_note',
+        items: practiceItems, source: practiceData?.source || 'hard_note',
         completed: practiceItems.every(p => p.completed),
       });
     }
 
     function renderPracticeList() {
       const list = document.getElementById('practiceList');
-      if (!practiceItems.length) {
-        list.innerHTML = `
-          <button class="practice-add-btn" id="manualBtn">＋ 오늘 실천 입력하기</button>`;
-        document.getElementById('manualBtn')?.addEventListener('click', openPracticeModal);
-        return;
-      }
+      const count = document.getElementById('practiceCount');
+      const doneN = practiceItems.filter(p => p.completed).length;
+      if (count) count.textContent = `${doneN}/${practiceItems.length}`;
+      if (!practiceItems.length) { list.innerHTML = ''; return; }
       list.innerHTML = practiceItems.map((item, idx) => `
-        <div class="practice-item" id="pitem${idx}">
-          <button class="practice-check ${item.completed ? 'done' : ''}"
-                  data-idx="${idx}" title="완료 토글">
-            ${item.completed ? '✓' : ''}
+        <div style="display:flex;align-items:center;gap:11px;padding:7px 0;">
+          <button class="practice-check-sq ${item.completed ? 'done' : ''}" data-idx="${idx}">
+            ${item.completed ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg>` : ''}
           </button>
-          <span class="practice-text ${item.completed ? 'done' : ''}">${item.text}</span>
+          <span style="font-size:14px;color:${item.completed?'var(--hint)':'var(--text)'};text-decoration:${item.completed?'line-through':'none'};flex:1;">${item.text}</span>
         </div>`).join('');
-
-      list.querySelectorAll('.practice-check').forEach(btn => {
+      list.querySelectorAll('.practice-check-sq').forEach(btn => {
         btn.addEventListener('click', async () => {
           const idx = +btn.dataset.idx;
           practiceItems[idx].completed = !practiceItems[idx].completed;
@@ -298,25 +305,19 @@
 
     function buildPracticeFromHard(d28) {
       if (!d28) return [];
-      return (d28.do || [])
-        .filter(Boolean)
-        .slice(0, 3)
+      return (d28.do || []).filter(Boolean).slice(0, 3)
         .map(text => ({ text, completed: false, source: 'hard_note' }));
     }
 
-    // ── 실천 입력 모달 ────────────────────────────────────────────────────
-    function openPracticeModal() {
+    // 실천 모달
+    document.getElementById('addPracticeBtn').addEventListener('click', () => {
       document.getElementById('practiceModal').classList.remove('hidden');
       document.getElementById('practiceInput').focus();
-    }
-
-    document.getElementById('addPracticeBtn').addEventListener('click', openPracticeModal);
-
+    });
     document.getElementById('practiceModal').addEventListener('click', e => {
       if (e.target === document.getElementById('practiceModal'))
         document.getElementById('practiceModal').classList.add('hidden');
     });
-
     document.getElementById('savePracticeBtn').addEventListener('click', async () => {
       const val = document.getElementById('practiceInput').value.trim();
       if (!val) return;
@@ -327,60 +328,33 @@
       await savePracticeState();
     });
 
-    // ── 비전 미리보기 렌더 ────────────────────────────────────────────────
-    const VISION_CATS = [
-      { key: 'career',   icon: '💼' },
-      { key: 'finance',  icon: '💰' },
-      { key: 'relation', icon: '❤️' },
-      { key: 'health',   icon: '🌿' },
-      { key: 'growth',   icon: '🌱' },
-    ];
-
+    // 비전 미리보기
+    const VISION_CATS = ['career', 'finance', 'relation', 'health', 'growth'];
     function renderVisionPreview(data) {
-      const wrap = document.getElementById('visionPreview');
       if (!data) return;
-      const items = VISION_CATS
-        .map(c => ({ icon: c.icon, text: data[c.key]?.y1 }))
-        .filter(c => c.text);
+      const items = VISION_CATS.map(k => data[k]?.y1).filter(Boolean);
       if (!items.length) return;
-      wrap.innerHTML = items.slice(0, 3).map(item => `
-        <div class="vision-preview-item">
-          <span class="vision-preview-icon">${item.icon}</span>
-          <span class="vision-preview-text serif">${item.text}</span>
-        </div>`).join('');
+      document.getElementById('visionPreview').textContent = items[0];
     }
 
-    // ── 이미 이룬 것 (Manifestation) 렌더 ────────────────────────────────
+    // 이미 이룬 것 (Manifestation)
     function renderAchieved(d28) {
       const wrap = document.getElementById('achievedList');
-      if (!d28) {
-        wrap.innerHTML = `<div style="color:var(--text-hint);font-size:13px;">
-          HARD 노트를 작성하면 자동으로 표시돼요.</div>`;
-        return;
-      }
+      if (!d28) { wrap.innerHTML = '<div style="color:var(--hint);font-size:13px;font-weight:400;">HARD 노트를 작성하면 자동으로 표시돼요.</div>'; return; }
       const items = (d28.achieved || []).filter(Boolean).slice(0, 3);
-      if (!items.length) {
-        wrap.innerHTML = `<div style="color:var(--text-hint);font-size:13px;">
-          이번 주 HARD 노트의 A 항목을 채워보세요.</div>`;
-        return;
-      }
-      wrap.innerHTML = items.map(text =>
-        `<div style="font-size:14px;color:var(--text);padding:5px 0;
-          border-bottom:0.5px solid var(--border);">· ${text}</div>`
-      ).join('');
+      if (!items.length) { wrap.innerHTML = '<div style="color:var(--hint);font-size:13px;font-weight:400;">이번 주 HARD 노트의 A 항목을 채워보세요.</div>'; return; }
+      wrap.innerHTML = items.map(text => `<div style="margin-bottom:4px;">· ${text}</div>`).join('');
     }
 
-    // ── 인증 + 전체 데이터 로드 ───────────────────────────────────────────
+    // 인증 + 데이터 로드
     const user = await waitForAuth();
     if (!user) { window.location.replace('index.html'); }
     else {
       onAuthChange(u => { if (!u) window.location.replace('index.html'); });
-      currentUid  = user.uid;
-      todayStr    = formatDate(new Date());
-      const today = new Date();
-      const weekKey = getWeekKey(today);
+      currentUid = user.uid;
+      todayStr   = formatDate(new Date());
+      const weekKey = getWeekKey(new Date());
       const { startDate, endDate } = getThisWeekRange();
-
       try {
         const [diaryRange, gratRange, d28, dailyAction, visionData, streak] =
           await Promise.all([
@@ -395,13 +369,9 @@
         const d17 = diaryRange[todayStr] || null;
         const d21 = gratRange[todayStr]  || null;
 
-        // 스트릭 배지
-        document.getElementById('streakBadge').textContent = `🔥 ${streak}일 연속`;
-
-        // 스트릭 바
+        document.getElementById('streakText').textContent = `${streak}일 연속 기록`;
         renderStreakWeek(diaryRange, gratRange);
 
-        // 실천 카드
         practiceData = dailyAction;
         if (dailyAction?.items?.length) {
           practiceItems = dailyAction.items;
@@ -411,26 +381,17 @@
         }
         renderPracticeList();
 
-        // 노트 카드
-        setCard('status17', 'preview17', !!d17,
-          d17 ? `나는 ${d17.declaration} 한 사람이다.` : '');
-        setCard('status21', 'preview21', !!d21,
-          d21 ? (d21.gratitudes?.[0] || '') + ' 감사합니다.' : '');
-        setCard('status28', 'preview28', !!d28,
-          d28 ? `키워드: ${d28.keyword || ''}` : '');
+        setNoteCard('preview17', 'status17-badge', !!d17, d17 ? `나는 ${d17.declaration} 한 사람이다.` : '');
+        setNoteCard('preview21', 'status21-badge', !!d21, d21 ? (d21.gratitudes?.[0] || '') + ' 감사합니다.' : '');
+        setNoteCard('preview28', 'status28-badge', !!d28, d28 ? `키워드: ${d28.keyword || ''}` : '');
 
-        // Manifestation
         renderAchieved(d28);
-
-        // Vision
         renderVisionPreview(visionData);
-
       } catch (e) {
         showToast('일부 데이터를 불러오지 못했습니다.');
       }
     }
 
-    // ── 로그아웃 ──────────────────────────────────────────────────────────
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       if (!confirm('로그아웃하시겠어요?')) return;
       await signOutUser();
