@@ -829,3 +829,27 @@ textarea { resize: none; line-height: 1.6; overflow: hidden; }
 }
 .onb-btn-main:active  { transform: scale(.985); }
 .onb-btn-main:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── 스켈레톤 로딩 ──────────────────────────────────────────────────────── */
+@keyframes kkskeleton { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+.skel {
+  background: var(--border);
+  border-radius: 8px;
+  animation: kkskeleton 1.4s ease-in-out infinite;
+}
+[data-theme="dark"] .skel { background: rgba(255,255,255,.08); }
+
+.skel-hero-quote { height: 22px; width: 80%; margin-bottom: 10px; }
+.skel-hero-quote2 { height: 22px; width: 55%; }
+.skel-streak-dot { width: 32px; height: 48px; border-radius: 10px; }
+.skel-note-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-radius: 16px;
+  background: var(--card); border: 1px solid var(--border);
+}
+.skel-note-icon { width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0; }
+.skel-note-text { flex: 1; }
+.skel-note-line1 { height: 14px; width: 60%; margin-bottom: 8px; border-radius: 6px; }
+.skel-note-line2 { height: 12px; width: 80%; border-radius: 6px; }
+.skel-badge { width: 52px; height: 24px; border-radius: 8px; flex-shrink: 0; }

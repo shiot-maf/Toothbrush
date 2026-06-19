@@ -44,7 +44,15 @@
       </div>
 
       <!-- 이번 주 스트릭 -->
-      <div class="streak-week" id="streakWeek"></div>
+      <div class="streak-week" id="streakWeek">
+        <div class="streak-day"><span class="streak-day-lbl" style="color:var(--hint)">월</span><div class="streak-dot skel skel-streak-dot"></div></div>
+        <div class="streak-day"><span class="streak-day-lbl" style="color:var(--hint)">화</span><div class="streak-dot skel skel-streak-dot"></div></div>
+        <div class="streak-day"><span class="streak-day-lbl" style="color:var(--hint)">수</span><div class="streak-dot skel skel-streak-dot"></div></div>
+        <div class="streak-day"><span class="streak-day-lbl" style="color:var(--hint)">목</span><div class="streak-dot skel skel-streak-dot"></div></div>
+        <div class="streak-day"><span class="streak-day-lbl" style="color:var(--hint)">금</span><div class="streak-dot skel skel-streak-dot"></div></div>
+        <div class="streak-day"><span class="streak-day-lbl" style="color:var(--hint)">토</span><div class="streak-dot skel skel-streak-dot"></div></div>
+        <div class="streak-day"><span class="streak-day-lbl" style="color:var(--hint)">일</span><div class="streak-dot skel skel-streak-dot"></div></div>
+      </div>
 
       <!-- 오늘의 실천 -->
       <div class="section-label">TODAY'S PRACTICE</div>
@@ -53,7 +61,10 @@
           <span class="practice-title">오늘의 실천</span>
           <span class="practice-count" id="practiceCount">0/3</span>
         </div>
-        <div id="practiceList"></div>
+        <div id="practiceList">
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;"><div class="skel" style="width:24px;height:24px;border-radius:8px;flex-shrink:0;"></div><div class="skel" style="height:14px;border-radius:6px;flex:1;"></div></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;"><div class="skel" style="width:24px;height:24px;border-radius:8px;flex-shrink:0;"></div><div class="skel" style="height:14px;border-radius:6px;width:65%;"></div></div>
+        </div>
         <button class="practice-add-btn" id="addPracticeBtn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>
           실천 추가
@@ -397,6 +408,11 @@
       await signOutUser();
       window.location.replace('index.html');
     });
+
+    // 서비스 워커 등록
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
   </script>
 </body>
 </html>
