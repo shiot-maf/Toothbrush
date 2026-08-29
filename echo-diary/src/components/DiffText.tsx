@@ -25,7 +25,13 @@ export function DiffText({
           return (
             <span
               key={i}
-              className="text-rose-500/70 line-through decoration-rose-400/60"
+              // 드래그 저장이 삭제된 단어를 집어가지 않도록 표시해 둔다.
+              data-diff="remove"
+              className="line-through decoration-2"
+              style={{
+                color: "color-mix(in srgb, var(--color-bad) 70%, transparent)",
+                textDecorationColor: "currentColor",
+              }}
             >
               {t.text}
             </span>
@@ -33,7 +39,12 @@ export function DiffText({
         return (
           <span
             key={i}
-            className="rounded bg-emerald-500/12 font-medium text-emerald-700 underline decoration-emerald-500/40 underline-offset-2 dark:text-emerald-300"
+            className="rounded font-medium underline underline-offset-2"
+            style={{
+              color: "var(--color-good)",
+              background: "color-mix(in srgb, var(--color-good) 10%, transparent)",
+              textDecorationColor: "color-mix(in srgb, var(--color-good) 45%, transparent)",
+            }}
           >
             {t.text}
           </span>
@@ -46,10 +57,14 @@ export function DiffText({
 /** 짧은 구 단위 비교 — 교정 카드 안에서 쓴다. */
 export function InlineFix({ before, after }: { before: string; after: string }) {
   return (
-    <p className="text-[15px] leading-relaxed">
-      <span className="text-rose-500 line-through decoration-rose-400/60">{before}</span>
-      <span className="mx-2 text-[var(--color-ink-faint)]">→</span>
-      <span className="font-medium text-emerald-700 dark:text-emerald-300">{after}</span>
+    <p className="content-text text-[15px] leading-relaxed">
+      <span className="line-through" style={{ color: "var(--color-bad)" }}>
+        {before}
+      </span>
+      <span className="mx-2 text-ink/30">→</span>
+      <span className="font-medium" style={{ color: "var(--color-good)" }}>
+        {after}
+      </span>
     </p>
   )
 }

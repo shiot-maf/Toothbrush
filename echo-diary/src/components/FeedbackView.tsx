@@ -5,6 +5,7 @@ import { Panel, SectionTitle, Tag } from "./ui"
 import { DiffText } from "./DiffText"
 import { CorrectionCard } from "./CorrectionCard"
 import { SaveButton } from "./SaveButton"
+import { SelectionSaver } from "./SelectionSaver"
 import { getCategory, categoryColor } from "@/lib/taxonomy"
 
 /** 첨삭 결과 전체. 작성 화면과 기록 상세가 같은 걸 쓴다. */
@@ -75,14 +76,22 @@ export function FeedbackView({
 
       <section>
         <SectionTitle>교정된 일기</SectionTitle>
-        <Panel>
-          <p className="content-text text-[17px] whitespace-pre-wrap">
-            <DiffText before={entry.text} after={fb.correctedText} />
-          </p>
-        </Panel>
+        <SelectionSaver
+          entryId={entryId}
+          dateKey={entry.dateKey}
+          sourceText={fb.correctedText}
+        >
+          <Panel>
+            <p className="content-text text-[17px] whitespace-pre-wrap">
+              <DiffText before={entry.text} after={fb.correctedText} />
+            </p>
+          </Panel>
+        </SelectionSaver>
         <p className="mt-2 text-xs text-ink/35">
           <span style={{ color: "var(--color-bad)" }}>취소선</span>은 빠진 부분,{" "}
           <span style={{ color: "var(--color-good)" }}>밑줄</span>은 새로 들어간 부분이에요.
+          {" "}마음에 드는 표현을 <strong className="font-medium text-ink/55">드래그하면</strong>{" "}
+          저장함에 담을 수 있어요.
         </p>
       </section>
 

@@ -13,6 +13,11 @@ import type { SavedItem } from "@/lib/types"
 
 type Filter = "all" | "correction" | "phrase"
 
+/** 저장함 필터: "표현"은 제안(phrase)과 발췌(selection)를 함께 담는다. */
+const matchesFilter = (kind: string, filter: Filter) =>
+  filter === "all" ||
+  (filter === "correction" ? kind === "correction" : kind !== "correction")
+
 export default function SavedPage() {
   const { user } = useAuth()
   const [items, setItems] = useState<SavedItem[] | null>(null)
@@ -27,7 +32,7 @@ export default function SavedPage() {
   }, [user])
 
   const filtered = useMemo(
-    () => items?.filter((i) => filter === "all" || i.kind === filter) ?? null,
+    () => items?.filter((i) => matchesFilter(i.kind, filter)) ?? null,
     [items, filter],
   )
 
@@ -53,7 +58,7 @@ export default function SavedPage() {
       <PageHeader
         eyebrow="Keepsafe"
         title="Saved"
-        description="교정과 표현 제안 중 따로 담아둔 것들. 답을 가려놓고 스스로 떠올려볼 수 있어요."
+        description="교정된 일기에서 긁어 담은 표현과, 북마크한 교정들. 정답이 있는 항목은 가려놓고 떠올려볼 수 있어요."
         action={
           items && items.length > 0 ? (
             <Segmented
@@ -81,8 +86,8 @@ export default function SavedPage() {
             </Link>
           }
         >
-          첨삭 결과에서 북마크 아이콘을 누르면 여기에 담깁니다. 꼭 외우고 싶은 것만
-          골라 담아두세요.
+          교정된 일기에서 마음에 드는 표현을 드래그하거나, 교정 카드의 북마크 아이콘을
+          누르면 여기에 담깁니다.
         </Empty>
       ) : filtered?.length === 0 ? (
         <Empty title="이 종류로 담아둔 게 없어요" />
@@ -98,7 +103,7 @@ export default function SavedPage() {
                       {getCategory(item.category).ko}
                     </Tag>
                   ) : (
-                    <Tag>표현</Tag>
+                    <Tag>{item.kind === "selection" ? "발췌" : "표현"}</Tag>
                   )}
                   <span className="ml-auto text-[11px] text-ink/35">
                     {item.dateKey && formatKo(item.dateKey)}
@@ -112,26 +117,43 @@ export default function SavedPage() {
                   </button>
                 </div>
 
-                <p className="content-text text-[15px] text-ink/70">{item.front}</p>
-
-                <button
-                  onClick={() => toggleReveal(item.id)}
-                  className="mt-3 block w-full text-left"
-                  aria-expanded={open}
-                >
-                  {open ? (
-                    <p className="content-text text-[15px] font-medium" style={{ color: "var(--color-good)" }}>
-                      {item.back}
+                {item.back ? (
+                  <>
+                    <p className="content-text text-[15px] text-ink/70">{item.front}</p>
+                    <button
+                      onClick={() => toggleReveal(item.id)}
+                      className="mt-3 block w-full text-left"
+                      aria-expanded={open}
+                    >
+                      {open ? (
+                        <p
+                          className="content-text text-[15px] font-medium"
+                          style={{ color: "var(--color-good)" }}
+                        >
+                          {item.back}
+                        </p>
+                      ) : (
+                        <p className="eyebrow rounded-lg bg-ink/[0.04] px-3 py-2 text-center">
+                          눌러서 정답 보기
+                        </p>
+                      )}
+                    </button>
+                    {open && item.note && (
+                      <p className="mt-3 text-sm leading-relaxed text-ink/60">{item.note}</p>
+                    )}
+                  </>
+                ) : (
+                  /* 드래그해서 담은 발췌 — 맞힐 정답이 없으니 그냥 보여준다 */
+                  <>
+                    <p className="content-text text-[17px] leading-relaxed">
+                      &ldquo;{item.front}&rdquo;
                     </p>
-                  ) : (
-                    <p className="eyebrow rounded-lg bg-ink/[0.04] px-3 py-2 text-center">
-                      눌러서 정답 보기
-                    </p>
-                  )}
-                </button>
-
-                {open && item.note && (
-                  <p className="mt-3 text-sm leading-relaxed text-ink/60">{item.note}</p>
+                    {item.note && (
+                      <p className="content-text mt-3 border-l-2 border-ink/15 pl-3 text-sm leading-relaxed text-ink/50">
+                        {item.note}
+                      </p>
+                    )}
+                  </>
                 )}
 
                 {item.entryId && (

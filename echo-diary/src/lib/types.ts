@@ -105,14 +105,19 @@ export interface UserProfile {
 /** 저장함에 담아둔 표현 */
 export interface SavedItem {
   id: string
-  kind: "correction" | "phrase"
+  /**
+   * correction — 교정 카드에서 담은 것 (내가 쓴 표현 ↔ 고친 표현)
+   * phrase     — "더 자연스럽게" 제안에서 담은 것
+   * selection  — 교정된 일기를 읽다가 드래그해서 담은 것 (정답 짝이 없다)
+   */
+  kind: "correction" | "phrase" | "selection"
   /** 원본 mistake의 id 또는 upgrade 인덱스 — 같은 걸 두 번 담지 않으려고 쓴다 */
   sourceId: string
   entryId: string
   dateKey: string
-  /** 내가 쓴 표현 */
+  /** 내가 쓴 표현. selection이면 긁어서 담은 표현 그 자체 */
   front: string
-  /** 고친 / 더 나은 표현 */
+  /** 고친 / 더 나은 표현. selection은 짝이 없어서 빈 문자열이다 */
   back: string
   note: string
   category?: string
