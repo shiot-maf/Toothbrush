@@ -97,9 +97,10 @@ npm install
 npm run dev
 ```
 
-환경변수 없이도 바로 뜹니다 — 이 리포지터리에 이미 있는 Firebase 프로젝트로
-폴백합니다. 본인 프로젝트를 쓰려면 `.env.example`을 `.env.local`로 복사해 채우세요.
-(웹 Firebase 설정값은 비밀이 아닙니다. 보안은 `firestore.rules`가 담당합니다.)
+환경변수 없이도 바로 뜹니다 — 이 앱 전용 Firebase 프로젝트(`diaryecho`)로
+폴백합니다. 다른 프로젝트를 쓰려면 `.env.example`을 `.env.local`로 복사해 채우세요.
+(웹 Firebase 설정값은 비밀이 아닙니다. 어차피 브라우저 번들에 실리고, 실제 보안은
+`firestore.rules`가 담당합니다.)
 
 첨삭을 쓰려면 [Anthropic 콘솔](https://console.anthropic.com/settings/keys)에서 키를
 발급받아 설정 화면에 넣으면 됩니다.
@@ -130,7 +131,19 @@ npm run build                                                 # 루트 도메인
 3. 배포 후 **Firebase 콘솔 → Authentication → Settings → 승인된 도메인**에
    `your-app.vercel.app`을 추가 — 안 하면 구글 로그인이 `auth/unauthorized-domain`으로
    실패합니다
-4. Firestore 규칙을 배포: `firebase deploy --only firestore:rules`
+
+### Firebase 쪽에서 한 번만 해둘 것
+
+프로젝트는 `diaryecho`입니다. 콘솔에서 세 가지가 필요합니다.
+
+1. **Authentication → Sign-in method → Google** 사용 설정
+2. **Authentication → Settings → 승인된 도메인**에 배포 도메인 추가
+   (`shiot-maf.github.io`, 그리고 Vercel로 옮기면 그 도메인도)
+3. **Firestore 데이터베이스 생성** 후 규칙 배포:
+   `firebase deploy --only firestore:rules --project diaryecho`
+
+이 셋을 하기 전까지 구글 로그인은 실패합니다. 데모 모드(`?demo=1`)는 Firebase를
+전혀 건드리지 않으므로 그와 무관하게 동작합니다.
 
 ## 네이티브 앱으로 가는 길
 
