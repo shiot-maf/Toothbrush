@@ -1,7 +1,7 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { Suspense, useCallback, useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/components/AuthProvider"
 import { Empty, ErrorNote, Loading, Panel, Pill } from "@/components/ui"
@@ -13,9 +13,17 @@ import { formatKoFull } from "@/lib/dates"
 import type { Entry, Mistake } from "@/lib/types"
 
 export default function EntryDetailPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <EntryDetail />
+    </Suspense>
+  )
+}
+
+function EntryDetail() {
   const { user, refreshProfile } = useAuth()
-  const { id } = useParams<{ id: string }>()
   const router = useRouter()
+  const id = useSearchParams().get("id") ?? ""
 
   const [entry, setEntry] = useState<Entry | null | "missing">(null)
   const [mistakes, setMistakes] = useState<Mistake[]>([])
@@ -25,7 +33,7 @@ export default function EntryDetailPage() {
   const [showOriginal, setShowOriginal] = useState(false)
 
   const load = useCallback(async () => {
-    if (!user) return
+    if (!user || !id) return
     const e = await getEntry(user.uid, id)
     if (!e) {
       setEntry("missing")
@@ -41,6 +49,20 @@ export default function EntryDetailPage() {
   }, [load])
 
   if (!user) return null
+  if (!id) {
+    return (
+      <Empty
+        title="어떤 일기인지 알 수 없어요"
+        action={
+          <Link href="/history">
+            <Pill variant="outline">기록으로</Pill>
+          </Link>
+        }
+      >
+        주소에 일기 번호가 빠져 있습니다.
+      </Empty>
+    )
+  }
   if (entry === null) return <Loading />
   if (entry === "missing") {
     return (

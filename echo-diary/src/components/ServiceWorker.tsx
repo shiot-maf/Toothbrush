@@ -7,7 +7,8 @@ export function ServiceWorker() {
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") return
     if (!("serviceWorker" in navigator)) return
-    navigator.serviceWorker.register("/sw.js").catch(() => {
+    const base = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
+    navigator.serviceWorker.register(`${base}/sw.js`).catch(() => {
       /* 등록 실패해도 앱은 정상 동작한다 */
     })
   }, [])

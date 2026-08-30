@@ -104,10 +104,29 @@ npm run dev
 첨삭을 쓰려면 [Anthropic 콘솔](https://console.anthropic.com/settings/keys)에서 키를
 발급받아 설정 화면에 넣으면 됩니다.
 
-## 배포 (Vercel)
+## 배포
+
+### GitHub Pages (설정돼 있음)
+
+`.github/workflows/echo-diary-pages.yml`이 `echo-diary/` 아래가 바뀔 때마다
+정적 내보내기를 만들어 Pages에 올립니다. 서버 코드가 하나도 없는 앱이라
+정적 호스팅으로 충분합니다.
+
+주소: `https://<사용자>.github.io/<리포>/echo-diary/`
+
+하위 경로에 올라가므로 빌드할 때 `NEXT_PUBLIC_BASE_PATH`를 넘깁니다.
+루트 도메인에 올릴 때는 비워두면 됩니다.
+
+```bash
+NEXT_PUBLIC_BASE_PATH=/Toothbrush/echo-diary npm run build   # Pages
+npm run build                                                 # 루트 도메인
+```
+
+### Vercel
 
 1. Vercel에서 이 리포를 import하고 **Root Directory를 `echo-diary`로** 지정
-2. 빌드 설정은 기본값 그대로 (Next.js 자동 인식)
+2. 빌드 설정은 기본값 그대로 (Next.js 자동 인식). `NEXT_PUBLIC_BASE_PATH`는
+   비워둡니다 — 루트 도메인에 올라가니까요.
 3. 배포 후 **Firebase 콘솔 → Authentication → Settings → 승인된 도메인**에
    `your-app.vercel.app`을 추가 — 안 하면 구글 로그인이 `auth/unauthorized-domain`으로
    실패합니다

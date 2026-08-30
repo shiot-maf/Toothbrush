@@ -158,7 +158,7 @@ export default function SavedPage() {
 
                 {item.entryId && (
                   <Link
-                    href={`/history/${item.entryId}`}
+                    href={`/history/entry?id=${item.entryId}`}
                     className="mt-3 inline-block text-[11px] text-ink/35 underline underline-offset-2 hover:text-ink"
                   >
                     원래 일기 보기

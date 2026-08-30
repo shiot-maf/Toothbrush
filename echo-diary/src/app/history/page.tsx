@@ -125,7 +125,7 @@ function EntryRow({ entry }: { entry: Entry }) {
   const clean = entry.feedback?.correctionCount === 0
 
   return (
-    <Link href={`/history/${entry.id}`} className="block">
+    <Link href={`/history/entry?id=${entry.id}`} className="block">
       <Panel className="!p-5 transition-colors hover:border-ink/25">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium">{formatKo(entry.dateKey)}</span>

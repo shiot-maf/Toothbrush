@@ -121,7 +121,7 @@ export default function WritePage() {
     const id = await saveEntry(user.uid, { id: entryId ?? undefined, dateKey, text })
     window.localStorage.removeItem(DRAFT_KEY)
     await refreshProfile()
-    router.push(`/history/${id}`)
+    router.push(`/history/entry?id=${id}`)
   }
 
   const startNew = () => {
