@@ -134,16 +134,27 @@ npm run build                                                 # 루트 도메인
 
 ### Firebase 쪽에서 한 번만 해둘 것
 
-프로젝트는 `diaryecho`입니다. 콘솔에서 세 가지가 필요합니다.
+프로젝트는 `diaryecho`입니다. 콘솔에서 세 가지가 필요하고, 전부 브라우저에서
+할 수 있습니다. 이 셋을 하기 전까지 구글 로그인은 실패합니다. 데모 모드(`?demo=1`)는
+Firebase를 전혀 건드리지 않으므로 그와 무관하게 동작합니다.
 
 1. **Authentication → Sign-in method → Google** 사용 설정
 2. **Authentication → Settings → 승인된 도메인**에 배포 도메인 추가
    (`shiot-maf.github.io`, 그리고 Vercel로 옮기면 그 도메인도)
-3. **Firestore 데이터베이스 생성** 후 규칙 배포:
-   `firebase deploy --only firestore:rules --project diaryecho`
+3. **Firestore Database → 규칙** 탭에 `firestore.rules` 내용을 붙여넣고 게시
 
-이 셋을 하기 전까지 구글 로그인은 실패합니다. 데모 모드(`?demo=1`)는 Firebase를
-전혀 건드리지 않으므로 그와 무관하게 동작합니다.
+3번은 CLI로도 할 수 있습니다. 이 디렉터리에 `firebase.json`과 `.firebaserc`가
+있으므로 프로젝트 지정 없이 바로 됩니다.
+
+```bash
+npm i -g firebase-tools   # 처음 한 번만
+firebase login            # 처음 한 번만
+cd echo-diary
+firebase deploy --only firestore:rules
+```
+
+규칙을 게시하지 않으면 Firestore 기본 잠금 정책에 걸려 일기를 저장할 때
+`permission-denied`가 납니다.
 
 ## 네이티브 앱으로 가는 길
 
