@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+/*
+ * 디자인 언어: 문학적 에디토리얼.
+ * 세리프 디스플레이(이탤릭) + 아주 작은 대문자 자간 라벨 + 넉넉한 여백.
+ * 색은 잉크 한 가지를 투명도로 굴려서 쓴다 — 팔레트가 늘어날수록
+ * 화면이 시끄러워지고, 일기는 조용해야 한다.
+ */
+
+@theme {
+  --font-display: Fraunces, "Iowan Old Style", Georgia, serif;
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+  --font-content: Lora, "Source Serif 4", Georgia, "Apple SD Gothic Neo", serif;
+  --font-mono: "Space Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* rgb(var(--ink)) 형태라서 Tailwind의 /40 같은 투명도 수식어가 그대로 먹는다 */
+  --color-ink: rgb(var(--ink));
+  --color-bg: rgb(var(--bg));
+  --color-surface: rgb(var(--surface));
+
+  --color-good: #2f7d5d;
+  --color-bad: #b23c3c;
+  --color-warn: #a8701f;
+}
+
+:root {
+  color-scheme: light;
+  --ink: 36 31 27;
+  --bg: 251 249 246;
+  --surface: 255 255 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ink: 240 236 230;
+    --bg: 20 19 18;
+    --surface: 28 26 25;
+    --color-good: #6ec49b;
+    --color-bad: #e88b8b;
+    --color-warn: #d9a441;
+  }
+}
+
+html,
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--ink));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* 아주 작은 대문자 라벨 — 화면마다 반복되는 시그니처 */
+@utility eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: rgb(var(--ink) / 0.5);
+}
+
+@utility eyebrow-lg {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: rgb(var(--ink) / 0.55);
+}
+
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+@utility panel {
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--ink) / 0.08);
+  border-radius: 1rem;
+}
+
+@utility tabnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 일기 본문 — 읽기 편한 세리프, 45ch 안쪽으로 */
+.content-text {
+  font-family: var(--font-content);
+  line-height: 1.6;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  animation: reveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--ink) / 0.15) transparent;
+}
+
+::selection {
+  background: rgb(var(--ink) / 0.1);
+}
