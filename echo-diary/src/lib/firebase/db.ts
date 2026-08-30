@@ -17,6 +17,7 @@ import { db } from "./client"
 import type { Entry, Feedback, Mistake, RawFeedback, UserProfile } from "../types"
 import type { Severity } from "../taxonomy"
 import { nextStreak, toDateKey } from "../dates"
+import { demoStore, isDemo } from "../demo/store"
 
 /*
  * Firestore 구조
@@ -42,6 +43,7 @@ export async function ensureProfile(user: {
   email: string | null
   photoURL: string | null
 }): Promise<UserProfile> {
+  if (isDemo()) return demoStore.profile()
   const snap = await getDoc(userRef(user.uid))
   if (snap.exists()) {
     const data = snap.data() as UserProfile
@@ -66,6 +68,7 @@ export async function ensureProfile(user: {
 }
 
 export async function getProfile(uid: string): Promise<UserProfile | null> {
+  if (isDemo()) return demoStore.profile()
   const snap = await getDoc(userRef(uid))
   if (!snap.exists()) return null
   const data = snap.data() as UserProfile
@@ -74,6 +77,7 @@ export async function getProfile(uid: string): Promise<UserProfile | null> {
 }
 
 export async function setWeeklyGoal(uid: string, goal: number): Promise<void> {
+  if (isDemo()) return demoStore.setWeeklyGoal(Math.max(1, Math.min(7, goal)))
   await updateDoc(userRef(uid), { weeklyGoal: Math.max(1, Math.min(7, goal)) })
 }
 
@@ -105,6 +109,7 @@ export async function saveEntry(
   uid: string,
   input: { id?: string; dateKey: string; text: string },
 ): Promise<string> {
+  if (isDemo()) return demoStore.saveEntry(input)
   const isNew = !input.id
   const ref = input.id ? entryRef(uid, input.id) : doc(entriesRef(uid))
   const now = Date.now()
@@ -140,18 +145,21 @@ async function bumpProfileForNewEntry(uid: string, dateKey: string, words: numbe
 }
 
 export async function getEntry(uid: string, id: string): Promise<Entry | null> {
+  if (isDemo()) return demoStore.getEntry(id)
   const snap = await getDoc(entryRef(uid, id))
   if (!snap.exists()) return null
   return toEntry(snap as QueryDocumentSnapshot)
 }
 
 export async function listEntries(uid: string, max = 100): Promise<Entry[]> {
+  if (isDemo()) return demoStore.entries().slice(0, max)
   const q = query(entriesRef(uid), orderBy("createdAt", "desc"), limit(max))
   const snap = await getDocs(q)
   return snap.docs.map(toEntry)
 }
 
 export async function deleteEntry(uid: string, entryId: string): Promise<void> {
+  if (isDemo()) return demoStore.deleteEntry(entryId)
   // 일기를 지우면 거기서 나온 실수 기록도 같이 지운다. 안 그러면 통계가
   // 사라진 일기를 계속 가리킨다.
   const q = query(mistakesRef(uid), where("entryId", "==", entryId))
@@ -175,6 +183,7 @@ export async function saveFeedback(
   raw: RawFeedback,
   model: string,
 ): Promise<void> {
+  if (isDemo()) return demoStore.saveFeedback(entryId, dateKey, raw)
   const now = Date.now()
 
   const existing = await getDocs(query(mistakesRef(uid), where("entryId", "==", entryId)))
@@ -237,6 +246,7 @@ function toMistake(snap: QueryDocumentSnapshot): Mistake {
 }
 
 export async function listMistakes(uid: string, max = 1000): Promise<Mistake[]> {
+  if (isDemo()) return demoStore.mistakes().slice(0, max)
   const q = query(mistakesRef(uid), orderBy("createdAt", "desc"), limit(max))
   const snap = await getDocs(q)
   return snap.docs.map(toMistake)
@@ -248,6 +258,7 @@ export async function markReviewed(
   correct: boolean,
   currentCount: number,
 ): Promise<void> {
+  if (isDemo()) return demoStore.markReviewed(mistakeId, correct)
   await updateDoc(doc(mistakesRef(uid), mistakeId), {
     reviewCount: currentCount + 1,
     lastReviewedAt: Date.now(),
@@ -274,6 +285,7 @@ import type { SavedItem } from "../types"
 const savedRef = (uid: string) => collection(db, "diaryUsers", uid, "saved")
 
 export async function listSaved(uid: string, max = 500): Promise<SavedItem[]> {
+  if (isDemo()) return demoStore.saved().slice(0, max)
   const snap = await getDocs(query(savedRef(uid), orderBy("createdAt", "desc"), limit(max)))
   return snap.docs.map((d) => {
     const data = d.data()
@@ -296,11 +308,13 @@ export async function addSaved(
   uid: string,
   item: Omit<SavedItem, "id" | "createdAt">,
 ): Promise<string> {
+  if (isDemo()) return demoStore.addSaved(item)
   const ref = doc(savedRef(uid))
   await setDoc(ref, { ...item, createdAt: Date.now() })
   return ref.id
 }
 
 export async function removeSaved(uid: string, id: string): Promise<void> {
+  if (isDemo()) return demoStore.removeSaved(id)
   await deleteDoc(doc(savedRef(uid), id))
 }

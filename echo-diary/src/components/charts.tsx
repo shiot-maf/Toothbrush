@@ -56,7 +56,7 @@ export function CategoryBars({
   )
 }
 
-/** 최근 30일 대비 그 이전 30일 변화. 음수면 개선. */
+/** 최근 30일 vs 이전 30일, 100단어당 실수 비율 변화. 음수면 개선. */
 function TrendChip({ trend }: { trend: number }) {
   if (trend === 0) return null
   const better = trend < 0
@@ -67,10 +67,10 @@ function TrendChip({ trend }: { trend: number }) {
           ? "bg-emerald-500/12 text-emerald-700 dark:text-emerald-300"
           : "bg-rose-500/12 text-rose-700 dark:text-rose-300"
       }`}
-      title="최근 30일 vs 그 이전 30일"
+      title="최근 30일 vs 그 이전 30일 · 100단어당 실수"
     >
       {better ? "▼" : "▲"}
-      {Math.abs(trend)}
+      {Math.abs(trend).toFixed(1)}
     </span>
   )
 }
@@ -147,7 +147,7 @@ export function ActivityHeatmap({
                     background:
                       level === 0
                         ? "var(--color-line)"
-                        : `color-mix(in srgb, var(--color-accent) ${level * 22 + 12}%, transparent)`,
+                        : `rgb(var(--ink) / ${0.12 + level * 0.22})`,
                   }}
                   title={
                     cell.entries
@@ -193,13 +193,13 @@ export function Sparkline({
     >
       <path
         d={`${path} L${w},${height} L0,${height} Z`}
-        fill="var(--color-accent)"
-        opacity="0.1"
+        fill="rgb(var(--ink))"
+        opacity="0.08"
       />
       <path
         d={path}
         fill="none"
-        stroke="var(--color-accent)"
+        stroke="rgb(var(--ink))"
         strokeWidth="1.5"
         vectorEffect="non-scaling-stroke"
         strokeLinejoin="round"

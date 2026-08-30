@@ -35,7 +35,7 @@ export function WeeklyGoal({
         <div className="flex min-w-0 flex-col">
           <span className="eyebrow">주간 목표</span>
           <span className="mt-0.5 truncate text-sm font-medium text-ink/90">
-            {goal}편 중 {done}편
+            {done}편 / 목표 {goal}편
           </span>
         </div>
         <div

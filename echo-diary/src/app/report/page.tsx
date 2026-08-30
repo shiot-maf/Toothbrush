@@ -208,13 +208,13 @@ export default function ReportPage() {
         <section className="grid gap-4 md:grid-cols-2">
           {improving.length > 0 && (
             <Panel>
-              <SectionTitle>나아지고 있어요</SectionTitle>
+              <SectionTitle>나아지고 있어요 (최근 30일 vs 이전 30일)</SectionTitle>
               <ul className="space-y-2.5 text-sm">
                 {improving.map((c) => (
                   <li key={c.slug} className="flex items-center gap-2">
                     <Tag color={categoryColor(c.slug)}>{c.ko}</Tag>
                     <span className="text-ink/55">
-                      최근 30일에 {Math.abs(c.trend)}회 줄었어요
+                      100단어당 {Math.abs(c.trend).toFixed(1)}회 줄었어요
                     </span>
                   </li>
                 ))}
@@ -223,12 +223,14 @@ export default function ReportPage() {
           )}
           {worsening.length > 0 && (
             <Panel>
-              <SectionTitle>늘고 있어요</SectionTitle>
+              <SectionTitle>늘고 있어요 (최근 30일 vs 이전 30일)</SectionTitle>
               <ul className="space-y-2.5 text-sm">
                 {worsening.map((c) => (
                   <li key={c.slug} className="flex items-center gap-2">
                     <Tag color={categoryColor(c.slug)}>{c.ko}</Tag>
-                    <span className="text-ink/55">최근 30일에 {c.trend}회 늘었어요</span>
+                    <span className="text-ink/55">
+                      100단어당 {c.trend.toFixed(1)}회 늘었어요
+                    </span>
                   </li>
                 ))}
               </ul>

@@ -29,7 +29,7 @@ const NAV = [
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { user, profile, loading } = useAuth()
+  const { user, profile, loading, demo } = useAuth()
   const pathname = usePathname()
   const [weekDone, setWeekDone] = useState(0)
 
@@ -96,12 +96,21 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <div className="mt-8 border-t border-ink/10 pt-6">
             <p className="truncate text-xs text-ink/50">{user.email}</p>
-            <button
-              onClick={() => signOutUser()}
-              className="mt-1.5 text-xs text-ink/40 underline-offset-2 hover:text-ink hover:underline"
-            >
-              로그아웃
-            </button>
+            {demo ? (
+              <a
+                href="/?demo=0"
+                className="mt-1.5 inline-block text-xs text-ink/40 underline-offset-2 hover:text-ink hover:underline"
+              >
+                데모 나가기
+              </a>
+            ) : (
+              <button
+                onClick={() => signOutUser()}
+                className="mt-1.5 text-xs text-ink/40 underline-offset-2 hover:text-ink hover:underline"
+              >
+                로그아웃
+              </button>
+            )}
           </div>
         </aside>
 
@@ -121,6 +130,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
             <WeeklyGoal done={weekDone} variant="mobile" />
           </header>
+
+          {demo && <DemoBanner />}
 
           {children}
         </main>
@@ -150,6 +161,23 @@ export function AppShell({ children }: { children: ReactNode }) {
           )
         })}
       </nav>
+    </div>
+  )
+}
+
+function DemoBanner() {
+  return (
+    <div className="mb-8 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-ink/10 bg-ink/[0.03] px-4 py-3">
+      <span className="eyebrow">데모 모드</span>
+      <p className="text-sm text-ink/60">
+        샘플 일기로 둘러보는 중이에요. 바꾼 내용은 저장되지 않습니다.
+      </p>
+      <a
+        href="/?demo=0"
+        className="ml-auto text-xs text-ink/40 underline underline-offset-2 hover:text-ink"
+      >
+        나가기
+      </a>
     </div>
   )
 }
@@ -246,8 +274,20 @@ function Landing() {
           <span className="h-1.5 w-1.5 rounded-full bg-bg/80" />
         </button>
         {error && <p className="mt-4 text-sm text-[var(--color-bad)]">{error}</p>}
+
         <p className="mt-5 text-xs text-ink/40">
           일기는 내 계정에만 저장되고, API 키는 브라우저를 벗어나지 않습니다.
+        </p>
+
+        <p className="mt-8 border-t border-ink/10 pt-6 text-sm text-ink/50">
+          그냥 어떤 앱인지 보고 싶다면{" "}
+          <a
+            href="/?demo=1"
+            className="font-medium text-ink underline underline-offset-2"
+          >
+            샘플 데이터로 둘러보기
+          </a>
+          {" "}— 로그인도 API 키도 필요 없습니다.
         </p>
       </div>
     </div>

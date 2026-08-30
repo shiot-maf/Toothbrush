@@ -57,6 +57,8 @@ export const CATEGORIES: CategoryDef[] = [
     hint: "who/which/that 절 사용이 틀렸을 때" },
   { slug: "negation", group: "grammar", ko: "부정문", en: "Negation",
     hint: "don't/doesn't/didn't, 이중 부정 등" },
+  { slug: "comparison", group: "grammar", ko: "비교급/최상급", en: "Comparatives",
+    hint: "-er / more, -est / most 선택, than 구문" },
 
   // ── 어휘 ──────────────────────────────────────────────
   { slug: "word-choice", group: "vocabulary", ko: "단어 선택", en: "Word choice",

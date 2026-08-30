@@ -4,6 +4,7 @@ import { FEEDBACK_TOOL } from "./schema"
 import { buildSystemPrompt, buildUserMessage } from "./prompt"
 import type { Mistake, RawFeedback } from "../types"
 import { CATEGORY_SLUGS, SEVERITIES, type Severity } from "../taxonomy"
+import { demoFeedback, isDemo } from "../demo/store"
 
 /**
  * BYO(Bring Your Own) 키 방식.
@@ -95,6 +96,12 @@ export async function requestFeedback(args: {
   recentMistakes: Mistake[]
   signal?: AbortSignal
 }): Promise<{ feedback: RawFeedback; model: string }> {
+  if (isDemo()) {
+    // 첨삭이 도는 느낌은 살리되 실제 요청은 보내지 않는다.
+    await new Promise((r) => setTimeout(r, 900))
+    return { feedback: demoFeedback(args.text), model: "demo" }
+  }
+
   const apiKey = getApiKey()
   if (!apiKey) {
     throw new FeedbackError("Anthropic API 키가 설정되지 않았어요.", "no_key")

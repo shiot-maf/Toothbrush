@@ -22,7 +22,11 @@ export interface CategoryStat {
   weight: number
   /** 전체 실수 중 비중 (0-1) */
   share: number
-  /** 최근 30일 vs 그 이전 30일 변화량 (음수 = 개선) */
+  /**
+   * 최근 30일 vs 그 이전 30일의 **100단어당 실수 비율** 변화 (음수 = 개선).
+   * 두 구간의 글 양이 크게 다르면 개수 비교는 거짓말이 되므로 비율로 잰다.
+   * 비교할 만큼 쓰지 않은 구간이 있으면 0으로 둔다(= 추이를 말하지 않는다).
+   */
   trend: number
   lastSeen: string | null
 }
@@ -71,15 +75,34 @@ export function buildOverview(entries: Entry[], mistakes: Mistake[], days = 120)
     totalWords,
     errorRate: analyzedWords > 0 ? (mistakes.length / analyzedWords) * 100 : 0,
     errorRateTrend: computeErrorRateTrend(analyzed),
-    categories: computeCategoryStats(mistakes),
+    categories: computeCategoryStats(mistakes, entries),
     groups: computeGroupStats(mistakes),
     repeated: computeRepeated(mistakes),
     activity: computeActivity(entries, mistakes, days),
   }
 }
 
-function computeCategoryStats(mistakes: Mistake[]): CategoryStat[] {
+/** 비교가 의미를 가지려면 각 구간에 이만큼은 써야 한다 */
+const TREND_MIN_WORDS = 100
+
+function computeCategoryStats(mistakes: Mistake[], entries: Entry[]): CategoryStat[] {
   const today = toDateKey()
+
+  // 최근 30일에 10편, 이전 30일에 1편을 썼다면 실수 "개수"는 당연히 늘어난다.
+  // 그건 실력이 나빠진 게 아니라 글을 더 썼다는 뜻이다. 그래서 각 구간의
+  // 단어 수로 나눠 100단어당 비율로 비교하고, 한쪽이 너무 적으면 아예 말을 아낀다.
+  const analyzed = entries.filter((e) => e.feedback)
+  const wordsBetween = (from: number, to: number) =>
+    analyzed
+      .filter((e) => {
+        const age = daysBetween(e.dateKey, today)
+        return age >= from && age <= to
+      })
+      .reduce((sum, e) => sum + e.wordCount, 0)
+
+  const recentWords = wordsBetween(0, 30)
+  const priorWords = wordsBetween(31, 60)
+  const comparable = recentWords >= TREND_MIN_WORDS && priorWords >= TREND_MIN_WORDS
   const map = new Map<
     string,
     { count: number; weight: number; recent: number; prior: number; lastSeen: string | null }
@@ -113,11 +136,17 @@ function computeCategoryStats(mistakes: Mistake[]): CategoryStat[] {
         count: e.count,
         weight: e.weight,
         share: e.count / total,
-        trend: e.recent - e.prior,
+        trend: comparable
+          ? round1((e.recent / recentWords - e.prior / priorWords) * 100)
+          : 0,
         lastSeen: e.lastSeen,
       }
     })
     .sort((a, b) => b.weight - a.weight || b.count - a.count)
+}
+
+function round1(n: number): number {
+  return Math.round(n * 10) / 10
 }
 
 function computeGroupStats(mistakes: Mistake[]): GroupStat[] {
