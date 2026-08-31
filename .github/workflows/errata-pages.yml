@@ -81,8 +81,12 @@ jobs:
         with:
           path: site
 
+  # github-pages 환경은 main에서만 배포를 허용한다. 기능 브랜치에서도 이 job이
+  # 돌면 스텝 하나 실행하기 전에 정책에 막혀 1초 만에 실패하고, PR마다 빨간불이
+  # 하나씩 붙는다. 브랜치에서는 build까지만 신호로 쓰고 배포는 main에서만 한다.
   deploy:
     needs: build
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
