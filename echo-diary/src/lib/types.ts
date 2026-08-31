@@ -1,3 +1,4 @@
+import type { Quest } from "./game"
 import type { Severity } from "./taxonomy"
 
 /** AI가 짚어낸 실수 하나. Firestore에는 이 형태로 평평하게 저장된다. */
@@ -100,6 +101,13 @@ export interface UserProfile {
   totalWords: number
   /** 한 주에 목표로 하는 일기 편수 */
   weeklyGoal: number
+
+  // ── 게이미피케이션 (WriterQuest의 체계를 가져옴) ──
+  level: number
+  exp: number
+  /** 마일스톤 레벨에서 얻은 칭호 */
+  titles: string[]
+  quests: Quest[]
 }
 
 /** 저장함에 담아둔 표현 */

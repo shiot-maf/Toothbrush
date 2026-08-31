@@ -3,6 +3,7 @@ import "./globals.css"
 import { AuthProvider } from "@/components/AuthProvider"
 import { AppShell } from "@/components/AppShell"
 import { ServiceWorker } from "@/components/ServiceWorker"
+import { ToastHost } from "@/components/Toast"
 
 const base = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthProvider>
           <AppShell>{children}</AppShell>
+          <ToastHost />
         </AuthProvider>
         <ServiceWorker />
       </body>

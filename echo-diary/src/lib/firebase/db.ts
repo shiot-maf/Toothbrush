@@ -18,6 +18,15 @@ import type { Entry, Feedback, Mistake, RawFeedback, UserProfile } from "../type
 import type { Severity } from "../taxonomy"
 import { nextStreak, toDateKey } from "../dates"
 import { demoStore, isDemo } from "../demo/store"
+import {
+  applyExp,
+  applyQuests,
+  defaultQuests,
+  notify,
+  resetQuests,
+  type Quest,
+  type QuestBump,
+} from "../game"
 
 /*
  * Firestore 구조
@@ -45,10 +54,7 @@ export async function ensureProfile(user: {
 }): Promise<UserProfile> {
   if (isDemo()) return demoStore.profile()
   const snap = await getDoc(userRef(user.uid))
-  if (snap.exists()) {
-    const data = snap.data() as UserProfile
-    return { ...data, weeklyGoal: data.weeklyGoal ?? 3 }
-  }
+  if (snap.exists()) return withGameDefaults(snap.data() as UserProfile)
 
   const profile: UserProfile = {
     uid: user.uid,
@@ -62,6 +68,10 @@ export async function ensureProfile(user: {
     totalEntries: 0,
     totalWords: 0,
     weeklyGoal: 3,
+    level: 1,
+    exp: 0,
+    titles: [],
+    quests: defaultQuests(),
   }
   await setDoc(userRef(user.uid), profile)
   return profile
@@ -71,9 +81,22 @@ export async function getProfile(uid: string): Promise<UserProfile | null> {
   if (isDemo()) return demoStore.profile()
   const snap = await getDoc(userRef(uid))
   if (!snap.exists()) return null
-  const data = snap.data() as UserProfile
-  // 목표 기능은 나중에 추가됐다 — 그 전에 만들어진 계정을 위한 기본값
-  return { ...data, weeklyGoal: data.weeklyGoal ?? 3 }
+  return withGameDefaults(snap.data() as UserProfile)
+}
+
+/**
+ * 주간 목표와 게임 필드는 앱이 굴러간 뒤에 추가됐다.
+ * 그 전에 만들어진 문서를 읽을 때 빈 자리를 메운다.
+ */
+function withGameDefaults(data: UserProfile): UserProfile {
+  return {
+    ...data,
+    weeklyGoal: data.weeklyGoal ?? 3,
+    level: data.level ?? 1,
+    exp: data.exp ?? 0,
+    titles: data.titles ?? [],
+    quests: data.quests?.length ? data.quests : defaultQuests(),
+  }
 }
 
 export async function setWeeklyGoal(uid: string, goal: number): Promise<void> {
@@ -317,4 +340,70 @@ export async function addSaved(
 export async function removeSaved(uid: string, id: string): Promise<void> {
   if (isDemo()) return demoStore.removeSaved(id)
   await deleteDoc(doc(savedRef(uid), id))
+}
+
+// ── 게이미피케이션 ────────────────────────────────────────────────
+
+/*
+ * EXP와 퀘스트는 프로필 문서 한 곳에만 산다. 별도 컬렉션으로 쪼개면
+ * 일기 한 편 쓸 때마다 읽기·쓰기가 여러 번 늘어나는데, 게임 상태는
+ * 크기가 작고 항상 통째로 필요해서 그럴 이유가 없다.
+ */
+
+export interface GameAward {
+  exp?: number
+  quests?: QuestBump[]
+}
+
+/**
+ * EXP를 주고 퀘스트를 밀어올린다. 레벨업·퀘스트 달성은 CustomEvent로 알린다
+ * (데이터 레이어가 화면을 직접 건드리지 않게).
+ *
+ * 날짜가 바뀌었으면 여기서 daily/weekly 퀘스트를 먼저 되돌린다 — 자정에
+ * 도는 스케줄러가 없으니, 다음에 무언가 할 때 리셋되면 충분하다.
+ */
+export async function award(uid: string, gain: GameAward): Promise<void> {
+  const profile = isDemo() ? demoStore.profile() : await getProfile(uid)
+  if (!profile) return
+
+  const reset = resetQuests(profile.quests ?? [])
+  const { quests, completed } = applyQuests(reset, gain.quests ?? [])
+  const level = applyExp(
+    { level: profile.level ?? 1, exp: profile.exp ?? 0, titles: profile.titles ?? [] },
+    gain.exp ?? 0,
+  )
+
+  const next = {
+    level: level.level,
+    exp: level.exp,
+    titles: level.titles,
+    quests,
+  }
+
+  if (isDemo()) demoStore.setGame(next)
+  else await updateDoc(userRef(uid), next)
+
+  for (const quest of completed) {
+    notify({ kind: "quest", title: "퀘스트 완료", detail: quest.title })
+  }
+  if (level.leveledUp) {
+    notify({ kind: "levelup", title: `레벨 ${level.level} 달성`, detail: "계속 쓰고 있어요" })
+  }
+  for (const title of level.earnedTitles) {
+    notify({ kind: "title", title: "새 칭호", detail: title })
+  }
+}
+
+/** 날짜만 바뀌었을 때 퀘스트를 되돌린다 (앱을 열었을 때 호출) */
+export async function refreshQuests(uid: string): Promise<Quest[] | null> {
+  const profile = isDemo() ? demoStore.profile() : await getProfile(uid)
+  if (!profile) return null
+
+  const quests = resetQuests(profile.quests ?? [])
+  const changed = JSON.stringify(quests) !== JSON.stringify(profile.quests)
+  if (!changed) return profile.quests
+
+  if (isDemo()) demoStore.setGame({ quests })
+  else await updateDoc(userRef(uid), { quests })
+  return quests
 }

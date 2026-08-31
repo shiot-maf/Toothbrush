@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { useAuth } from "./AuthProvider"
-import { addSaved, listSaved, removeSaved } from "@/lib/firebase/db"
+import { addSaved, award, listSaved, removeSaved } from "@/lib/firebase/db"
+import { EXP } from "@/lib/game"
 import { Bookmark } from "./icons"
 import type { SavedItem } from "@/lib/types"
 
@@ -48,7 +49,7 @@ export function SaveButton({
 }: {
   item: Omit<SavedItem, "id" | "createdAt">
 }) {
-  const { user } = useAuth()
+  const { user, refreshProfile } = useAuth()
   const saved = useSavedIndex()
   const [busy, setBusy] = useState(false)
 
@@ -66,6 +67,11 @@ export function SaveButton({
       } else {
         const id = await addSaved(user.uid, item)
         cache = [{ ...item, id, createdAt: Date.now() }, ...(cache ?? [])]
+        await award(user.uid, {
+          exp: EXP.saved,
+          quests: [{ id: "once_saved", set: cache.length }],
+        })
+        await refreshProfile()
       }
       notify()
     } finally {

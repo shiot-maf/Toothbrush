@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { useAuth } from "./AuthProvider"
-import { addSaved } from "@/lib/firebase/db"
+import { addSaved, award, listSaved } from "@/lib/firebase/db"
+import { EXP } from "@/lib/game"
 import { invalidateSaved } from "./SaveButton"
 import { Bookmark } from "./icons"
 
@@ -24,7 +25,7 @@ export function SelectionSaver({
   dateKey: string
   sourceText: string
 }) {
-  const { user } = useAuth()
+  const { user, refreshProfile } = useAuth()
   const containerRef = useRef<HTMLDivElement>(null)
   const [popup, setPopup] = useState<{
     text: string
@@ -94,6 +95,14 @@ export function SelectionSaver({
       note: findSentence(sourceText, popup.text),
     })
     invalidateSaved()
+
+    // 북마크 버튼으로 담을 때와 같은 보상을 준다.
+    await award(user.uid, {
+      exp: EXP.saved,
+      quests: [{ id: "once_saved", set: (await listSaved(user.uid)).length }],
+    })
+    await refreshProfile()
+
     setSaved(true)
     window.setTimeout(dismiss, 900)
     window.getSelection()?.removeAllRanges()

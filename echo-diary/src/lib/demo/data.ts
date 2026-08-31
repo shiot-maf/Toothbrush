@@ -1,5 +1,6 @@
 import type { Entry, Mistake, SavedItem, UserProfile } from "../types"
 import { addDays, toDateKey } from "../dates"
+import { defaultQuests } from "../game"
 
 /**
  * 데모용 씨앗 데이터.
@@ -786,6 +787,22 @@ const PENDING: { daysAgo: number; text: string }[] = [
   },
 ]
 
+/** 데모는 퀘스트가 반쯤 진행된 상태여야 화면이 심심하지 않다 */
+function demoQuests() {
+  const progress: Record<string, number> = {
+    daily_entry: 1,
+    daily_words: 46,
+    weekly_days: 4,
+    weekly_review: 8,
+    once_flawless: 0,
+    once_saved: 3,
+  }
+  return defaultQuests().map((q) => {
+    const value = progress[q.id] ?? 0
+    return { ...q, progress: value, done: value >= q.target }
+  })
+}
+
 let cached: {
   profile: UserProfile
   entries: Entry[]
@@ -910,6 +927,11 @@ export function demoData() {
       totalEntries: entries.length,
       totalWords,
       weeklyGoal: 3,
+      // 일기 14편을 쓴 사람이 도달했을 법한 상태
+      level: 4,
+      exp: 720,
+      titles: [],
+      quests: demoQuests(),
     },
     entries,
     mistakes,
