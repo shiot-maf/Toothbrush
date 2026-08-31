@@ -1,22 +1,18 @@
-# 이 리포의 GitHub Pages 사이트 전체를 만든다.
+# 이 리포의 GitHub Pages 사이트를 만든다.
 #
 # Pages 사이트는 리포당 하나뿐이다. 예전에는 Pages가 "Deploy from a branch"
-# 모드였고, GitHub 내장 Jekyll 빌더가 리포 소스를 그대로 올리고 있었다.
+# 모드였고 GitHub 내장 Jekyll 빌더가 리포 소스를 그대로 올리고 있었다.
 # 거기에 이 워크플로를 얹으면서 발행자가 둘이 됐고, 같은 푸시에 둘 다 떠서
-# 나중에 끝난 쪽이 덮어썼다 — Jekyll이 3초 늦게 끝나 이겼고, 그래서
-# /errata/ 에는 앱 대신 errata/README.md가 렌더링돼 나왔다.
+# 나중에 끝난 쪽이 덮어썼다. 이제 발행자는 이 워크플로 하나다.
 #
-# 이제 Pages 소스를 "GitHub Actions"로 두고 발행자를 이 워크플로 하나로
-# 통일한다. 그러면 Jekyll이 올려주던 것도 여기서 같이 올려야 한다.
+# ERRATA는 전용 리포(shiot-maf/Errata)로 독립했다. 여기서는 예전 주소로 들어오는
+# 북마크와 이미 설치된 PWA를 새 주소로 보내주기만 한다.
 name: Deploy Pages
 
 on:
   push:
-    branches:
-      - main
-      - claude/english-diary-learning-app-kk9diu
+    branches: [main]
     paths:
-      - "errata/**"
       - "attraction-journal/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -26,10 +22,12 @@ permissions:
   pages: write
   id-token: write
 
-# 배포는 한 번에 하나만. 진행 중인 배포를 취소하지는 않는다.
 concurrency:
   group: pages
   cancel-in-progress: false
+
+env:
+  ERRATA_URL: https://shiot-maf.github.io/Errata/
 
 jobs:
   build:
@@ -37,53 +35,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: errata/package-lock.json
-
-      - name: Install
-        working-directory: errata
-        run: npm ci
-
-      - name: Typecheck
-        working-directory: errata
-        run: npx tsc --noEmit
-
-      # Pages는 사이트를 리포 이름 아래에 서빙한다. 이 앱은 모노레포의 한 프로젝트라
-      # 다시 errata/ 아래에 두어 다른 프로젝트와 자리를 나눠 쓴다.
-      - name: Build ERRATA (static export)
-        working-directory: errata
-        env:
-          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}/errata
-        run: npm run build
-
       - name: Assemble site
         run: |
           mkdir -p site
 
-          # ERRATA — 빌드 산출물
-          mkdir -p site/errata
-          cp -r errata/out/. site/errata/
-
           # attraction-journal — 빌드가 없는 정적 파일. 예전 Jekyll이 소스를
-          # 그대로 복사해 서빙하던 것과 같은 결과이므로 주소도 그대로 유지된다.
+          # 그대로 복사해 서빙하던 것과 결과가 같으므로 주소도 그대로 유지된다.
           mkdir -p site/attraction-journal
           cp -r attraction-journal/. site/attraction-journal/
 
-          # 예전 주소(/echo-diary/)로 들어오는 북마크와 설치된 PWA를 새 주소로 보낸다
-          mkdir -p site/echo-diary
-          cat > site/echo-diary/index.html <<'HTML'
+          # ERRATA가 쓰던 예전 주소 둘을 새 리포로 보낸다. 설치된 PWA와
+          # 북마크가 죽지 않도록 남겨둔다.
+          for old in errata echo-diary; do
+            mkdir -p "site/$old"
+            cat > "site/$old/index.html" <<HTML
           <!doctype html>
           <meta charset="utf-8">
           <title>ERRATA</title>
-          <meta http-equiv="refresh" content="0; url=../errata/">
-          <p>ERRATA로 이름이 바뀌었습니다. <a href="../errata/">새 주소로 이동</a></p>
+          <meta http-equiv="refresh" content="0; url=${ERRATA_URL}">
+          <p>ERRATA는 전용 리포로 옮겼습니다.
+             <a href="${ERRATA_URL}">새 주소로 이동</a></p>
           HTML
+          done
 
-          # 루트는 어느 한쪽으로 보내지 않고 목록을 보여준다.
-          cat > site/index.html <<'HTML'
+          # 루트는 목록을 보여준다.
+          cat > site/index.html <<HTML
           <!doctype html>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -110,13 +86,12 @@ jobs:
           <main>
             <h1>Toothbrush</h1>
             <ul>
-              <li><a href="./errata/"><b>ERRATA</b><span>영어일기를 쓰고, 틀린 것을 세어 둡니다</span></a></li>
               <li><a href="./attraction-journal/"><b>끌어당김 저널</b><span>오늘의 나 · 미리 감사 · HARD 노트</span></a></li>
+              <li><a href="${ERRATA_URL}"><b>ERRATA &rarr;</b><span>영어일기를 쓰고, 틀린 것을 세어 둡니다 — 전용 리포로 이전</span></a></li>
             </ul>
           </main>
           HTML
 
-          # Pages가 _next 같은 밑줄 폴더를 Jekyll로 삼키지 않게 한다
           touch site/.nojekyll
 
       - uses: actions/configure-pages@v5
@@ -127,12 +102,8 @@ jobs:
         with:
           path: site
 
-  # github-pages 환경은 main에서만 배포를 허용한다. 기능 브랜치에서도 이 job이
-  # 돌면 스텝 하나 실행하기 전에 정책에 막혀 1초 만에 실패하고, PR마다 빨간불이
-  # 하나씩 붙는다. 브랜치에서는 build까지만 신호로 쓰고 배포는 main에서만 한다.
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
