@@ -2,11 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
+import type { Entry } from "@/lib/types"
 import { useAuth } from "./AuthProvider"
 import { signInWithGoogle, signOutUser } from "@/lib/firebase/auth"
 import { WeeklyGoal } from "./WeeklyGoal"
-import { listEntries } from "@/lib/firebase/db"
+import { MonthCalendar } from "./MonthCalendar"
+import { QuestPanel } from "./QuestPanel"
+import { listEntries, refreshQuests } from "@/lib/firebase/db"
 import { currentWeekKeys } from "@/lib/dates"
 import {
   Bookmark,
@@ -31,26 +34,33 @@ const NAV = [
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, profile, loading, demo } = useAuth()
   const pathname = usePathname()
-  const [weekDone, setWeekDone] = useState(0)
+  const [entries, setEntries] = useState<Entry[]>([])
 
-  // 주간 목표 진행률. 일기를 쓰면 profile.totalEntries가 바뀌므로 그때 다시 센다.
+  // 주간 목표와 캘린더가 같은 목록을 쓰므로 한 번만 읽는다.
+  // 일기를 쓰면 profile.totalEntries가 바뀌므로 그때 다시 읽는다.
   useEffect(() => {
     if (!user) return
     let cancelled = false
-    listEntries(user.uid, 40)
-      .then((entries) => {
-        if (cancelled) return
-        const week = new Set(currentWeekKeys())
-        const days = new Set(
-          entries.filter((e) => week.has(e.dateKey)).map((e) => e.dateKey),
-        )
-        setWeekDone(days.size)
+    listEntries(user.uid, 400)
+      .then((list) => {
+        if (!cancelled) setEntries(list)
       })
       .catch(() => {})
     return () => {
       cancelled = true
     }
   }, [user, profile?.totalEntries])
+
+  // 자정에 도는 스케줄러가 없으니 앱을 열 때 지난 퀘스트를 되돌린다.
+  useEffect(() => {
+    if (!user) return
+    void refreshQuests(user.uid).catch(() => {})
+  }, [user])
+
+  const weekDone = useMemo(() => {
+    const week = new Set(currentWeekKeys())
+    return new Set(entries.filter((e) => week.has(e.dateKey)).map((e) => e.dateKey)).size
+  }, [entries])
 
   if (loading) {
     return (
@@ -65,8 +75,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-6 md:grid-cols-12 md:gap-16 md:py-16">
-        {/* 데스크톱 사이드바 */}
-        <aside className="hidden md:sticky md:top-16 md:col-span-3 md:block md:self-start">
+        {/*
+          데스크톱 사이드바.
+          주간목표 + 캘린더 + 퀘스트가 쌓이면 화면 높이를 넘는데, sticky만 걸면
+          넘친 부분에 영원히 닿을 수 없다. 안쪽에서 따로 스크롤되게 한다.
+        */}
+        <aside className="hidden md:sticky md:top-16 md:col-span-3 md:block md:max-h-[calc(100dvh-6rem)] md:self-start md:overflow-y-auto md:pr-2 md:[scrollbar-width:none]">
           <nav aria-label="주 메뉴" className="flex flex-col gap-8">
             <Link href="/" className="inline-flex items-baseline gap-2">
               <span className="display text-3xl italic text-ink">Echo</span>
@@ -91,8 +105,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               })}
             </div>
           </nav>
-          <div className="mt-12">
+          <div className="mt-12 space-y-8">
             <WeeklyGoal done={weekDone} variant="sidebar" />
+            <MonthCalendar entries={entries} />
+            <QuestPanel />
           </div>
           <div className="mt-8 border-t border-ink/10 pt-6">
             <p className="truncate text-xs text-ink/50">{user.email}</p>
@@ -129,6 +145,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </div>
             <WeeklyGoal done={weekDone} variant="mobile" />
+            {pathname === "/" && (
+              <details className="mb-8 rounded-2xl border border-ink/10 px-4 py-3">
+                <summary className="eyebrow cursor-pointer">기록 캘린더</summary>
+                <div className="pt-2">
+                  <MonthCalendar entries={entries} />
+                </div>
+              </details>
+            )}
           </header>
 
           {demo && <DemoBanner />}

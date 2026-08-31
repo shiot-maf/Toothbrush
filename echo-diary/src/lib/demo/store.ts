@@ -60,6 +60,10 @@ export const demoStore = {
     store().profile.weeklyGoal = goal
   },
 
+  setGame(patch: Partial<Pick<UserProfile, "level" | "exp" | "titles" | "quests">>) {
+    Object.assign(store().profile, patch)
+  },
+
   saveEntry(input: { id?: string; dateKey: string; text: string }): string {
     const s = store()
     const words = input.text.trim() ? input.text.trim().split(/\s+/).length : 0

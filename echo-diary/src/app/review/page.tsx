@@ -5,7 +5,8 @@ import Link from "next/link"
 import { useAuth } from "@/components/AuthProvider"
 import { PageHeader } from "@/components/AppShell"
 import { Empty, Loading, Panel, Pill, Tag } from "@/components/ui"
-import { listMistakes, markReviewed } from "@/lib/firebase/db"
+import { award, listMistakes, markReviewed } from "@/lib/firebase/db"
+import { EXP } from "@/lib/game"
 import { prioritizeForReview } from "@/lib/analysis/aggregate"
 import { answersMatch, diffWords } from "@/lib/analysis/diff"
 import { categoryColor, getCategory } from "@/lib/taxonomy"
@@ -17,7 +18,7 @@ import type { Mistake } from "@/lib/types"
  * 내 일기에서 나온 것이라 "왜 이걸 풀어야 하는지"가 자명하다.
  */
 export default function ReviewPage() {
-  const { user } = useAuth()
+  const { user, refreshProfile } = useAuth()
   const [deck, setDeck] = useState<Mistake[] | null>(null)
   const [index, setIndex] = useState(0)
   const [answer, setAnswer] = useState("")
@@ -43,6 +44,13 @@ export default function ReviewPage() {
       wrong: s.wrong + (correct ? 0 : 1),
     }))
     await markReviewed(user.uid, current.id, correct, current.reviewCount)
+
+    // 문제를 푼 것 자체가 주간 퀘스트 진행이고, 맞히면 EXP가 붙는다.
+    await award(user.uid, {
+      exp: correct ? EXP.reviewCorrect : 0,
+      quests: [{ id: "weekly_review", add: 1 }],
+    })
+    await refreshProfile()
   }
 
   const next = () => {

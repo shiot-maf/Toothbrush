@@ -9,11 +9,31 @@ import { ApiKeyPrompt } from "@/components/ApiKeyPrompt"
 import { FeedbackView } from "@/components/FeedbackView"
 import { TextSizeControl, useTextSize } from "@/components/TextSizeControl"
 import { getApiKey, requestFeedback, FeedbackError } from "@/lib/ai/client"
-import { countWords, getEntry, listMistakes, saveEntry, saveFeedback } from "@/lib/firebase/db"
+import {
+  award,
+  countWords,
+  getEntry,
+  listEntries,
+  listMistakes,
+  saveEntry,
+  saveFeedback,
+} from "@/lib/firebase/db"
+import { EXP } from "@/lib/game"
+import { currentWeekKeys } from "@/lib/dates"
 import { toDateKey, formatKoFull } from "@/lib/dates"
 import type { Entry, Mistake, RawCorrection } from "@/lib/types"
 
 const DRAFT_KEY = "echodiary.draft"
+
+/**
+ * 이번 주에 일기를 쓴 "날"의 수. 하루에 두 편을 써도 하루로 센다 —
+ * 주 5일 퀘스트는 습관을 재는 것이지 분량을 재는 게 아니다.
+ */
+async function countWeekDays(uid: string): Promise<number> {
+  const week = new Set(currentWeekKeys())
+  const recent = await listEntries(uid, 40)
+  return new Set(recent.filter((e) => week.has(e.dateKey)).map((e) => e.dateKey)).size
+}
 
 const NUDGES = [
   "What was the best part of today?",
@@ -100,6 +120,22 @@ export default function WritePage() {
       setEntry(await getEntry(user.uid, id))
       setCorrections(feedback.corrections)
       window.localStorage.removeItem(DRAFT_KEY)
+
+      await award(user.uid, {
+        exp:
+          EXP.entry +
+          Math.min(EXP.maxWordBonus, Math.floor(words / 10) * EXP.perTenWords) +
+          EXP.corrected +
+          (feedback.corrections.length === 0 ? EXP.flawless : 0),
+        quests: [
+          { id: "daily_entry", add: 1 },
+          { id: "daily_words", set: words },
+          { id: "weekly_days", set: await countWeekDays(user.uid) },
+          ...(feedback.corrections.length === 0
+            ? [{ id: "once_flawless", add: 1 }]
+            : []),
+        ],
+      })
       await refreshProfile()
     } catch (e) {
       if ((e as Error).name === "AbortError") return
@@ -120,6 +156,15 @@ export default function WritePage() {
     if (!text.trim()) return
     const id = await saveEntry(user.uid, { id: entryId ?? undefined, dateKey, text })
     window.localStorage.removeItem(DRAFT_KEY)
+
+    await award(user.uid, {
+      exp: EXP.entry + Math.min(EXP.maxWordBonus, Math.floor(words / 10) * EXP.perTenWords),
+      quests: [
+        { id: "daily_entry", add: 1 },
+        { id: "daily_words", set: words },
+        { id: "weekly_days", set: await countWeekDays(user.uid) },
+      ],
+    })
     await refreshProfile()
     router.push(`/history/entry?id=${id}`)
   }
