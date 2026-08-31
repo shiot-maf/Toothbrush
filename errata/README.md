@@ -159,7 +159,8 @@ npm run dev
 정적 내보내기를 만들어 Pages에 올립니다. 서버 코드가 하나도 없는 앱이라
 정적 호스팅으로 충분합니다.
 
-주소: `https://<사용자>.github.io/<리포>/errata/`
+주소: <https://shiot-maf.github.io/Toothbrush/errata/>
+데모: <https://shiot-maf.github.io/Toothbrush/errata/?demo=1> (로그인도 API 키도 없이 샘플 데이터로 둘러보기)
 
 하위 경로에 올라가므로 빌드할 때 `NEXT_PUBLIC_BASE_PATH`를 넘깁니다.
 루트 도메인에 올릴 때는 비워두면 됩니다.

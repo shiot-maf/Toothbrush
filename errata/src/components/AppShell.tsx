@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { appUrl } from "@/lib/basePath"
 import { useAuth } from "./AuthProvider"
 import { signInWithGoogle, signOutUser } from "@/lib/firebase/auth"
 import { listEntries, refreshQuests } from "@/lib/firebase/db"
@@ -172,7 +173,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </p>
                 {demo ? (
                   <a
-                    href="/?demo=0"
+                    href={appUrl("/?demo=0")}
                     className="mt-1.5 inline-block font-mono text-[10px] tracking-[0.08em] text-ink-4 uppercase hover:text-ink"
                   >
                     데모 나가기
@@ -243,7 +244,7 @@ function DemoBanner() {
         샘플 일기로 둘러보는 중이에요. 바꾼 내용은 저장되지 않습니다.
       </p>
       <a
-        href="/?demo=0"
+        href={appUrl("/?demo=0")}
         className="ml-auto font-mono text-[10px] tracking-[0.08em] text-ink-3 uppercase underline underline-offset-2 hover:text-ink"
       >
         나가기
@@ -351,7 +352,7 @@ function Landing() {
             </p>
             <p className="mt-6 border-t border-rule-2 pt-5 text-sm text-ink-3">
               그냥 어떤 앱인지 보고 싶다면{" "}
-              <a href="/?demo=1" className="font-medium text-ink underline underline-offset-4">
+              <a href={appUrl("/?demo=1")} className="font-medium text-ink underline underline-offset-4">
                 샘플 데이터로 둘러보기
               </a>{" "}
               — 로그인도 API 키도 필요 없습니다.
