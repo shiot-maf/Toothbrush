@@ -172,9 +172,9 @@ export function Pill({
       onClick={onClick}
       disabled={disabled || busy}
       aria-busy={busy}
-      className={`inline-flex items-center justify-center gap-2 font-mono text-xs font-semibold tracking-[0.14em] uppercase transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap font-mono text-xs font-semibold tracking-[0.14em] uppercase transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
         variant === "quiet" ? "py-3" : "px-6 py-3.5"
-      } ${block ? "w-full" : ""} ${styles} ${className}`}
+      } ${block ? "w-full sm:w-auto" : ""} ${styles} ${className}`}
     >
       {busy && <SpinnerIcon className="h-3.5 w-3.5" />}
       {children}

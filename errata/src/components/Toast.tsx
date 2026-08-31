@@ -43,7 +43,7 @@ export function ToastHost() {
       {items.map((item) => (
         <div
           key={item.id}
-          className="reveal pointer-events-auto flex items-center gap-3 rounded-full bg-ink px-5 py-3 text-bg shadow-xl shadow-ink/20"
+          className="reveal pointer-events-auto flex items-center gap-3 rounded-full bg-ink px-5 py-3 text-sheet shadow-xl shadow-ink/20"
         >
           <span aria-hidden className="text-sm">
             {item.kind === "levelup" ? "★" : item.kind === "title" ? "✦" : "✓"}

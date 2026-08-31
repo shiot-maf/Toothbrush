@@ -248,7 +248,7 @@ function Toggle({
     <button
       onClick={onClick}
       className={`rounded-full px-3 py-1 transition-colors ${
-        active ? "bg-ink text-bg" : "text-ink-3 hover:text-ink"
+        active ? "bg-ink text-sheet" : "text-ink-3 hover:text-ink"
       }`}
     >
       {children}

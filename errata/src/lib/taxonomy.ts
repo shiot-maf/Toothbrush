@@ -26,15 +26,18 @@ export interface CategoryDef {
  *
  * 무지개로 칠하면 종이·먹 화면에서 혼자 시끄러워진다. 가장 큰 영역(문법)에만
  * 강조색인 빨간펜을 주고 나머지는 종이와 어울리는 낮은 채도로 내린다.
+ *
+ * 실제 값은 CSS 변수에 있다. 여기에 색을 박아두면 테마가 바뀌어도 따라오지
+ * 못해서, 먹지 화면에서 어두운 색이 어두운 바탕에 묻힌다.
  */
 export const CATEGORY_GROUPS: Record<
   CategoryGroup,
   { ko: string; color: string; bg: string }
 > = {
-  grammar: { ko: "문법", color: "hsl(6 64% 46%)", bg: "hsl(6 62% 96%)" },
-  vocabulary: { ko: "어휘", color: "hsl(28 42% 40%)", bg: "hsl(28 45% 95%)" },
-  structure: { ko: "문장 구조", color: "hsl(205 28% 40%)", bg: "hsl(205 30% 95%)" },
-  mechanics: { ko: "표기", color: "hsl(150 26% 34%)", bg: "hsl(150 28% 95%)" },
+  grammar: { ko: "문법", color: "var(--color-g-grammar)", bg: "var(--color-g-grammar-soft)" },
+  vocabulary: { ko: "어휘", color: "var(--color-g-vocab)", bg: "var(--color-g-vocab-soft)" },
+  structure: { ko: "문장 구조", color: "var(--color-g-structure)", bg: "var(--color-g-structure-soft)" },
+  mechanics: { ko: "표기", color: "var(--color-g-mechanics)", bg: "var(--color-g-mechanics-soft)" },
 }
 
 export const CATEGORIES: CategoryDef[] = [

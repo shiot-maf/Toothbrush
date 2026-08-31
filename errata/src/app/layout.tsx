@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/AuthProvider"
 import { AppShell } from "@/components/AppShell"
 import { ServiceWorker } from "@/components/ServiceWorker"
 import { ToastHost } from "@/components/Toast"
+import { THEME_BOOTSTRAP } from "@/lib/theme"
 
 const base = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
@@ -21,8 +22,10 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  // 종이 한 가지로만 간다 — 다크 팔레트는 아직 없다
-  themeColor: "#faf7f1",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf7f1" },
+    { media: "(prefers-color-scheme: dark)", color: "#181614" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -30,7 +33,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        {/* React가 렌더되기 전에 테마를 박아야 밝은 화면이 번쩍이지 않는다 */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
+      </head>
       <body>
         <AuthProvider>
           <AppShell>{children}</AppShell>

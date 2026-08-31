@@ -161,7 +161,7 @@ function SelectionPopup({
       <button
         onClick={onSave}
         disabled={saved}
-        className="flex items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[11px] font-bold tracking-[0.16em] text-bg uppercase shadow-xl shadow-ink/20 transition-transform hover:scale-[1.03] active:scale-[0.97] disabled:hover:scale-100"
+        className="flex items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[11px] font-bold tracking-[0.16em] text-sheet uppercase shadow-xl shadow-ink/20 transition-transform hover:scale-[1.03] active:scale-[0.97] disabled:hover:scale-100"
       >
         <Bookmark className="h-3.5 w-3.5" filled={saved} />
         {saved ? "저장됨" : "저장함에 담기"}

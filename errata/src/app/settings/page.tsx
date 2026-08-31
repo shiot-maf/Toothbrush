@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider"
 import { PageHeader } from "@/components/AppShell"
 import { ErrorNote, Pill, Section } from "@/components/ui"
 import { TextSizeControl, useTextSize } from "@/components/TextSizeControl"
+import { ThemeControl } from "@/components/ThemeControl"
 import {
   MODELS,
   clearApiKey,
@@ -154,6 +155,13 @@ export default function SettingsPage() {
             </option>
           ))}
         </select>
+      </Section>
+
+      <Section
+        title="테마"
+        description="먹지는 어두운 곳에서 눈이 덜 부십니다. 기기 설정을 따르는 게 기본입니다."
+      >
+        <ThemeControl />
       </Section>
 
       <Section
