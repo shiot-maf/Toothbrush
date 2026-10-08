@@ -241,9 +241,10 @@ export async function getVisionPlan(uid) {
 export const RESET_DAYS  = 90;
 export const RESET_WEEKS = 13;
 
-export function saveReset90(uid, data) {
+// 바뀐 칸만 넘긴다. merge로 합쳐지므로 다른 기기에서 고친 칸을 덮어쓰지 않는다.
+export function saveReset90(uid, changes) {
   const ref = doc(db, "users", uid, "reset90", "current");
-  return setDoc(ref, { ...data, updatedAt: Timestamp.now() });
+  return setDoc(ref, { ...changes, updatedAt: Timestamp.now() }, { merge: true });
 }
 
 export async function getReset90(uid) {

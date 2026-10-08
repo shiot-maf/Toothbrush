@@ -380,29 +380,66 @@
     }
 
     // ── 자동 저장 ─────────────────────────────────────────────────────────
-    let currentUid = null, loaded = {}, timer = null, dirty = false;
+    // 저장은 바뀐 칸만 보낸다 — 두 기기에서 서로 다른 칸을 고쳐도 덮어쓰지 않도록.
+    // 서버에 닿기 전에 페이지를 떠나면(새로고침·탭 닫기) 쓰기가 사라지므로,
+    // 아직 저장되지 않은 칸은 이 기기에 따로 들고 있다가 다음에 열 때 다시 보낸다.
+    let currentUid = null, timer = null, inFlight = Promise.resolve(), saving = 0;
+    let changed = {};                 // data-k 경로 → 아직 서버에 안 보낸 값
+    let unsaved = {};                 // 보냈든 안 보냈든 서버 도착이 확인되지 않은 값 — 임시본의 내용
+    let needStart = false;            // 서버에 시작일이 없으면 첫 편집 때 같이 보낸다
     const saveState = document.getElementById('saveState');
+    const pendingKey = () => `reset90-pending-${currentUid}`;
+    const isDirty = () => Object.keys(changed).length > 0;
 
-    async function doSave() {
-      if (!currentUid || !dirty) return;
-      dirty = false;
-      saveState.textContent = '저장 중…';
+    function keepPending() {
       try {
-        loaded = { ...loaded, ...collect() };
-        delete loaded.updatedAt;
-        await saveReset90(currentUid, loaded);
-        saveState.textContent = '저장됨';
-      } catch (e) {
-        dirty = true;
+        if (Object.keys(unsaved).length) localStorage.setItem(pendingKey(), JSON.stringify(unsaved));
+        else localStorage.removeItem(pendingKey());
+      } catch (e) {}
+    }
+    function readPending() {
+      try { return JSON.parse(localStorage.getItem(pendingKey()) || 'null'); } catch (e) { return null; }
+    }
+    const fieldValue = el => el.type === 'checkbox' ? el.checked : el.value.trim();
+
+    function doSave() {
+      if (!currentUid || !isDirty()) return inFlight;
+      const batch = changed;
+      changed = {};
+      const nested = {};
+      Object.entries(batch).forEach(([k, v]) => setPath(nested, k, v));
+      saving++;
+      saveState.textContent = '저장 중…';
+      inFlight = inFlight.then(() => saveReset90(currentUid, nested)).then(() => {
+        saving--;
+        // 서버에 닿은 칸만 임시본에서 뺀다 (그사이 다시 고친 칸은 남긴다)
+        Object.entries(batch).forEach(([k, v]) => { if (unsaved[k] === v) delete unsaved[k]; });
+        keepPending();
+        if (!saving && !isDirty()) saveState.textContent = '저장됨';
+      }).catch(() => {
+        saving--;
+        // 그사이 다시 고친 칸은 새 값을 살리고, 나머지만 되돌려 놓는다
+        changed = { ...batch, ...changed };
+        keepPending();
         saveState.textContent = '저장 실패';
         showToast('저장에 실패했습니다. 잠시 후 다시 시도해요.');
-      }
+        clearTimeout(timer);
+        timer = setTimeout(doSave, 5000);
+      });
+      return inFlight;
     }
-    function queueSave() {
-      dirty = true;
+    function queueSave(el) {
+      if (needStart) { changed.startDate ??= document.querySelector('[data-k="startDate"]').value; needStart = false; }
+      changed[el.dataset.k] = unsaved[el.dataset.k] = fieldValue(el);
+      keepPending();
       saveState.textContent = '';
       clearTimeout(timer);
       timer = setTimeout(doSave, 800);
+    }
+    // 남은 저장을 지금 보내고, 이미 보낸 것까지 끝날 때를 기다린다
+    function flushSave() {
+      clearTimeout(timer);
+      return doSave();
     }
 
     // ── 섹션 이동 ─────────────────────────────────────────────────────────
@@ -432,13 +469,17 @@
     else {
       onAuthChange(u => { if (!u) window.location.replace('index.html'); });
       currentUid = user.uid;
+      let loaded = {};
       try {
         loaded = (await getReset90(user.uid)) || {};
       } catch (e) {
-        loaded = {};
         showToast('기록을 불러오지 못했습니다.');
       }
-      if (!loaded.startDate) loaded.startDate = formatDate(new Date());
+      // 지난번에 서버에 닿지 못한 칸이 있으면 그것이 더 최신이다
+      const pending = readPending();
+      if (pending) { unsaved = pending; changed = { ...pending }; Object.entries(pending).forEach(([k, v]) => setPath(loaded, k, v)); }
+      // 시작일이 없으면 오늘로 보여 주되, 열어 보기만 해서는 시작되지 않게 첫 편집 때 저장한다
+      if (!loaded.startDate) { loaded.startDate = formatDate(new Date()); needStart = true; }
 
       render();
       fill(loaded);
@@ -461,10 +502,10 @@
           const np = renderProgress();
           if (el.dataset.k === 'startDate' && np?.started && !np.finished) document.getElementById(`week-${np.week}`).open = true;
         }
-        queueSave();
+        queueSave(el);
       });
       document.getElementById('workbook').addEventListener('change', e => {
-        if (e.target.type === 'checkbox') queueSave();
+        if (e.target.type === 'checkbox' && e.target.dataset.k) queueSave(e.target);
       });
       // 펼친 주의 textarea는 처음 보일 때 높이를 다시 잰다
       document.querySelectorAll('.rs-week').forEach(d => d.addEventListener('toggle', () => {
@@ -481,9 +522,22 @@
       // 리포트·홈에서 #week-n, #identity 등으로 들어오면 그 자리로
       if (location.hash) requestAnimationFrame(() => goTo(location.hash.slice(1)));
 
-      // 페이지를 떠나기 직전 남은 저장을 밀어낸다
-      document.addEventListener('visibilitychange', () => { if (document.hidden) { clearTimeout(timer); doSave(); } });
-      window.addEventListener('pagehide', () => { clearTimeout(timer); doSave(); });
+      if (pending) flushSave();
+
+      // 앱 안의 링크(하단 탭 등)는 저장이 끝난 뒤에 이동한다
+      document.addEventListener('click', async e => {
+        const a = e.target.closest('a[href]');
+        if (!a || a.target || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey) return;
+        if (!isDirty() && !saving) return;
+        e.preventDefault();
+        saveState.textContent = '저장 중…';
+        await Promise.race([flushSave(), new Promise(r => setTimeout(r, 5000))]);
+        location.href = a.href;
+      });
+      // 새로고침·탭 닫기는 기다려 줄 수 없으니 일단 보내 본다 (안 닿으면 임시본으로 복구)
+      document.addEventListener('visibilitychange', () => { if (document.hidden) flushSave(); });
+      window.addEventListener('online', () => flushSave());
+      window.addEventListener('pagehide', () => flushSave());
     }
   </script>
 </body>
