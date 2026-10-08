@@ -2,6 +2,20 @@
 
 ---
 
+## v3.4 — 2026-10-08
+### 90 DAY RESET 합류
+- 노션 「90 DAY RESET · 90일 인생 리셋 워크북」을 앱 안으로 옮김 (`reset.html`)
+  - 시작 · 01 RESET · 02 VISION · 03 MY THREE · 04 IDENTITY · 05 SYSTEM · 06 WEEKLY RESET(13주) · FINISH LINE
+  - 시작일을 정하면 DAY N/90, 진행 중인 주차, DAY 90 날짜를 자동 계산
+  - 10X QUESTION: 현재 목표의 숫자에 ×10을 자동 계산
+  - 입력하면 자동 저장 (Firestore `users/{uid}/reset90/current`)
+- 하단 탭에 **90일** 추가 (5탭)
+- 기존 노트와 연결
+  - 04 IDENTITY 선언 → 자기증명 일기의 선언 칸에 미리 채움 (그날 쓴 기록이 없을 때)
+  - 05 SYSTEM 반복할 행동 → 홈 **오늘의 실천**에 자동 추가 (HARD D 항목과 함께)
+  - 홈: 90 DAY RESET 진행 카드, 일요일엔 WEEKLY RESET 알림
+  - 주간 리포트: 이번 주 KEEP / PROBLEM / TRY 카드
+
 ## v3.3 — 2026-05-13
 ### 입력 UX 개선
 - 증거(오늘의 나), 감사 항목(미리 감사), 감정(미리 감사) 입력칸 auto-resize 적용

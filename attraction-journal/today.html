@@ -68,7 +68,7 @@
   <script type="module">
     import {
       waitForAuth, onAuthChange,
-      saveIdentityDiary, getIdentityDiary,
+      saveIdentityDiary, getIdentityDiary, getReset90,
       formatDate,
     } from './firebase.js';
     import { initTheme, showToast } from './utils.js';
@@ -79,10 +79,16 @@
     dateInput.value = formatDate(new Date());
 
     let currentUid = null;
+    let resetIdentity = '';
 
     async function loadData(uid, date) {
       const data = await getIdentityDiary(uid, date);
-      if (!data) return;
+      if (!data) {
+        // 아직 안 쓴 날은 90 DAY RESET의 IDENTITY 선언으로 시작한다
+        const decl = document.getElementById('declaration');
+        if (resetIdentity && !decl.value) decl.value = resetIdentity;
+        return;
+      }
       document.getElementById('declaration').value = data.declaration  || '';
       document.getElementById('ev0').value         = data.evidence?.[0] || '';
       document.getElementById('ev1').value         = data.evidence?.[1] || '';
@@ -100,6 +106,9 @@
     else {
       onAuthChange(u => { if (!u) window.location.replace('index.html'); });
       currentUid = user.uid;
+      try {
+        resetIdentity = (await getReset90(user.uid))?.identity?.statement?.trim() || '';
+      } catch (e) {}
       await loadData(user.uid, dateInput.value);
     }
 

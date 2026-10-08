@@ -1,4 +1,4 @@
-const CACHE = 'aj-v1';
+const CACHE = 'aj-v2';
 const PRECACHE = [
   '/',
   '/index.html',
@@ -9,6 +9,7 @@ const PRECACHE = [
   '/history.html',
   '/report.html',
   '/vision.html',
+  '/reset.html',
   '/onboarding.html',
   '/style.css',
   '/utils.js',

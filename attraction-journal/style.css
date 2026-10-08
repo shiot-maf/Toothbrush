@@ -21,6 +21,7 @@
   --c21:   #C03060;  --c21bg: #FFE8F0;
   --c28:   #3050B0;  --c28bg: #E0E8FF;
   --cd:    #A06010;  --cdbg:  #FFF0D8;
+  --c90:   #2B2540;  --c90bg: #ECE8F4;  /* 90 DAY RESET — 노션 ◼️ 잉크 */
 
   --hero:   linear-gradient(135deg,#F0EAFF 0%,#FFE8F2 50%,#F5EEFF 100%);
   --glow:   none;
@@ -55,6 +56,7 @@
   --c21:   #D04870;  --c21bg: #2A1428;
   --c28:   #4060C0;  --c28bg: #0E1430;
   --cd:    #C07820;  --cdbg:  #201808;
+  --c90:   #D9D0F0;  --c90bg: #26213A;
 
   --hero:   linear-gradient(135deg,#221645 0%,#2E1530 50%,#1C1640 100%);
   --glow:   0 0 44px rgba(124,80,208,.40);
@@ -853,3 +855,156 @@ textarea { resize: none; line-height: 1.6; overflow: hidden; }
 .skel-note-line1 { height: 14px; width: 60%; margin-bottom: 8px; border-radius: 6px; }
 .skel-note-line2 { height: 12px; width: 80%; border-radius: 6px; }
 .skel-badge { width: 52px; height: 24px; border-radius: 8px; flex-shrink: 0; }
+
+/* ── 90 DAY RESET ───────────────────────────────────────────────────────── */
+/* 긴 워크북이라 프레임 높이를 고정하고 안쪽만 스크롤한다 — 칩 내비와 탭바가 늘 보이게 */
+.rs-frame { height: calc(100vh - 72px); height: calc(100dvh - 72px); min-height: 0; }
+.rs-frame .page-content { min-height: 0; }
+@media (max-width: 430px) { .rs-frame { height: 100vh; height: 100dvh; } }
+.rs-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px 10px; flex-shrink: 0;
+}
+.rs-title { font-size: 17px; font-weight: 800; }
+.rs-save  { font-size: 11px; font-weight: 700; color: var(--hint); margin-right: 8px; }
+
+.rs-chipnav {
+  display: flex; gap: 6px; overflow-x: auto; flex-shrink: 0;
+  padding: 0 20px 12px; border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+}
+.rs-chipnav::-webkit-scrollbar { display: none; }
+.rs-chip {
+  flex: none; height: 30px; padding: 0 12px; border-radius: 15px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text2); font-size: 12px; font-weight: 700; font-family: inherit;
+  cursor: pointer; white-space: nowrap;
+}
+.rs-chip.active { background: var(--c90); border-color: var(--c90); color: var(--frame-bg); }
+
+.rs-sec { padding-top: 8px; margin-bottom: 36px; scroll-margin-top: 8px; }
+.rs-num { font-size: 11px; font-weight: 800; letter-spacing: 1.6px; color: var(--hint); }
+.rs-h1  { font-size: 22px; font-weight: 800; letter-spacing: -.5px; margin: 2px 0 4px; }
+.rs-h2  { font-size: 15px; font-weight: 800; margin: 22px 0 10px; letter-spacing: -.2px; }
+.rs-lead { font-size: 13.5px; color: var(--text2); line-height: 1.6; margin-bottom: 14px; }
+
+.rs-callout {
+  background: var(--c90bg); color: var(--text); border-radius: var(--r);
+  padding: 14px 15px; font-size: 13px; line-height: 1.6; margin-bottom: 14px;
+}
+.rs-callout b { font-weight: 800; }
+.rs-quote {
+  border-left: 3px solid var(--c90); padding: 4px 0 4px 12px;
+  font-size: 14px; font-weight: 700; line-height: 1.55; margin-bottom: 14px;
+}
+
+.rs-label {
+  display: block; font-size: 11px; font-weight: 700; color: var(--text2);
+  margin: 12px 0 6px;
+}
+.rs-label:first-of-type { margin-top: 0; }
+.rs-card-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 800; margin-bottom: 12px;
+}
+.rs-tag {
+  font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 8px;
+  background: var(--c90bg); color: var(--text2);
+}
+.rs-card textarea, .rs-card input[type="text"] { font-size: 14px; padding: 9px 12px; background: var(--bg); }
+
+.rs-check {
+  display: flex; align-items: flex-start; gap: 11px; padding: 8px 0;
+  font-size: 14px; line-height: 1.45; cursor: pointer;
+}
+.rs-check input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; flex: none;
+  width: 22px; height: 22px; border-radius: 7px; margin: 0;
+  border: 1.8px solid var(--hint); background: transparent; cursor: pointer;
+  display: grid; place-items: center;
+}
+.rs-check input[type="checkbox"]:checked { background: var(--c90); border-color: var(--c90); }
+.rs-check input[type="checkbox"]:checked::after {
+  content: ""; width: 10px; height: 6px; margin-top: -3px;
+  border-left: 2.5px solid var(--frame-bg); border-bottom: 2.5px solid var(--frame-bg);
+  transform: rotate(-45deg);
+}
+.rs-check input[type="text"] {
+  border: none; border-bottom: 1px solid var(--border); border-radius: 0;
+  padding: 0 0 3px; background: transparent; font-size: 14px;
+}
+
+.rs-decl .decl-input { color: var(--text); border-bottom-color: var(--c90); }
+
+.rs-x10 {
+  font-size: 15px; font-weight: 800; padding: 9px 12px; border-radius: 11px;
+  background: var(--c90bg); min-height: 40px;
+}
+.rs-x10.empty { color: var(--hint); font-weight: 500; font-size: 13px; }
+
+.rs-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.rs-grid3 input[type="text"] { font-size: 13px; padding: 9px 10px; text-align: center; }
+
+/* 진행 상태 */
+.rs-hero {
+  background: var(--c90); color: var(--frame-bg); border-radius: var(--r-hero);
+  padding: 20px; margin-bottom: 14px;
+}
+.rs-hero-msg  { font-size: 13px; font-weight: 600; opacity: .8; margin-bottom: 14px; line-height: 1.55; }
+.rs-hero-day  { font-size: 44px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; }
+.rs-hero-day small { font-size: 15px; font-weight: 700; opacity: .65; letter-spacing: 0; margin-left: 4px; }
+.rs-bar { height: 6px; border-radius: 3px; background: rgba(127,127,127,.35); margin: 14px 0 12px; overflow: hidden; }
+.rs-bar > i { display: block; height: 100%; background: currentColor; border-radius: 3px; transition: width .4s; }
+.rs-weeks { display: grid; grid-template-columns: repeat(13, 1fr); gap: 4px; }
+.rs-weeks span { height: 6px; border-radius: 3px; background: rgba(127,127,127,.35); }
+.rs-weeks span.filled { background: currentColor; }
+.rs-weeks span.now { outline: 1.5px solid currentColor; outline-offset: 1.5px; }
+
+.rs-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.rs-dates .card { margin: 0; padding: 12px 14px; }
+.rs-dates input[type="date"] { padding: 6px 0 0; border: none; background: transparent; font-size: 15px; font-weight: 700; }
+.rs-dates .rs-end { font-size: 15px; font-weight: 700; padding-top: 6px; }
+
+.rs-steps { padding-left: 18px; font-size: 13.5px; line-height: 1.7; color: var(--text2); }
+.rs-steps b { color: var(--text); }
+
+.rs-link-note {
+  display: block;
+  font-size: 12px; line-height: 1.5; color: var(--c17);
+  background: var(--c17bg); border-radius: 11px; padding: 9px 11px; margin-bottom: 14px;
+}
+
+/* 주간 리셋 아코디언 */
+.rs-week {
+  border: 1px solid var(--border); border-radius: var(--r); background: var(--card);
+  margin-bottom: 8px; overflow: hidden;
+}
+.rs-week[open] { border-color: var(--text2); }
+.rs-week.now { border-color: var(--c90); box-shadow: 0 0 0 1px var(--c90); }
+.rs-week summary {
+  list-style: none; cursor: pointer; padding: 13px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.rs-week summary::-webkit-details-marker { display: none; }
+.rs-week-no   { font-size: 13px; font-weight: 800; width: 62px; flex: none; }
+.rs-week-sub  { flex: 1; font-size: 11.5px; color: var(--hint); }
+.rs-week-mark {
+  width: 20px; height: 20px; border-radius: 50%; flex: none;
+  border: 1.5px solid var(--border); display: grid; place-items: center;
+}
+.rs-week-mark.done { background: var(--c90); border-color: var(--c90); color: var(--frame-bg); }
+.rs-week-body { padding: 0 14px 14px; }
+.rs-week-body textarea { font-size: 14px; padding: 9px 12px; background: var(--bg); }
+.rs-kpt { font-size: 11px; font-weight: 800; letter-spacing: 1px; margin: 12px 0 2px; }
+.rs-kpt:first-child { margin-top: 0; }
+.rs-kpt-q { font-size: 12px; color: var(--hint); margin-bottom: 6px; }
+
+/* 홈 카드 */
+.rs-home { display: block; text-decoration: none; color: var(--frame-bg); }
+.rs-home .rs-hero { margin-bottom: 24px; }
+.rs-home-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.rs-home-id { font-size: 13px; font-weight: 600; opacity: .85; margin-top: 2px; line-height: 1.5; }
+.rs-home-nudge {
+  margin-top: 12px; font-size: 12px; font-weight: 700;
+  padding: 8px 11px; border-radius: 10px; background: rgba(127,127,127,.22);
+}
