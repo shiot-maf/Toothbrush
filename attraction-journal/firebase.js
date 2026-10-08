@@ -236,6 +236,63 @@ export async function getVisionPlan(uid) {
   return snap.exists() ? snap.data() : null;
 }
 
+// ── 90 DAY RESET ──────────────────────────────────────────────────────────
+// 워크북 전체를 문서 하나에 담는다. 화면이 섹션별로 나뉘어 있어도 저장은 한 번에.
+export const RESET_DAYS  = 90;
+export const RESET_WEEKS = 13;
+
+// 바뀐 칸만 넘긴다. merge로 합쳐지므로 다른 기기에서 고친 칸을 덮어쓰지 않는다.
+export function saveReset90(uid, changes) {
+  const ref = doc(db, "users", uid, "reset90", "current");
+  return setDoc(ref, { ...changes, updatedAt: Timestamp.now() }, { merge: true });
+}
+
+export async function getReset90(uid) {
+  const snap = await getDoc(doc(db, "users", uid, "reset90", "current"));
+  return snap.exists() ? snap.data() : null;
+}
+
+function parseLocalDate(str) {
+  const [y, m, d] = str.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+// 시작일 기준 오늘이 며칠째인지. 시작 전이면 day <= 0, 끝났으면 finished.
+export function getResetProgress(startDate, today = new Date()) {
+  if (!startDate) return null;
+  const start = parseLocalDate(startDate);
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const day = Math.round((t - start) / 86400000) + 1;
+  const end = new Date(start);
+  end.setDate(start.getDate() + RESET_DAYS - 1);
+  const week = Math.min(RESET_WEEKS, Math.max(1, Math.ceil(day / 7)));
+  return {
+    day,
+    week,
+    endDate: formatDate(end),
+    started: day >= 1,
+    finished: day > RESET_DAYS,
+    percent: Math.max(0, Math.min(100, Math.round((Math.min(day, RESET_DAYS) / RESET_DAYS) * 100))),
+  };
+}
+
+// n주차(1~13)의 날짜 범위
+export function getResetWeekRange(startDate, week) {
+  const start = parseLocalDate(startDate);
+  const s = new Date(start);
+  s.setDate(start.getDate() + (week - 1) * 7);
+  const e = new Date(s);
+  e.setDate(s.getDate() + 6);
+  const last = new Date(start);
+  last.setDate(start.getDate() + RESET_DAYS - 1);
+  if (e > last) e.setTime(last.getTime()); // 13주차는 DAY 90에서 끝난다
+  return { start: formatDate(s), end: formatDate(e) };
+}
+
+export function isResetWeekFilled(w) {
+  return !!(w && (w.keep || w.problem || w.try));
+}
+
 // ── 연속 기록 (스트릭) ────────────────────────────────────────────────────
 export async function getStreak(uid) {
   const today = new Date();

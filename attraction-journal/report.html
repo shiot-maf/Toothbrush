@@ -42,11 +42,18 @@
         <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="2.6"/></svg>
         <span class="bottom-nav-label">비전</span>
       </a>
+      <a class="bottom-nav-item" href="reset.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="4.5" width="15" height="15" rx="3"/><path d="M8.8 12.3l2.3 2.3 4.3-4.8"/></svg>
+        <span class="bottom-nav-label">90일</span>
+      </a>
     </nav>
   </div>
 
   <script type="module">
-    import { waitForAuth, onAuthChange, getThisWeekEntries, getWeekKey, formatDate, WEEKDAYS } from './firebase.js';
+    import {
+      waitForAuth, onAuthChange, getThisWeekEntries, getWeekKey, formatDate, WEEKDAYS,
+      getReset90, getResetProgress, isResetWeekFilled,
+    } from './firebase.js';
     import { initTheme } from './utils.js';
 
     initTheme();
@@ -171,6 +178,32 @@
       `;
     }
 
+    // 90 DAY RESET — 이번 주 KEEP / PROBLEM / TRY를 리포트 끝에 붙인다
+    function renderResetWeek(reset) {
+      const p = getResetProgress(reset?.startDate);
+      if (!p?.started || p.finished) return;
+      const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      const wk = String(p.week).padStart(2, '0');
+      const w = reset.weeks?.[p.week];
+      const rows = [['KEEP', 'keep', 'var(--c17)'], ['PROBLEM', 'problem', 'var(--c21)'], ['TRY', 'try', 'var(--c28)']]
+        .filter(([, k]) => w?.[k])
+        .map(([t, k, c]) => `<div class="modal-line" style="border-color:${c};margin-bottom:8px;"><b style="font-size:11px;color:${c};">${t}</b><br>${esc(w[k])}</div>`)
+        .join('');
+      const body = isResetWeekFilled(w)
+        ? rows
+        : `<div style="font-size:13.5px;color:var(--text2);line-height:1.6;">이번 주 기록을 바탕으로 계획을 고쳐보세요.<br>잘된 건 남기고, 막힌 이유를 확인하고, 새로 해볼 일을 정해요.</div>`;
+      const enc = document.querySelector('#reportContent .encouragement');
+      enc?.insertAdjacentHTML('beforebegin', `
+        <div class="section-label">90 DAY RESET · WEEK ${wk}</div>
+        <a class="card" href="reset.html#week-${p.week}" style="display:block;text-decoration:none;color:inherit;margin-bottom:24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-size:14px;font-weight:800;">DAY ${p.day} / 90</span>
+            <span class="note-status-badge" style="background:var(--c90bg);color:var(--text2);">${isResetWeekFilled(w) ? '수정하기' : '작성하기'} →</span>
+          </div>
+          ${body}
+        </a>`);
+    }
+
     const user = await waitForAuth();
     if (!user) { window.location.replace('index.html'); }
     else {
@@ -178,6 +211,7 @@
       try {
         const data = await getThisWeekEntries(user.uid);
         render(data);
+        renderResetWeek(await getReset90(user.uid).catch(() => null));
       } catch (e) {
         document.getElementById('reportContent').innerHTML =
           '<div style="text-align:center;padding:40px 0;color:var(--hint);">데이터를 불러오지 못했습니다.</div>';

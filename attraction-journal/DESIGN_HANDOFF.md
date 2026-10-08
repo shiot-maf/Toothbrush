@@ -25,16 +25,18 @@
     ├── [HARD 노트]    hard.html           ← 뒤로가기 → 홈
     ├── [기록 열람]    history.html        ← 탭바 탭
     ├── [주간 리포트]  report.html         ← 탭바 탭
-    └── [5년 비전]    vision.html          ← 탭바 탭
+    ├── [5년 비전]    vision.html          ← 탭바 탭
+    └── [90 DAY RESET] reset.html          ← 탭바 탭
 ```
 
-### 하단 탭바 구성 (4탭)
+### 하단 탭바 구성 (5탭)
 | 아이콘 | 라벨 | 페이지 |
 |--------|------|--------|
 | ⌂ | 홈 | home.html |
 | ◫ | 기록 | history.html |
 | ◈ | 리포트 | report.html |
 | ✦ | 비전 | vision.html |
+| ☑ | 90일 | reset.html |
 
 > 현재 아이콘은 유니코드 심볼. 디자인 단계에서 SVG 아이콘으로 교체 권장.
 
@@ -60,6 +62,7 @@
   감사선행  --c21:    #C03060  / --c21-bg: #FFE8F0  (코랄)
   HARD노트  --c28:    #3050B0  / --c28-bg: #E0E8FF  (인디고)
   실천      --cd:     #A06010  / --cd-bg:  #FFF0D8  (앰버)
+  90일리셋  --c90:    #2B2540  / --c90bg:  #ECE8F4  (잉크)
 
 히어로 그라디언트
   linear-gradient(135deg, #F0EAFF 0%, #FFE8F2 50%, #F5EEFF 100%)
@@ -83,6 +86,7 @@
   감사선행  --c21:    #D04870  / --c21-bg: #2A1428
   HARD노트  --c28:    #4060C0  / --c28-bg: #0E1430
   실천      --cd:     #C07820  / --cd-bg:  #201808
+  90일리셋  --c90:    #D9D0F0  / --c90bg:  #26213A
 ```
 
 ---
@@ -227,6 +231,13 @@
 - 5개 카테고리 (커리어/재정/관계/건강/성장), 각 1년/3년/5년 입력
 - 보라색(c17) 저장 버튼
 
+### reset.html — 90 DAY RESET
+- 노션 워크북을 그대로 옮긴 한 페이지. 상단 칩 내비로 섹션 이동, 스크롤에 따라 활성 칩 변경
+- 진행 히어로(잉크 배경): DAY N/90 + 진행 바 + 13주 막대(작성한 주는 채움, 이번 주는 테두리)
+- 01–05 입력, 06 WEEKLY RESET은 13개 아코디언(이번 주 자동 펼침), FINISH LINE
+- 입력 즉시 자동 저장, 헤더 우측에 저장 상태 표시
+- `reset.html#week-5`처럼 해시로 특정 섹션/주차로 바로 이동
+
 ---
 
 ## Border Radius 시스템
@@ -267,6 +278,7 @@ attraction-journal/
 ├── history.html      기록 열람
 ├── report.html       주간 리포트
 ├── vision.html       5년 비전
+├── reset.html        90 DAY RESET 워크북
 ├── style.css         전체 스타일
 ├── utils.js          공통 유틸 (initTheme, showToast)
 ├── firebase.js       Firebase 연동

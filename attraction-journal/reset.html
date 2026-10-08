@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>90 DAY RESET — 끌어당김의 기록</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="theme-color" content="#6A3EC0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="끌어당김의 기록">
+</head>
+<body>
+  <div class="phone-frame rs-frame">
+    <div class="rs-topbar">
+      <div class="rs-title">90 DAY RESET</div>
+      <div style="display:flex;align-items:center;">
+        <span class="rs-save" id="saveState"></span>
+        <button class="theme-btn" id="themeBtn" aria-label="테마 전환">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <nav class="rs-chipnav" id="chipNav"></nav>
+
+    <div class="page-content" id="scroller">
+      <div id="workbook">
+        <div style="text-align:center;padding:40px 0;color:var(--hint);">불러오는 중…</div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <a class="bottom-nav-item" href="home.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/></svg>
+        <span class="bottom-nav-label">홈</span>
+      </a>
+      <a class="bottom-nav-item" href="history.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 9.5h16M9 3.5v3M15 3.5v3"/></svg>
+        <span class="bottom-nav-label">기록</span>
+      </a>
+      <a class="bottom-nav-item" href="report.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V4M5 19h15"/><path d="M9 16v-4M13 16V8M17 16v-6"/></svg>
+        <span class="bottom-nav-label">리포트</span>
+      </a>
+      <a class="bottom-nav-item" href="vision.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="2.6"/></svg>
+        <span class="bottom-nav-label">비전</span>
+      </a>
+      <a class="bottom-nav-item active" href="reset.html">
+        <svg class="bottom-nav-icon" width="23" height="23" viewBox="0 0 24 24" fill="rgba(106,62,192,.14)" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="4.5" width="15" height="15" rx="3"/><path d="M8.8 12.3l2.3 2.3 4.3-4.8"/></svg>
+        <span class="bottom-nav-label">90일</span>
+      </a>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import {
+      waitForAuth, onAuthChange, getReset90, saveReset90,
+      getResetProgress, getResetWeekRange, isResetWeekFilled,
+      formatDate, RESET_DAYS, RESET_WEEKS,
+    } from './firebase.js';
+    import { initTheme, showToast } from './utils.js';
+
+    initTheme();
+
+    // ── 노션 워크북의 고정 문구 ───────────────────────────────────────────
+    const DROP_PRESETS = [
+      '한 번 놓치면 다 망했다고 생각하고 포기하는 나',
+      '남의 시선부터 생각하느라 시작하지 않는 나',
+      '불안하면서도 확인하지 않고 피하는 나',
+    ];
+    const AUDIT_AREAS = [
+      { key: 'money',  name: '돈' },
+      { key: 'career', name: '커리어' },
+      { key: 'self',   name: '성격' },
+      { key: 'body',   name: '몸' },
+      { key: 'space',  name: '생활환경' },
+    ];
+    const FEELINGS = [
+      { key: 'envy1', name: '부러움 01', want: '그 안에서 내가 진짜 원하는 것' },
+      { key: 'envy2', name: '부러움 02', want: '그 안에서 내가 진짜 원하는 것' },
+      { key: 'fear1', name: '두려움 01', want: '사실 내가 해보고 싶은 것' },
+      { key: 'fear2', name: '두려움 02', want: '사실 내가 해보고 싶은 것' },
+    ];
+    const STOP_SAYING = ['나는 원래 못해', '나는 늘 미뤄', '나는 꾸준하지 못해'];
+    const DO_INSTEAD  = ['한 번 놓쳐도 다음 날 다시 시작하기', '완벽하지 않아도 일단 시작하기', '힘든 날에는 최소 행동이라도 하기'];
+    const SETUP = [
+      '필요한 일정부터 캘린더에 넣기',
+      '자동이체·예약·알림 설정하기',
+      '방해되는 물건 치우기',
+      '책상·옷·공간 중 하나를 앞으로 지킬 생활에 맞게 바꾸기',
+    ];
+    const KPT_DEFAULT = {
+      keep:    '이번 주에 잘됐고, 다음 주에도 계속할 것은?',
+      problem: '계획대로 되지 않은 것과 그 이유는?',
+      try:     '이 문제를 해결하기 위해 다음 주에 새로 시도할 것은?',
+    };
+    const KPT_SPECIAL = {
+      7:  { title: 'HALFWAY', keep: '지난 6주 동안 효과가 있어서 계속할 것', problem: '지금 나를 가장 크게 막고 있는 것', try: '남은 기간에 새로 시도하거나 더 집중할 것' },
+      13: { title: 'FINISH',  keep: '새해에도 계속 가져갈 루틴과 선택', problem: '이번 90일에 해결하지 못해 다음에도 이어서 살펴볼 것', try: '다음 90일에 새롭게 시도할 것' },
+    };
+    const SECTIONS = [
+      { id: 'start',    chip: '시작' },
+      { id: 'reset',    chip: '01 RESET' },
+      { id: 'vision',   chip: '02 VISION' },
+      { id: 'three',    chip: '03 MY THREE' },
+      { id: 'identity', chip: '04 IDENTITY' },
+      { id: 'system',   chip: '05 SYSTEM' },
+      { id: 'weekly',   chip: '06 WEEKLY' },
+      { id: 'finish',   chip: 'FINISH' },
+    ];
+
+    // ── 입력 요소 헬퍼 — 값은 렌더 후 data-k 경로로 채운다 ────────────────
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const ta  = (k, ph, max = 300) => `<textarea data-k="${k}" rows="1" maxlength="${max}" placeholder="${esc(ph)}"></textarea>`;
+    const inp = (k, ph, max = 100) => `<input type="text" data-k="${k}" maxlength="${max}" placeholder="${esc(ph)}">`;
+    const chk = (k, label) => `<label class="rs-check"><input type="checkbox" data-k="${k}"><span>${esc(label)}</span></label>`;
+    const lbl = t => `<span class="rs-label">${esc(t)}</span>`;
+    const no  = i => String(i + 1).padStart(2, '0');
+    const sec = (id, num, title, body) =>
+      `<section class="rs-sec" id="${id}">${num ? `<div class="rs-num">${num}</div>` : ''}<div class="rs-h1">${title}</div>${body}</section>`;
+
+    function render() {
+      const html = [];
+
+      // 시작
+      html.push(sec('start', '', '90일 인생 리셋 워크북', `
+        <div class="rs-hero" id="progressHero"></div>
+        <div class="rs-dates">
+          <div class="card"><div class="section-label" style="margin:0;">START</div><input type="date" data-k="startDate"></div>
+          <div class="card"><div class="section-label" style="margin:0;">DAY 90</div><div class="rs-end" id="endDate">—</div></div>
+        </div>
+        <div class="card">
+          <div class="section-label">START HERE</div>
+          <ol class="rs-steps">
+            <li>처음에는 <b>01–05</b>를 순서대로 채우세요.</li>
+            <li>바꾸고 싶은 영역을 세 개 고른 뒤, 90일 뒤에 남길 결과를 하나씩 정하세요.</li>
+            <li>매주 일요일 <b>WEEKLY RESET</b>에서 계획을 점검하고 고치세요.</li>
+            <li>한 번도 실패하지 않는 것보다, 실패해도 다시 돌아오는 걸 더 중요하게 생각하세요.</li>
+          </ol>
+        </div>`));
+
+      // 01 RESET
+      html.push(sec('reset', '01 · RESET', '새해까지 데려가지 않을 나', `
+        <div class="card" style="padding:8px 16px;">
+          ${DROP_PRESETS.map((t, i) => chk(`reset.drop.${i}`, t)).join('')}
+          <label class="rs-check"><input type="checkbox" data-k="reset.drop.custom"><input type="text" data-k="reset.dropCustom" maxlength="100" placeholder="직접 적기"></label>
+        </div>
+        <div class="decl-row rs-decl">
+          <span style="white-space:nowrap;">이제 그만할 말: “나는 원래</span>
+          <input class="decl-input" type="text" data-k="reset.stopPhrase" placeholder="어떤 사람" maxlength="50">
+          <span>.”</span>
+        </div>
+
+        <div class="rs-h2">내 생활 먼저 점검하기</div>
+        <p class="rs-lead">내 인생을 <b>돈, 커리어, 성격, 몸, 생활환경</b>으로 나눠서 한 번 쭉 점검해보세요. 지금 만족하는 건 뭔지, 계속 마음에 걸리는데도 모른 척하고 있는 건 뭔지, <b>90일 뒤에 이거 하나만 딱 달라지면 소원이 없겠다 싶은 건 뭔지</b> 적어봅니다.</p>
+        ${AUDIT_AREAS.map(a => `
+          <div class="card rs-card">
+            <div class="rs-card-title">${a.name}</div>
+            ${lbl('지금 만족하는 것')}${ta(`audit.${a.key}.good`, '여기에 입력')}
+            ${lbl('계속 마음에 걸리는 것')}${ta(`audit.${a.key}.worry`, '여기에 입력')}
+            ${lbl('90일 뒤 가장 바꾸고 싶은 것')}${ta(`audit.${a.key}.change`, '여기에 입력')}
+          </div>`).join('')}
+
+        <div class="rs-h2">부러움과 두려움 해체하기</div>
+        ${FEELINGS.map(f => `
+          <div class="card rs-card">
+            <div class="rs-card-title"><span class="rs-tag">${f.name}</span></div>
+            ${lbl('떠오른 사람·장면·일')}${ta(`feel.${f.key}.what`, '여기에 입력')}
+            ${lbl(f.want)}${ta(`feel.${f.key}.want`, '여기에 입력')}
+          </div>`).join('')}
+        <div class="rs-callout">→ 적은 내용에서 반복해서 보이는 것</div>
+        <div class="rs-grid3">${[0, 1, 2].map(i => inp(`reset.keywords.${i}`, `키워드 ${no(i)}`, 20)).join('')}</div>`));
+
+      // 02 VISION
+      html.push(sec('vision', '02 · VISION', '지금 가능한 삶 말고, 정말 원하는 삶', `
+        <div class="rs-h2">10X QUESTION</div>
+        <div class="rs-callout">↗ <b>《10배의 법칙》을 숫자로 적용해보기</b><br>지금 생각한 목표를 숫자로 적고, 그 숫자에 정확히 10을 곱해보세요. 당장 전부 이루겠다는 선언이 아니라, 지금 하던 방식 밖의 방법을 찾기 위한 질문입니다.</div>
+        ${[0, 1, 2].map(i => `
+          <div class="card rs-card">
+            <div class="rs-card-title"><span class="rs-tag">${no(i)}</span></div>
+            ${lbl('바꾸고 싶은 것')}${inp(`tenx.${i}.what`, '예: 월 수입')}
+            ${lbl('현재 목표')}${inp(`tenx.${i}.now`, '숫자로 입력 — 예: 300만원', 50)}
+            ${lbl('×10 목표')}<div class="rs-x10 empty" data-x10="${i}">현재 목표에 숫자를 넣으면 계산돼요</div>
+            ${lbl('방법을 어떻게 바꿔야 할까?')}${ta(`tenx.${i}.how`, '지금과 달라져야 할 방법')}
+          </div>`).join('')}
+        <p class="rs-lead" style="margin-top:6px;">방금 크게 적은 답을 바탕으로 원하는 삶을 더 구체적으로 그려보세요.</p>
+        <div class="card rs-card">
+          ${lbl('WHERE · 어디에서 살고 싶은가?')}${ta('vision.where', '')}
+          ${lbl('WORK · 무슨 일을 하고 싶은가?')}${ta('vision.work', '')}
+          ${lbl('LIFE · 누구와 어떻게 살고 싶은가?')}${ta('vision.life', '')}
+        </div>
+        <div class="rs-h2">내가 원하는 하루</div>
+        <div class="card rs-card">
+          ${lbl('아침에는')}${ta('vision.morning', '여기에 입력')}
+          ${lbl('낮에는')}${ta('vision.noon', '여기에 입력')}
+          ${lbl('저녁에는')}${ta('vision.evening', '여기에 입력')}
+        </div>
+        <div class="section-label" style="margin-top:18px;">✦ 내가 원하는 삶을 한 문장으로</div>
+        <div class="decl-row rs-decl">
+          <span>나는</span>
+          <input class="decl-input" type="text" data-k="vision.oneLine" placeholder="여기에 입력" maxlength="100">
+        </div>`));
+
+      // 03 MY THREE
+      html.push(sec('three', '03 · MY THREE', '이번 90일에 먼저 바꿀 세 가지', `
+        <div class="rs-quote">내가 딱 세 가지 능력을 가질 수 있다면, 난 뭘 갖고 싶을까?</div>
+        ${[0, 1, 2].map(i => `
+          <div class="card rs-card">
+            <div class="rs-card-title"><span class="rs-tag">${no(i)}</span>${inp(`three.${i}.area`, '영역 이름', 20).replace('<input', '<input style="flex:1;font-weight:700;"')}</div>
+            ${lbl('지금')}${ta(`three.${i}.now`, '현재 상태')}
+            ${lbl('DAY 90 — 눈에 보이는 결과')}${ta(`three.${i}.day90`, '측정하거나 확인할 수 있는 결과 하나')}
+            ${lbl('이걸 원하는 이유')}${ta(`three.${i}.why`, '내 삶에서 달라지는 것')}
+          </div>`).join('')}`));
+
+      // 04 IDENTITY
+      html.push(sec('identity', '04 · IDENTITY', '이 세 가지를 해낼 나는 어떤 사람인가?', `
+        <div class="decl-row rs-decl" style="margin-bottom:10px;">
+          <span>나는</span>
+          <input class="decl-input" type="text" data-k="identity.statement" placeholder="어떤" maxlength="50">
+          <span style="white-space:nowrap;">한 사람이다.</span>
+        </div>
+        <div class="rs-link-note">✦ 이 선언은 <b>자기증명 일기</b>의 선언 칸에 미리 채워져요. 매일 이 사람이라는 증거를 모아보세요.</div>
+        <p class="rs-lead">90일 동안 행동이 달라지면 내가 나를 보는 방식도 달라집니다. 거창하게 다짐하는 것보다, 한 번 놓쳐도 다시 시작하고 미루던 일을 실제로 해보는 경험이 더 중요해요.</p>
+        <div class="card" style="padding:12px 16px;">
+          <div class="section-label" style="margin-bottom:2px;">이제 그만할 말</div>
+          ${STOP_SAYING.map((t, i) => chk(`identity.stop.${i}`, t)).join('')}
+        </div>
+        <div class="card" style="padding:12px 16px;">
+          <div class="section-label" style="margin-bottom:2px;">앞으로 이렇게 행동하기</div>
+          ${DO_INSTEAD.map((t, i) => chk(`identity.do.${i}`, t)).join('')}
+        </div>
+        <div class="rs-quote" style="font-weight:600;">내가 정한 사람이라면 오늘 어떻게 행동할지 생각해본다.</div>`));
+
+      // 05 SYSTEM
+      html.push(sec('system', '05 · THE SYSTEM', '목표를 루틴으로 바꾸기', `
+        <div class="rs-link-note">✦ <b>반복할 행동</b>은 홈의 <b>오늘의 실천</b>에 매일 자동으로 올라가요.</div>
+        ${[0, 1, 2].map(i => `
+          <div class="card rs-card">
+            <div class="rs-card-title"><span class="rs-tag">${no(i)}</span><span data-area="${i}"></span></div>
+            ${lbl('반복할 행동')}${inp(`system.${i}.action`, '여기에 입력')}
+            ${lbl('언제·어디서')}${inp(`system.${i}.when`, '요일·시간·장소')}
+            ${lbl('하기 싫은 날의 최소 기준')}${inp(`system.${i}.minimum`, '작게라도 이어갈 행동')}
+            ${lbl('미리 바꿀 환경')}${ta(`system.${i}.env`, '시작을 쉽게 만드는 준비')}
+          </div>`).join('')}
+        <div class="rs-h2">시작 전에 세팅할 것</div>
+        <div class="card" style="padding:8px 16px;">
+          ${SETUP.map((t, i) => chk(`setup.${i}`, t)).join('')}
+          <label class="rs-check"><input type="checkbox" data-k="setup.custom"><input type="text" data-k="setupCustom" maxlength="100" placeholder="직접 적기"></label>
+        </div>`));
+
+      // 06 WEEKLY RESET
+      const weeks = [];
+      for (let w = 1; w <= RESET_WEEKS; w++) {
+        const p = { ...KPT_DEFAULT, ...(KPT_SPECIAL[w] || {}) };
+        weeks.push(`
+          <details class="rs-week" id="week-${w}" data-week="${w}">
+            <summary>
+              <span class="rs-week-no">WEEK ${no(w - 1)}</span>
+              <span class="rs-week-sub" data-weekrange="${w}">${p.title || 'KEEP / PROBLEM / TRY'}</span>
+              <span class="rs-week-mark" data-weekmark="${w}"></span>
+            </summary>
+            <div class="rs-week-body">
+              <div class="rs-kpt" style="color:var(--c17);">KEEP</div><div class="rs-kpt-q">${p.keep}</div>${ta(`weeks.${w}.keep`, '여기에 입력')}
+              <div class="rs-kpt" style="color:var(--c21);">PROBLEM</div><div class="rs-kpt-q">${p.problem}</div>${ta(`weeks.${w}.problem`, '여기에 입력')}
+              <div class="rs-kpt" style="color:var(--c28);">TRY</div><div class="rs-kpt-q">${p.try}</div>${ta(`weeks.${w}.try`, '여기에 입력')}
+            </div>
+          </details>`);
+      }
+      html.push(sec('weekly', '06 · WEEKLY RESET', '13 WEEKS', `
+        <div class="rs-callout">↻ 매주 일요일에는 나를 탓하는 대신 <b>계획을 고쳐봅니다.</b><br>잘된 건 남기고, 막힌 이유를 확인한 다음, 새로 해볼 일을 정해보세요.</div>
+        ${weeks.join('')}`));
+
+      // FINISH LINE
+      html.push(sec('finish', 'FINISH LINE', '90일 전의 나에게', `
+        <div class="card rs-card">
+          ${lbl('그때의 내가 걱정했던 것')}${ta('finish.worried', '여기에 입력')}
+          ${lbl('지금의 내가 알게 된 것')}${ta('finish.learned', '여기에 입력')}
+          ${lbl('새해에도 계속 가져갈 것')}${ta('finish.keep', '여기에 입력')}
+        </div>
+        <div class="rs-callout">→ <b>이 몰입 시스템을 90일씩 반복해보세요!</b></div>`));
+
+      document.getElementById('workbook').innerHTML = html.join('');
+      document.getElementById('chipNav').innerHTML =
+        SECTIONS.map(s => `<button class="rs-chip" data-go="${s.id}">${s.chip}</button>`).join('');
+    }
+
+    // ── 경로 기반 값 읽기/쓰기 ────────────────────────────────────────────
+    const getPath = (o, path) => path.split('.').reduce((a, k) => (a == null ? undefined : a[k]), o);
+    function setPath(o, path, v) {
+      const ks = path.split('.');
+      let cur = o;
+      ks.slice(0, -1).forEach(k => { if (typeof cur[k] !== 'object' || cur[k] === null) cur[k] = {}; cur = cur[k]; });
+      cur[ks.at(-1)] = v;
+    }
+    const fields = () => document.querySelectorAll('#workbook [data-k]');
+
+    function fill(data) {
+      fields().forEach(el => {
+        const v = getPath(data, el.dataset.k);
+        if (el.type === 'checkbox') el.checked = v === true;
+        else el.value = v ?? '';
+      });
+    }
+
+    function collect() {
+      const out = {};
+      fields().forEach(el => setPath(out, el.dataset.k, el.type === 'checkbox' ? el.checked : el.value.trim()));
+      return out;
+    }
+
+    function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
+    // ×10 — 첫 번째 숫자에 10을 곱하고 나머지 글자(단위)는 그대로 둔다
+    function times10(str) {
+      const m = (str || '').match(/\d[\d,]*(?:\.\d+)?/);
+      if (!m) return '';
+      const n = parseFloat(m[0].replace(/,/g, '')) * 10;
+      return str.replace(m[0], n.toLocaleString('ko-KR', { maximumFractionDigits: 2 }));
+    }
+    function renderX10() {
+      document.querySelectorAll('[data-x10]').forEach(box => {
+        const v = times10(document.querySelector(`[data-k="tenx.${box.dataset.x10}.now"]`).value);
+        box.textContent = v || '현재 목표에 숫자를 넣으면 계산돼요';
+        box.classList.toggle('empty', !v);
+      });
+    }
+
+    function renderAreas() {
+      document.querySelectorAll('[data-area]').forEach(el => {
+        const name = document.querySelector(`[data-k="three.${el.dataset.area}.area"]`).value.trim();
+        el.textContent = name || '03의 영역 이름을 적으면 여기 표시돼요';
+        el.style.color = name ? 'var(--text)' : 'var(--hint)';
+        el.style.fontWeight = name ? '800' : '500';
+        el.style.fontSize = name ? '14px' : '12px';
+      });
+    }
+
+    function renderProgress() {
+      const startDate = document.querySelector('[data-k="startDate"]').value;
+      const p = getResetProgress(startDate);
+      const data = collect();
+      const hero = document.getElementById('progressHero');
+      document.getElementById('endDate').textContent = p ? p.endDate : '—';
+
+      let big = '—', msg = '90일은 새로운 나를 만들기에 충분한 시간입니다.';
+      if (p && !p.started)      { big = `D-${1 - p.day}`; msg = '곧 시작해요. 01–05를 먼저 채워두세요.'; }
+      else if (p && p.finished) { big = '완주'; msg = 'FINISH LINE에서 90일 전의 나에게 답해보세요.'; }
+      else if (p)               { big = `DAY ${p.day}<small>/ ${RESET_DAYS}</small>`; msg += ` 지금은 WEEK ${String(p.week).padStart(2, '0')}.`; }
+
+      const bars = [];
+      for (let w = 1; w <= RESET_WEEKS; w++) {
+        const cls = [isResetWeekFilled(data.weeks?.[w]) ? 'filled' : '', p?.started && !p.finished && p.week === w ? 'now' : ''].join(' ');
+        bars.push(`<span class="${cls}" title="WEEK ${w}"></span>`);
+      }
+      hero.innerHTML = `
+        <div class="rs-hero-msg">${msg}</div>
+        <div class="rs-hero-day">${big}</div>
+        <div class="rs-bar"><i style="width:${p ? p.percent : 0}%"></i></div>
+        <div class="rs-weeks">${bars.join('')}</div>`;
+
+      for (let w = 1; w <= RESET_WEEKS; w++) {
+        const det = document.getElementById(`week-${w}`);
+        det.classList.toggle('now', !!(p?.started && !p.finished && p.week === w));
+        const range = startDate ? getResetWeekRange(startDate, w) : null;
+        const title = KPT_SPECIAL[w]?.title;
+        det.querySelector(`[data-weekrange]`).textContent =
+          [range ? `${range.start.slice(5).replace('-', '.')} – ${range.end.slice(5).replace('-', '.')}` : '', title].filter(Boolean).join(' · ') || 'KEEP / PROBLEM / TRY';
+        const mark = det.querySelector('[data-weekmark]');
+        const done = isResetWeekFilled(data.weeks?.[w]);
+        mark.classList.toggle('done', done);
+        mark.innerHTML = done ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg>' : '';
+      }
+      return p;
+    }
+
+    // ── 자동 저장 ─────────────────────────────────────────────────────────
+    // 저장은 바뀐 칸만 보낸다 — 두 기기에서 서로 다른 칸을 고쳐도 덮어쓰지 않도록.
+    // 서버에 닿기 전에 페이지를 떠나면(새로고침·탭 닫기) 쓰기가 사라지므로,
+    // 아직 저장되지 않은 칸은 이 기기에 따로 들고 있다가 다음에 열 때 다시 보낸다.
+    let currentUid = null, timer = null, inFlight = Promise.resolve(), saving = 0;
+    let changed = {};                 // data-k 경로 → 아직 서버에 안 보낸 값
+    let unsaved = {};                 // 보냈든 안 보냈든 서버 도착이 확인되지 않은 값 — 임시본의 내용
+    let needStart = false;            // 서버에 시작일이 없으면 첫 편집 때 같이 보낸다
+    const saveState = document.getElementById('saveState');
+    const pendingKey = () => `reset90-pending-${currentUid}`;
+    const isDirty = () => Object.keys(changed).length > 0;
+
+    function keepPending() {
+      try {
+        if (Object.keys(unsaved).length) localStorage.setItem(pendingKey(), JSON.stringify(unsaved));
+        else localStorage.removeItem(pendingKey());
+      } catch (e) {}
+    }
+    function readPending() {
+      try { return JSON.parse(localStorage.getItem(pendingKey()) || 'null'); } catch (e) { return null; }
+    }
+    const fieldValue = el => el.type === 'checkbox' ? el.checked : el.value.trim();
+
+    function doSave() {
+      if (!currentUid || !isDirty()) return inFlight;
+      const batch = changed;
+      changed = {};
+      const nested = {};
+      Object.entries(batch).forEach(([k, v]) => setPath(nested, k, v));
+      saving++;
+      saveState.textContent = '저장 중…';
+      inFlight = inFlight.then(() => saveReset90(currentUid, nested)).then(() => {
+        saving--;
+        // 서버에 닿은 칸만 임시본에서 뺀다 (그사이 다시 고친 칸은 남긴다)
+        Object.entries(batch).forEach(([k, v]) => { if (unsaved[k] === v) delete unsaved[k]; });
+        keepPending();
+        if (!saving && !isDirty()) saveState.textContent = '저장됨';
+      }).catch(() => {
+        saving--;
+        // 그사이 다시 고친 칸은 새 값을 살리고, 나머지만 되돌려 놓는다
+        changed = { ...batch, ...changed };
+        keepPending();
+        saveState.textContent = '저장 실패';
+        showToast('저장에 실패했습니다. 잠시 후 다시 시도해요.');
+        clearTimeout(timer);
+        timer = setTimeout(doSave, 5000);
+      });
+      return inFlight;
+    }
+    function queueSave(el) {
+      if (needStart) { changed.startDate ??= document.querySelector('[data-k="startDate"]').value; needStart = false; }
+      changed[el.dataset.k] = unsaved[el.dataset.k] = fieldValue(el);
+      keepPending();
+      saveState.textContent = '';
+      clearTimeout(timer);
+      timer = setTimeout(doSave, 800);
+    }
+    // 남은 저장을 지금 보내고, 이미 보낸 것까지 끝날 때를 기다린다
+    function flushSave() {
+      clearTimeout(timer);
+      return doSave();
+    }
+
+    // ── 섹션 이동 ─────────────────────────────────────────────────────────
+    const scroller = document.getElementById('scroller');
+    function goTo(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.tagName === 'DETAILS') el.open = true;
+      scroller.scrollTo({ top: el.offsetTop - scroller.offsetTop - 8, behavior: 'smooth' });
+    }
+    function syncChips() {
+      let current = SECTIONS[0].id;
+      SECTIONS.forEach(s => {
+        const el = document.getElementById(s.id);
+        if (el && el.offsetTop - scroller.offsetTop - scroller.scrollTop <= 60) current = s.id;
+      });
+      document.querySelectorAll('.rs-chip').forEach(c => {
+        const on = c.dataset.go === current;
+        if (on && !c.classList.contains('active')) c.scrollIntoView({ block: 'nearest', inline: 'center' });
+        c.classList.toggle('active', on);
+      });
+    }
+
+    // ── 시작 ─────────────────────────────────────────────────────────────
+    const user = await waitForAuth();
+    if (!user) { window.location.replace('index.html'); }
+    else {
+      onAuthChange(u => { if (!u) window.location.replace('index.html'); });
+      currentUid = user.uid;
+      let loaded = {};
+      try {
+        loaded = (await getReset90(user.uid)) || {};
+      } catch (e) {
+        showToast('기록을 불러오지 못했습니다.');
+      }
+      // 지난번에 서버에 닿지 못한 칸이 있으면 그것이 더 최신이다
+      const pending = readPending();
+      if (pending) { unsaved = pending; changed = { ...pending }; Object.entries(pending).forEach(([k, v]) => setPath(loaded, k, v)); }
+      // 시작일이 없으면 오늘로 보여 주되, 열어 보기만 해서는 시작되지 않게 첫 편집 때 저장한다
+      if (!loaded.startDate) { loaded.startDate = formatDate(new Date()); needStart = true; }
+
+      render();
+      fill(loaded);
+      renderX10();
+      renderAreas();
+      const p = renderProgress();
+      document.querySelectorAll('#workbook textarea').forEach(autoResize);
+
+      // 진행 중인 주는 펼쳐 둔다
+      if (p?.started && !p.finished) document.getElementById(`week-${p.week}`).open = true;
+
+      document.getElementById('workbook').addEventListener('input', e => {
+        const el = e.target;
+        if (!el.dataset?.k) return;
+        if (el.type !== 'checkbox' && el.type !== 'date') el.value = el.value.replace(/[<>&]/g, '');
+        if (el.tagName === 'TEXTAREA') autoResize(el);
+        if (el.dataset.k.startsWith('tenx.')) renderX10();
+        if (el.dataset.k.startsWith('three.')) renderAreas();
+        if (el.dataset.k === 'startDate' || el.dataset.k.startsWith('weeks.')) {
+          const np = renderProgress();
+          if (el.dataset.k === 'startDate' && np?.started && !np.finished) document.getElementById(`week-${np.week}`).open = true;
+        }
+        queueSave(el);
+      });
+      document.getElementById('workbook').addEventListener('change', e => {
+        if (e.target.type === 'checkbox' && e.target.dataset.k) queueSave(e.target);
+      });
+      // 펼친 주의 textarea는 처음 보일 때 높이를 다시 잰다
+      document.querySelectorAll('.rs-week').forEach(d => d.addEventListener('toggle', () => {
+        if (d.open) d.querySelectorAll('textarea').forEach(autoResize);
+      }));
+
+      document.getElementById('chipNav').addEventListener('click', e => {
+        const id = e.target.dataset?.go;
+        if (id) goTo(id);
+      });
+      scroller.addEventListener('scroll', syncChips, { passive: true });
+      syncChips();
+
+      // 리포트·홈에서 #week-n, #identity 등으로 들어오면 그 자리로
+      if (location.hash) requestAnimationFrame(() => goTo(location.hash.slice(1)));
+
+      if (pending) flushSave();
+
+      // 앱 안의 링크(하단 탭 등)는 저장이 끝난 뒤에 이동한다
+      document.addEventListener('click', async e => {
+        const a = e.target.closest('a[href]');
+        if (!a || a.target || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey) return;
+        if (!isDirty() && !saving) return;
+        e.preventDefault();
+        saveState.textContent = '저장 중…';
+        await Promise.race([flushSave(), new Promise(r => setTimeout(r, 5000))]);
+        location.href = a.href;
+      });
+      // 새로고침·탭 닫기는 기다려 줄 수 없으니 일단 보내 본다 (안 닿으면 임시본으로 복구)
+      document.addEventListener('visibilitychange', () => { if (document.hidden) flushSave(); });
+      window.addEventListener('online', () => flushSave());
+      window.addEventListener('pagehide', () => flushSave());
+    }
+  </script>
+</body>
+</html>
